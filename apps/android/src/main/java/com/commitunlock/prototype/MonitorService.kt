@@ -23,6 +23,7 @@ class MonitorService : Service() {
     private val handler = Handler(Looper.getMainLooper())
     private var lastForegroundPackage: String? = null
     private var showingBlockedPackage: String? = null
+    private var showingStrictMode: Boolean? = null
     private var lastHeartbeatDay: String? = null
     private var activeSpendPackage: String? = null
     private var lastSpendTickMs: Long? = null
@@ -189,13 +190,13 @@ class MonitorService : Service() {
     }
 
     private fun showOverlay(foregroundPackage: String, strictMode: Boolean) {
-        if (showingBlockedPackage == foregroundPackage) return
+        if (showingBlockedPackage == foregroundPackage && showingStrictMode == strictMode) return
 
         dogfoodEventStore.record("blocked_attempt", foregroundPackage)
         overlay.hide()
         overlay.show(
             packageName = foregroundPackage,
-            canAddCredit = !strictMode,
+            strictMode = strictMode,
             onOpenApp = {
                 dogfoodEventStore.record("overlay_open_app", foregroundPackage)
                 openMainActivity()
@@ -208,6 +209,7 @@ class MonitorService : Service() {
             }
         )
         showingBlockedPackage = foregroundPackage
+        showingStrictMode = strictMode
         debugLogStore.record("overlay_shown:$foregroundPackage")
         dogfoodEventStore.record("overlay_shown", foregroundPackage)
     }
@@ -219,6 +221,7 @@ class MonitorService : Service() {
         }
         overlay.hide()
         showingBlockedPackage = null
+        showingStrictMode = null
     }
 
     private fun openMainActivity() {
