@@ -354,11 +354,12 @@ Completed after this review:
 - `docs/dogfood-runbook`
 - `test/android-event-store`
 - `test/policy-golden-fixtures`
+- `feature/android-privacy-permissions`
 
 Continue in this order:
 
-1. `feature/android-privacy-permissions`
-   Usage Access/Overlay/Notification disclosure, local data clear/export 설명.
+1. `feature/android-dogfood-review`
+   앱 안에서 Data Quality/Gate summary를 확인하고 14일 dogfood 판단을 쉽게 만든다.
 
 2. `docs/github-sprint4-security-entry`
    GitHub App permissions, webhook HMAC, delivery dedupe, retention, ledger idempotency.

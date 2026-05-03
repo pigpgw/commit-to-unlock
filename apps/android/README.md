@@ -14,6 +14,7 @@ This is the first runnable Commit-to-Unlock mobile prototype. It does not connec
   - `freeUntil`
   - `strictMode`
   - `lastUpdatedAt`
+- Shows a permission and privacy disclosure for Usage Access, Overlay, Notifications, local dogfood data, export/clear behavior, and prototype limitations.
 - Stores local policy state:
   - active weekdays
   - optional active time window
