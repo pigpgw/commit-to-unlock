@@ -91,7 +91,10 @@ class MonitorService : Service() {
 
         if (foregroundPackage != null && foregroundPackage != lastForegroundPackage) {
             lastForegroundPackage = foregroundPackage
-            dogfoodEventStore.record("foreground_changed", foregroundPackage)
+            dogfoodEventStore.recordStructured(
+                type = "foreground_changed",
+                target = foregroundPackage
+            )
         }
 
         if (!deviceInteractive) {
@@ -104,12 +107,12 @@ class MonitorService : Service() {
         }
 
         var decision = evaluatePolicy(foregroundPackage, state, policyState, activeUnlocks)
-        recordPolicyDecision(decision)
+        recordPolicyDecision(decision, state.remainingMinutes)
 
         if (decision.shouldSpendCredit && foregroundPackage != null) {
             state = accrueSpend(foregroundPackage, state)
             decision = evaluatePolicy(foregroundPackage, state, policyState, activeUnlocks)
-            recordPolicyDecision(decision)
+            recordPolicyDecision(decision, state.remainingMinutes)
         } else {
             stopSpendSession(
                 reason = decision.reason.code,
@@ -119,7 +122,12 @@ class MonitorService : Service() {
 
         if (!decision.allowed) {
             val blockedPackage = decision.matchedTarget ?: foregroundPackage ?: return
-            dogfoodEventStore.record("target_matched", "package=$blockedPackage reason=${decision.reason.code}")
+            dogfoodEventStore.recordStructured(
+                type = "target_matched",
+                target = blockedPackage,
+                policyReason = decision.reason.code,
+                creditRemaining = state.remainingMinutes
+            )
             showOverlay(blockedPackage, state.strictMode, decision.reason)
         } else {
             hideOverlay(decision.reason.code)
@@ -140,7 +148,12 @@ class MonitorService : Service() {
             stopSpendSession("target_changed")
             activeSpendPackage = foregroundPackage
             lastSpendTickMs = nowMs
-            dogfoodEventStore.record("target_use_started", foregroundPackage)
+            dogfoodEventStore.recordStructured(
+                type = "target_use_started",
+                target = foregroundPackage,
+                policyReason = PolicyDecisionReason.CREDIT_AVAILABLE.code,
+                creditRemaining = state.remainingMinutes
+            )
             return state
         }
 
@@ -154,9 +167,12 @@ class MonitorService : Service() {
             spendAccumulatorMs -= CREDIT_SPEND_INTERVAL_MS
             creditStore.spendMinute()
             updatedState = creditStore.read()
-            dogfoodEventStore.record(
-                "credit_auto_spent",
-                "package=$foregroundPackage minutes=1 remaining=${updatedState.remainingMinutes}"
+            dogfoodEventStore.recordStructured(
+                type = "credit_auto_spent",
+                target = foregroundPackage,
+                policyReason = PolicyDecisionReason.CREDIT_AVAILABLE.code,
+                creditRemaining = updatedState.remainingMinutes,
+                detail = "minutes=1"
             )
         }
 
@@ -169,9 +185,11 @@ class MonitorService : Service() {
 
     private fun stopSpendSession(reason: String, clearAccumulator: Boolean = false) {
         val packageName = activeSpendPackage ?: return
-        dogfoodEventStore.record(
-            "target_use_stopped",
-            "package=$packageName reason=$reason pending_ms=$spendAccumulatorMs"
+        dogfoodEventStore.recordStructured(
+            type = "target_use_stopped",
+            target = packageName,
+            policyReason = reason,
+            detail = "pending_ms=$spendAccumulatorMs"
         )
         activeSpendPackage = null
         lastSpendTickMs = null
@@ -204,7 +222,7 @@ class MonitorService : Service() {
         )
     }
 
-    private fun recordPolicyDecision(decision: PolicyDecision) {
+    private fun recordPolicyDecision(decision: PolicyDecision, creditRemaining: Int) {
         val key = listOf(
             decision.matchedTarget.orEmpty(),
             decision.reason.code,
@@ -215,9 +233,12 @@ class MonitorService : Service() {
 
         if (key == lastPolicyDecisionKey) return
         lastPolicyDecisionKey = key
-        dogfoodEventStore.record(
-            if (decision.allowed) "policy_allowed" else "policy_blocked",
-            "reason=${decision.reason.code} target=${decision.matchedTarget.orEmpty()} spend=${decision.shouldSpendCredit}"
+        dogfoodEventStore.recordStructured(
+            type = if (decision.allowed) "policy_allowed" else "policy_blocked",
+            target = decision.matchedTarget,
+            policyReason = decision.reason.code,
+            creditRemaining = creditRemaining,
+            detail = "spend=${decision.shouldSpendCredit}"
         )
     }
 
@@ -232,31 +253,58 @@ class MonitorService : Service() {
             showingReason == reason
         ) return
 
-        dogfoodEventStore.record("blocked_attempt", foregroundPackage)
+        val creditRemaining = creditStore.read().remainingMinutes
+        dogfoodEventStore.recordStructured(
+            type = "blocked_attempt",
+            target = foregroundPackage,
+            policyReason = reason.code,
+            creditRemaining = creditRemaining
+        )
         overlay.hide()
         overlay.show(
             packageName = foregroundPackage,
             strictMode = strictMode,
             reasonCode = reason.code,
             onOpenApp = {
-                dogfoodEventStore.record("overlay_open_app", foregroundPackage)
+                dogfoodEventStore.recordStructured(
+                    type = "overlay_open_app",
+                    target = foregroundPackage,
+                    policyReason = reason.code,
+                    creditRemaining = creditStore.read().remainingMinutes
+                )
                 openMainActivity()
             },
             onAddCredit = {
                 creditStore.addMinutes(5)
-                dogfoodEventStore.record("overlay_add_credit", "package=$foregroundPackage minutes=5")
+                dogfoodEventStore.recordStructured(
+                    type = "overlay_add_credit",
+                    target = foregroundPackage,
+                    policyReason = reason.code,
+                    creditRemaining = creditStore.read().remainingMinutes,
+                    detail = "minutes=5"
+                )
                 hideOverlay("credit_added")
             }
         )
         showingBlockedPackage = foregroundPackage
         showingStrictMode = strictMode
         showingReason = reason
-        dogfoodEventStore.record("overlay_shown", foregroundPackage)
+        dogfoodEventStore.recordStructured(
+            type = "overlay_shown",
+            target = foregroundPackage,
+            policyReason = reason.code,
+            creditRemaining = creditRemaining
+        )
     }
 
     private fun hideOverlay(reason: String) {
         if (showingBlockedPackage != null) {
-            dogfoodEventStore.record("overlay_hidden", "package=$showingBlockedPackage reason=$reason")
+            dogfoodEventStore.recordStructured(
+                type = "overlay_hidden",
+                target = showingBlockedPackage,
+                policyReason = reason,
+                creditRemaining = creditStore.read().remainingMinutes
+            )
         }
         overlay.hide()
         showingBlockedPackage = null

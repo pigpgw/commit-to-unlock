@@ -6,6 +6,9 @@ interface DogfoodEvent {
   timestamp: Date;
   timestampRaw: string;
   type: string;
+  target: string | null;
+  policyReason: string | null;
+  creditRemaining: number | null;
   detail: string;
 }
 
@@ -38,6 +41,13 @@ interface GateDecision {
   summary: string;
 }
 
+interface DataQualityMetric {
+  metric: string;
+  events: number;
+  populated: number;
+  coverage: number;
+}
+
 interface DogfoodAnalysis {
   file: string;
   eventCount: number;
@@ -50,6 +60,7 @@ interface DogfoodAnalysis {
   targets: Record<string, number>;
   daily: DailySummary[];
   gates: GateDecision[];
+  dataQuality: DataQualityMetric[];
   recommendations: string[];
 }
 
@@ -75,6 +86,49 @@ const eventTypes = {
   monitorEnabledSignals: ["monitor_started", "monitor_heartbeat"],
   overlayShows: ["overlay_shown"]
 } as const;
+
+const targetLikeEvents = new Set([
+  "blocked_attempt",
+  "foreground_changed",
+  "overlay_open_app",
+  "overlay_shown",
+  "policy_allowed",
+  "policy_blocked",
+  "target_added",
+  "target_matched",
+  "target_use_started",
+  "target_use_stopped"
+]);
+
+const policyReasonEvents = new Set([
+  "blocked_attempt",
+  "credit_auto_spent",
+  "overlay_add_credit",
+  "overlay_hidden",
+  "overlay_open_app",
+  "overlay_shown",
+  "policy_allowed",
+  "policy_blocked",
+  "target_matched",
+  "target_use_started",
+  "target_use_stopped"
+]);
+
+const creditRemainingEvents = new Set([
+  "blocked_attempt",
+  "credit_added",
+  "credit_auto_spent",
+  "credit_reset",
+  "credit_spent",
+  "overlay_add_credit",
+  "overlay_hidden",
+  "overlay_open_app",
+  "overlay_shown",
+  "policy_allowed",
+  "policy_blocked",
+  "target_matched",
+  "target_use_started"
+]);
 
 function usage(): string {
   return `Usage: pnpm android:dogfood:analyze [dogfood-export.tsv] [--json]
@@ -139,6 +193,9 @@ function parseTsv(filePath: string): DogfoodEvent[] {
   const header = lines.shift()?.split("\t") ?? [];
   const timestampIndex = header.indexOf("timestamp");
   const typeIndex = header.indexOf("type");
+  const targetIndex = header.indexOf("target");
+  const policyReasonIndex = header.indexOf("policy_reason");
+  const creditRemainingIndex = header.indexOf("credit_remaining");
   const detailIndex = header.indexOf("detail");
 
   if (timestampIndex < 0 || typeIndex < 0 || detailIndex < 0) {
@@ -150,16 +207,37 @@ function parseTsv(filePath: string): DogfoodEvent[] {
       const columns = line.split("\t");
       const timestampRaw = columns[timestampIndex]?.trim() ?? "";
       const type = columns[typeIndex]?.trim() ?? "";
+      const target = optionalColumn(columns, targetIndex);
+      const policyReason = optionalColumn(columns, policyReasonIndex);
+      const creditRemainingRaw = optionalColumn(columns, creditRemainingIndex);
+      const creditRemaining = creditRemainingRaw === null ? null : Number.parseInt(creditRemainingRaw, 10);
       const detail = columns.slice(detailIndex).join("\t").trim();
       const timestamp = new Date(timestampRaw);
 
       if (!timestampRaw || Number.isNaN(timestamp.getTime()) || !type) {
         throw new Error(`Invalid dogfood row at line ${index + 2}: ${line}`);
       }
+      if (creditRemainingRaw !== null && !Number.isInteger(creditRemaining)) {
+        throw new Error(`Invalid credit_remaining value at line ${index + 2}: ${line}`);
+      }
 
-      return { timestamp, timestampRaw, type, detail };
+      return {
+        timestamp,
+        timestampRaw,
+        type,
+        target,
+        policyReason,
+        creditRemaining,
+        detail
+      };
     })
     .sort((left, right) => left.timestamp.getTime() - right.timestamp.getTime());
+}
+
+function optionalColumn(columns: string[], index: number): string | null {
+  if (index < 0) return null;
+  const value = columns[index]?.trim() ?? "";
+  return value.length > 0 ? value : null;
 }
 
 function analyze(filePath: string, events: DogfoodEvent[]): DogfoodAnalysis {
@@ -187,6 +265,7 @@ function analyze(filePath: string, events: DogfoodEvent[]): DogfoodAnalysis {
     targets,
     daily,
     gates: [],
+    dataQuality: dataQuality(events),
     recommendations: []
   };
   analysis.gates = gateDecisions(analysis, events);
@@ -203,51 +282,59 @@ function countBy<T>(items: T[], key: (item: T) => string): Record<string, number
 }
 
 function countPolicyReasons(events: DogfoodEvent[]): Record<string, number> {
-  const policyReasonTypes = new Set([
-    "overlay_hidden",
-    "policy_allowed",
-    "policy_blocked",
-    "target_matched",
-    "target_use_stopped"
-  ]);
-  return countDetails(
-    events.filter((event) => policyReasonTypes.has(event.type)),
-    "reason"
-  );
+  return countByValues(events.filter((event) => policyReasonEvents.has(event.type)), eventPolicyReason);
 }
 
-function countDetails(events: DogfoodEvent[], key: string): Record<string, number> {
-  const pattern = new RegExp(`(?:^|\\s)${escapeRegExp(key)}=([^\\s]+)`);
+function countByValues(events: DogfoodEvent[], value: (event: DogfoodEvent) => string | null): Record<string, number> {
   return events.reduce<Record<string, number>>((accumulator, event) => {
-    const match = event.detail.match(pattern);
-    if (!match?.[1]) return accumulator;
-    accumulator[match[1]] = (accumulator[match[1]] ?? 0) + 1;
+    const item = value(event);
+    if (!item) return accumulator;
+    accumulator[item] = (accumulator[item] ?? 0) + 1;
     return accumulator;
   }, {});
 }
 
 function targetCounts(events: DogfoodEvent[]): Record<string, number> {
-  const targetLikeEvents = new Set([
-    "blocked_attempt",
-    "foreground_changed",
-    "overlay_open_app",
-    "policy_allowed",
-    "policy_blocked",
-    "target_matched",
-    "target_use_started",
-    "target_use_stopped"
-  ]);
-
   const targets: Record<string, number> = {};
   for (const event of events) {
     if (!targetLikeEvents.has(event.type)) continue;
-    const target = detailValue(event.detail, "target") ??
-      detailValue(event.detail, "package") ??
-      (event.detail.includes("=") ? null : event.detail.trim());
+    const target = eventTarget(event);
     if (!target) continue;
     targets[target] = (targets[target] ?? 0) + 1;
   }
   return sortRecord(targets);
+}
+
+function dataQuality(events: DogfoodEvent[]): DataQualityMetric[] {
+  const targetEvents = events.filter((event) => targetLikeEvents.has(event.type));
+  const reasonEvents = events.filter((event) => policyReasonEvents.has(event.type));
+  const creditEvents = events.filter((event) => creditRemainingEvents.has(event.type));
+
+  return [
+    qualityMetric("target coverage", targetEvents.length, targetEvents.filter((event) => eventTarget(event)).length),
+    qualityMetric("policy reason coverage", reasonEvents.length, reasonEvents.filter((event) => eventPolicyReason(event)).length),
+    qualityMetric("credit remaining coverage", creditEvents.length, creditEvents.filter((event) => event.creditRemaining !== null).length)
+  ];
+}
+
+function qualityMetric(metric: string, events: number, populated: number): DataQualityMetric {
+  return {
+    metric,
+    events,
+    populated,
+    coverage: events === 0 ? 1 : Number((populated / events).toFixed(3))
+  };
+}
+
+function eventTarget(event: DogfoodEvent): string | null {
+  return event.target ??
+    detailValue(event.detail, "target") ??
+    detailValue(event.detail, "package") ??
+    (event.detail.includes("=") ? null : event.detail.trim() || null);
+}
+
+function eventPolicyReason(event: DogfoodEvent): string | null {
+  return event.policyReason ?? detailValue(event.detail, "reason");
 }
 
 function detailValue(detail: string, key: string): string | null {
@@ -472,6 +559,18 @@ function renderMarkdown(analysis: DogfoodAnalysis): string {
     table(
       ["Metric", "Count"],
       Object.entries(analysis.metrics).map(([key, value]) => [key, String(value)])
+    ),
+    "",
+    "## Data Quality",
+    "",
+    table(
+      ["Metric", "Events", "Populated", "Coverage"],
+      analysis.dataQuality.map((metric) => [
+        metric.metric,
+        String(metric.events),
+        String(metric.populated),
+        `${Math.round(metric.coverage * 100)}%`
+      ])
     ),
     "",
     "## Gate Snapshot",
