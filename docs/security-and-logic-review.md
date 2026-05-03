@@ -349,19 +349,18 @@ MVP 전 대응:
 
 ## 15. Next PRs After This Review
 
-1. `docs/dogfood-runbook`
-   14일 실기기 runbook과 Gate A/B/C/D 기록 템플릿.
+Completed after this review:
 
-2. `test/policy-golden-fixtures`
-   shared TS와 Android Kotlin 정책 결과가 같은지 fixtures로 검증.
+- `docs/dogfood-runbook`
+- `test/android-event-store`
+- `test/policy-golden-fixtures`
 
-3. `feature/android-privacy-permissions`
+Continue in this order:
+
+1. `feature/android-privacy-permissions`
    Usage Access/Overlay/Notification disclosure, local data clear/export 설명.
 
-4. `test/android-event-store`
-   DogfoodEventStore export/parse/sanitize/max event unit tests.
-
-5. `docs/github-sprint4-security-entry`
+2. `docs/github-sprint4-security-entry`
    GitHub App permissions, webhook HMAC, delivery dedupe, retention, ledger idempotency.
 
 ## 16. Sources Checked

@@ -1,7 +1,8 @@
 # MVP Execution Plan
 
-문서 상태: v0.1
+문서 상태: v0.2
 작성일: 2026-05-03
+최종 정리: 2026-05-03
 역할: 현재 MVP의 단일 실행 계획, 남은 작업 목록, 문서/코드 정리 기준
 
 ## 1. Current Decision
@@ -75,13 +76,13 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 | 영역 | 상태 | 판단 |
 | --- | --- | --- |
 | Android app | runnable local prototype | 현재 유일한 product surface |
-| Android dogfood | log/export/analyzer 있음 | 14일 실기기 데이터 필요 |
-| Android UI | 기능은 많지만 한 화면이 길다 | 테스트 보강 후 section 리팩토링 |
-| Shared policy | TS canonical + Android mirror | golden fixture 필요 |
+| Android dogfood | runbook/log/export/analyzer 있음 | 14일 실기기 데이터 필요 |
+| Android UI | 기능은 많지만 한 화면이 길다 | privacy disclosure 후 section 리팩토링 |
+| Shared policy | TS canonical + Android mirror + golden fixtures | 정책 drift 방지 기준 확보 |
 | Scoring package | pure rules scaffold | 유지. runtime 연결 금지 |
 | API | health-only, localhost/CORS-closed default | 유지. Sprint 4 전 auth/webhook 금지 |
 | iOS | Swift source skeleton only | Xcode/entitlement 전까지 보류 |
-| Docs | 많고 중복 있음 | 이 문서를 source of truth로 정리 |
+| Docs | source-of-truth 정리됨 | reference 문서는 실행 기준이 아님 |
 
 ## 5. Document Cleanup Plan
 
@@ -137,8 +138,8 @@ Archive 후보:
 | 대상 | 문제 | 처리 |
 | --- | --- | --- |
 | `MainActivity.kt` | 700라인 이상, UI/logic 혼재 | 테스트 보강 후 section renderer/helper로 분리 |
-| `DogfoodEventStore.kt` | parser/export 핵심인데 unit test 부족 | 테스트 먼저 추가 |
-| TS/Kotlin policy mirror | drift 위험 | golden fixtures 추가 |
+| `DogfoodEventStore.kt` | parser/export 핵심 | unit test 추가 완료. event type constants는 후순위 |
+| TS/Kotlin policy mirror | drift 위험 | golden fixtures 추가 완료. 정책 변경 시 fixture 우선 갱신 |
 | Android event type strings | 문자열 분산 | tests 후 constants/sealed class 검토 |
 
 ### Do Not Delete
@@ -162,7 +163,7 @@ Archive 후보:
 
 | Gate | 상태 | 통과 기준 | 다음 작업 |
 | --- | --- | --- | --- |
-| A: Enforcement viability | needs_data | 실기기 smoke pass, overlay <= 2초, 권한 상태 정확 | runbook smoke + event store tests |
+| A: Enforcement viability | needs_data | 실기기 smoke pass, overlay <= 2초, 권한 상태 정확 | runbook smoke + privacy UI |
 | B: Dogfood need | needs_data | 14일 blocked attempt/override 데이터 | 14일 TSV collection |
 | C: Proof supply | needs_data | 14일 실제 GitHub/WakaTime/IDE proof 빈도 | mock proof + dev activity note |
 | D: Trust/privacy | needs_data | permission/privacy UI, retention/revoke/delete spec, webhook HMAC/dedupe spec | privacy UI + GitHub entry spec |
@@ -216,6 +217,8 @@ Deliverables:
 
 ### PR 5: Android privacy and permission screen
 
+Status: next.
+
 Deliverables:
 
 - Usage Access disclosure
@@ -226,6 +229,8 @@ Deliverables:
 
 ### PR 6: Android UI section cleanup
 
+Status: pending.
+
 Deliverables:
 
 - MainActivity section helpers
@@ -233,6 +238,8 @@ Deliverables:
 - no behavior change
 
 ### PR 7: GitHub Sprint 4 entry spec
+
+Status: pending.
 
 Deliverables:
 
@@ -258,7 +265,7 @@ Deliverables:
 이 PR 이후 즉시 할 일:
 
 ```text
-docs/dogfood-runbook
+feature/android-privacy-permissions
 ```
 
-이유: 현재 가장 큰 병목은 코드가 아니라 실기기 데이터 부재다. Dogfood runbook이 없으면 Gate A/B/C/D 판단이 계속 `needs_data`에 머문다.
+이유: runbook, event store tests, policy golden fixtures는 완료됐다. 다음 병목은 Gate D의 권한/개인정보 신뢰 UI다. 이 UI가 있어야 Usage Access, Overlay, Notification, local dogfood export/clear를 사용자에게 정직하게 설명하고 실기기 dogfood를 진행할 수 있다.
