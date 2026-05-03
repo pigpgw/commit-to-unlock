@@ -1,0 +1,25 @@
+node_modules/
+dist/
+build/
+.env
+.env.*
+!.env.example
+.DS_Store
+coverage/
+.turbo/
+*.tsbuildinfo
+
+# Android
+local.properties
+.gradle/
+.kotlin/
+*.apk
+*.aab
+captures/
+
+# Xcode / Swift
+DerivedData/
+*.xcuserstate
+xcuserdata/
+.swiftpm/
+.build/

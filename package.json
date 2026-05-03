@@ -1,0 +1,19 @@
+{
+  "name": "commit-to-unlock",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r build",
+    "dev:api": "pnpm --filter @commit-to-unlock/api dev",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm build && pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.2"
+  },
+  "packageManager": "pnpm@10.12.1"
+}

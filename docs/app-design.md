@@ -1,0 +1,294 @@
+# Commit-to-Unlock App Design
+
+문서 상태: v0.2  
+역할: 제품/기술 통합 설계 기준 문서  
+현재 최우선 구현: Android 실기기 차단 검증
+
+상세 결정 기록은 [decision-log.md](decision-log.md)를 따른다. Android 다음 구현 단위는 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)가 우선한다.
+
+## 1. 결정 요약
+
+Commit-to-Unlock은 “개발 활동을 했다고 직접 체크하면 앱을 열어주는 서비스”가 아니라, 검증 가능한 개발 이벤트를 크레딧 장부로 바꾸고 그 장부가 선택 앱 접근을 열고 닫는 제품이다.
+
+최적 결정은 다음과 같다.
+
+- 첫 검증은 GitHub가 아니라 모바일 enforcement다. 앱이 실제로 선택 앱을 막지 못하면 scoring 품질은 제품 가치를 만들 수 없다.
+- Android를 먼저 검증한다. 현재 repo는 Android SDK/JDK와 Gradle Wrapper로 빌드 가능하고, Xcode 앱은 아직 준비되지 않았다.
+- Android B2C는 `UsageStatsManager + foreground service + overlay`로 간다. AccessibilityService, Device Admin, 앱 삭제 방지, 전체 기기 잠금은 MVP에서 제외한다.
+- iOS는 FamilyControls/ManagedSettings 기반으로 간다. 선택 대상은 opaque token이므로 앱이 iOS에서 차단 앱 이름을 직접 표시한다는 UX를 약속하지 않는다.
+- Credit state는 로컬 mock contract를 유지하고, 서버 API는 나중에 같은 의미의 contract로 맞춘다.
+- GitHub scoring은 PR 중심, rules-first, ledger-first로 재개한다. LLM은 판정자가 아니라 설명 보조층이다.
+
+제품 약속 문구는 다음으로 고정한다.
+
+> Verified dev work earns credits for selected distracting apps.
+
+금지 문구:
+
+- “휴대폰 전체 잠금”
+- “삭제 불가능”
+- “AI가 알아서 폰을 통제”
+- “코드 품질을 자동 평가”
+
+## 2. Product UX
+
+MVP의 사용자는 개인 개발자다. 학교/부모/MDM, 금전 스테이크, 리더보드, 부트캠프 관리자는 뒤로 미룬다.
+
+핵심 화면은 다섯 개다.
+
+| 화면 | 목적 | Sprint |
+| --- | --- | --- |
+| Home | 오늘 남은 크레딧, 정책 상태, 최근 credit event 표시 | 1 |
+| Permissions | Usage Access, Overlay, Notification, Family Controls 상태 표시 | 1-2 |
+| Targets | Android package 또는 iOS activity selection 관리 | 1-2 |
+| Credit Test | mock credit 추가/소진/0 초기화 | 1 |
+| Blocked/Shield | 차단 사유, 현재 credit 0, 앱으로 돌아가기 | 1-2 |
+
+Android prototype의 target selection은 수동 package 입력으로 시작한다. 프로덕션 Android에서는 `QUERY_ALL_PACKAGES` 없이 가야 하므로, 설치 앱 전체 스캐너를 만들지 않는다. 대신 Usage Access 승인 후 최근 foreground/usage package 목록을 보여주고 사용자가 그중 선택하게 한다. 수동 입력은 dev/debug 기능으로 남긴다.
+
+iOS target selection은 FamilyActivityPicker만 사용한다. FamilyActivitySelection은 privacy-preserving opaque value이므로, 앱 내부 UI는 “선택한 앱 3개, 웹 도메인 2개”처럼 개수 중심으로 표현한다.
+
+Strict mode의 의미는 “테스트/편의 override를 줄이는 정책 플래그”다. 삭제 방지나 tamper-proof를 뜻하지 않는다.
+
+## 3. Mobile Enforcement Design
+
+### Android
+
+Android MVP는 다음 구조로 고정한다.
+
+```mermaid
+flowchart LR
+  A["MainActivity"] --> B["CreditStore"]
+  A --> C["PermissionChecks"]
+  A --> D["MonitorService"]
+  D --> E["ForegroundAppReader"]
+  D --> B
+  D --> F["BlockOverlay"]
+  E --> G["UsageStatsManager"]
+```
+
+동작 규칙:
+
+- Usage Access가 없으면 foreground app 감지를 시도하지 않고 권한 안내만 보여준다.
+- Overlay 권한이 없으면 차단 화면을 띄우지 않고 권한 안내를 보여준다.
+- MonitorService는 foreground service로 실행하고 상시 notification을 표시한다.
+- `currentForegroundPackage`가 `blockedTargets`에 있고 `remainingMinutes <= 0`이면 overlay를 표시한다.
+- `remainingMinutes > 0`이거나 target이 아니면 overlay를 숨긴다.
+- 앱 자신의 package는 절대 차단하지 않는다.
+- AccessibilityService는 쓰지 않는다.
+
+Android 다음 보강 구현은 아래 네 가지다.
+
+- UI에 현재 감지된 foreground package를 표시한다.
+- bounded debug log를 추가한다. 예: permission missing, foreground changed, target matched, overlay shown, overlay hidden.
+- strictMode가 true이면 overlay 안의 “테스트 credit 추가” 버튼을 숨긴다.
+- 실기기 검증을 위해 `credit 0으로 초기화` 버튼을 추가한다.
+
+Sprint 1.1의 상세 acceptance criteria는 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)를 기준으로 한다.
+
+### iOS
+
+iOS MVP는 다음 target 구조로 고정한다.
+
+```text
+CommitUnlockPrototype
+CommitUnlockDeviceActivityMonitor
+CommitUnlockShieldConfiguration
+CommitUnlockShieldAction
+```
+
+동작 규칙:
+
+- main app은 Family Controls authorization을 요청한다.
+- FamilyActivityPicker로 앱/카테고리/웹 도메인을 선택한다.
+- 선택 token과 local credit state는 App Group container에 저장한다.
+- `remainingMinutes <= 0`이면 ManagedSettings shield를 적용한다.
+- `remainingMinutes > 0`이면 shield를 해제한다.
+- DeviceActivity는 실제 사용량 기반 credit spend가 필요해질 때 추가한다.
+
+iOS에서 앱 이름을 직접 알거나 raw browsing history를 보는 UX를 만들지 않는다. Apple Screen Time 계열 API의 privacy model에 맞춰 opaque selection을 그대로 다룬다.
+
+## 4. Credit And Policy Design
+
+로컬 contract는 Sprint 1-3의 canonical interface다.
+
+```ts
+export interface MobileCreditState {
+  remainingMinutes: number;
+  blockedTargets: string[];
+  strictMode: boolean;
+  lastUpdatedAt: string;
+}
+```
+
+불변 조건:
+
+- `remainingMinutes`는 0 이상의 정수 minute이다.
+- `blockedTargets`는 platform-specific identifier다. Android는 package name, iOS는 serialized opaque selection/token reference다.
+- `lastUpdatedAt`은 ISO 8601 UTC string이다.
+- local store는 서버보다 우선하지 않는다. Sprint 5 이후 서버 sync가 들어오면 server state가 source of truth가 된다.
+
+Credit state transition은 다음으로 고정한다.
+
+```mermaid
+stateDiagram-v2
+  [*] --> NoCredit
+  NoCredit --> HasCredit: add/earn credit
+  HasCredit --> HasCredit: spend less than balance
+  HasCredit --> NoCredit: spend to 0
+  NoCredit --> OverrideActive: emergency override
+  OverrideActive --> NoCredit: override expires
+```
+
+실제 사용 시간에 따른 자동 credit spend는 Sprint 1-3에서는 하지 않는다. Android 실기기 차단이 안정화된 뒤, selected target foreground 누적 시간이 60초를 넘을 때마다 1분을 차감하는 local spend engine을 추가한다.
+
+## 5. Backend And Scoring Design
+
+Sprint 4부터 서버를 다시 연결한다.
+
+```mermaid
+flowchart LR
+  A["GitHub Webhook"] --> B["Webhook Receiver"]
+  B --> C["Inbound Event Store"]
+  C --> D["Enrichment Job"]
+  D --> E["Feature Extractor"]
+  E --> F["Rules-first Scoring"]
+  F --> G["Credit Ledger"]
+  G --> H["/credits/today"]
+  H --> I["Mobile Sync"]
+```
+
+GitHub는 GitHub App + webhook-first 구조로 고정한다. webhook은 polling보다 지연과 quota 면에서 유리하고, PR files/commits/reviews/checks enrichment는 installation access token으로 수행한다.
+
+Scoring v0 판단 순서:
+
+1. eligibility: bot, duplicate delivery, unsupported event, selected repo 여부
+2. enrichment: PR files, commits, reviews, review comments, checks/status, linked issue
+3. feature extraction: file category, diff size, tests, CI, review, generated/vendor/lockfile risk
+4. score decision: 0/10/25/45/60분 tier
+5. ledger write: provisional, confirmed, clawback, override, manual_adjustment
+
+저장 원칙:
+
+- raw webhook payload은 dedupe/audit에 필요한 기간만 보관한다.
+- private repo raw diff는 기본 저장하지 않는다.
+- 장기 보관 대상은 feature vector, score decision, rationale, ledger entry다.
+- LLM에 diff를 보낼 경우 최소 hunk와 metadata만 사용하고, 별도 opt-in 전에는 private repo full diff를 보내지 않는다.
+
+Sprint 4 API 최소 shape:
+
+| API | 역할 |
+| --- | --- |
+| `POST /webhooks/github` | GitHub delivery 수신, signature 검증, dedupe |
+| `GET /credits/today` | 모바일이 사용할 현재 credit/policy state 반환 |
+| `GET /activity/feed` | 최근 score decision과 ledger event 반환 |
+| `GET/PUT /policy` | blocked target, strictMode, daily cap 저장 |
+| `POST /override` | 긴급 해제 기록 |
+
+`GET /credits/today`는 `MobileCreditState` 필드를 반드시 포함한다. 서버 메타데이터가 필요하면 `policyVersion`, `serverTime`, `source` 같은 optional field로 추가한다.
+
+## 6. Roadmap
+
+### Gate 0: Android enforcement viability
+
+목표: 모바일 차단 루프가 실제 Android 기기에서 제품 가치의 최소 조건을 만족하는지 확인한다.
+
+통과 기준:
+
+- Usage Access/Overlay 권한을 사용자가 직접 허용할 수 있다.
+- foreground package 감지가 실제 대상 앱에서 동작한다.
+- credit 0일 때 overlay가 2초 이내 표시된다.
+- credit > 0일 때 overlay가 유지되지 않는다.
+- 권한 회수나 서비스 중지 시 UI가 원인을 보여준다.
+
+통과하지 못하면 GitHub scoring으로 넘어가지 않고 Android/iOS enforcement 대안을 먼저 재검토한다.
+
+### Sprint 1.1: Android 실기기 검증 hardening
+
+구현:
+
+- foreground package 표시
+- debug log 표시
+- credit 0 초기화 버튼
+- strictMode overlay 동작
+- README에 실기기 테스트 절차 추가
+
+성공 기준:
+
+- `./gradlew :apps:android:assembleDebug` 통과
+- 실제 Android 기기에서 Usage Access/Overlay 권한 상태가 정확히 표시됨
+- `com.android.chrome` 같은 target package가 foreground일 때 credit 0이면 overlay 표시
+- credit > 0이면 overlay 숨김
+- 앱 재시작 후 local credit state 유지
+
+### Sprint 2: iOS Xcode 전환
+
+구현:
+
+- Xcode project 생성
+- main app + 3개 extension target 생성
+- App Group 설정
+- Family Controls entitlement 준비
+- FamilyActivityPicker selection 저장
+- ManagedSettings shield apply/clear
+
+성공 기준:
+
+- 실제 기기에서 authorization 상태가 UI에 표시됨
+- 선택 token 저장/복구 가능
+- mock credit 0/5 전환에 따라 shield 적용/해제 가능
+
+### Sprint 4: GitHub scoring 재개
+
+구현:
+
+- webhook dedupe
+- GitHub App installation token
+- PR files/reviews/checks enrichment
+- score decision persistence
+- credit ledger
+- `/credits/today`
+
+성공 기준:
+
+- 실제 PR merge 후 1분 내 confirmed credit 생성
+- 같은 delivery 재전송으로 중복 적립 없음
+- generated-heavy/lockfile-only/bot PR은 0 또는 낮은 credit
+
+## 7. Verification Checklist
+
+Repo:
+
+- `pnpm test`
+- `pnpm build`
+- `pnpm typecheck`
+- `./gradlew :apps:android:assembleDebug`
+- `./gradlew :apps:android:lintDebug`
+
+Android device:
+
+- `adb devices -l`에 실기기 표시
+- debug APK install 성공
+- Usage Access missing/granted 상태 전환 확인
+- Overlay missing/granted 상태 전환 확인
+- monitor start 후 foreground package 표시 확인
+- blocked target + credit 0 overlay 확인
+- blocked target + credit > 0 allow 확인
+- strictMode true에서 test credit shortcut 제한 확인
+
+iOS device:
+
+- Xcode build 성공
+- Family Controls authorization 성공/거부 UI 반영
+- FamilyActivityPicker selection 저장
+- ManagedSettings shield apply/clear 확인
+
+## 8. 공식 근거
+
+- Apple FamilyActivityPicker: https://developer.apple.com/documentation/familycontrols/familyactivitypicker
+- Apple FamilyActivitySelection: https://developer.apple.com/documentation/familycontrols/familyactivityselection
+- Android UsageStatsManager: https://developer.android.com/reference/android/app/usage/UsageStatsManager
+- Google Play sensitive permissions and Accessibility API policy: https://support.google.com/googleplay/android-developer/answer/16558241
+- GitHub webhooks: https://docs.github.com/en/webhooks/about-webhooks
+- GitHub App rate limits: https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/rate-limits-for-github-apps
+- GitHub pull request REST API: https://docs.github.com/en/rest/pulls/pulls
