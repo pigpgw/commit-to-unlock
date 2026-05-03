@@ -30,3 +30,12 @@ export interface ScoreDecision {
 }
 
 export type { MobileCreditState } from "./mobile-credit.js";
+export type {
+  EmergencyUnlock,
+  PolicyCreditState,
+  PolicyDecision,
+  PolicyDecisionInput,
+  PolicyDecisionReason,
+  PolicyState
+} from "./policy.js";
+export { evaluatePolicyDecision } from "./policy.js";
