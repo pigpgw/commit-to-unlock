@@ -1,6 +1,6 @@
 # Commit-to-Unlock Decision Log
 
-문서 상태: v0.1  
+문서 상태: v0.2
 목적: 구현자가 다시 판단하지 않아도 되는 제품/기술 결정 기록
 
 ## Current Source Of Truth
@@ -14,13 +14,7 @@
 | Android Sprint 1.1 | [android-sprint-1.1-design.md](android-sprint-1.1-design.md) |
 | 모바일 credit contract | [mobile-credit-contract.md](mobile-credit-contract.md) |
 | GitHub MVP PRD | [mvp-prd.md](mvp-prd.md) |
-
-Background only:
-
-- [commit-to-unlock-research-and-planning.md](commit-to-unlock-research-and-planning.md)
-- [phase-0-research-pack.md](phase-0-research-pack.md)
-
-위 두 문서의 인터뷰/설문/fake-door 항목은 현재 실행 지시가 아니다.
+| 저장소 정리/삭제 기준 | [repository-audit-and-cleanup.md](repository-audit-and-cleanup.md) |
 
 ## Decisions
 
@@ -42,6 +36,8 @@ Background only:
 | D-014 | Sprint 4 전 market/dogfood gate를 추가 | GitHub scoring을 본격 구현하기 전에 모바일 차단 효용, 본인 반복 사용, 자연스러운 scorable dev event 빈도를 확인해야 한다. | Accepted |
 | D-015 | 사용자-facing 제품은 score가 아니라 ledger/minutes/reasons 중심으로 설계 | raw score를 전면 노출하면 점수 게임을 유도한다. 사용자는 minutes, proof tier, reasons, risk flags만 보면 된다. | Accepted |
 | D-016 | 결제 구현은 Gate 4 전까지 금지 | 단순 blocker 구독은 가격 저항이 크다. proof ledger가 blocker 없이도 가치 있음을 확인하기 전에는 결제 기능을 만들지 않는다. | Accepted |
+| D-017 | Android는 별도 debug log를 제거하고 dogfood event log를 단일 source of truth로 사용 | 같은 이벤트를 두 저장소에 쓰면 UI/TSV/summary가 어긋난다. | Accepted |
+| D-018 | GitHub webhook placeholder는 API에서 제거 | 실제 PR enrichment 없이 scoring decision을 반환하면 제품/테스트 신뢰를 깎는다. Sprint 4에서 dedupe/enrichment/ledger와 함께 다시 추가한다. | Accepted |
 
 ## Revisit Triggers
 

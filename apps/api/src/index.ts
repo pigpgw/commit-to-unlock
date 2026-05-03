@@ -1,7 +1,6 @@
 import cors from "@fastify/cors";
 import Fastify from "fastify";
 import { loadConfig } from "./config.js";
-import { registerGitHubWebhookRoutes } from "./routes/github-webhooks.js";
 import { registerHealthRoutes } from "./routes/health.js";
 
 const config = loadConfig();
@@ -31,8 +30,5 @@ app.addContentTypeParser(
 );
 
 await registerHealthRoutes(app);
-await registerGitHubWebhookRoutes(app, {
-  webhookSecret: config.githubWebhookSecret
-});
 
 await app.listen({ port: config.port, host: "0.0.0.0" });

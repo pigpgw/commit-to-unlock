@@ -1,8 +1,8 @@
 # Commit-to-Unlock Market Needs And Pivot Plan
 
-문서 상태: v0.1  
-조사일: 2026-05-03  
-범위: 인터뷰/설문 없이 공개 자료, 경쟁 서비스, 앱스토어/커뮤니티 신호를 바탕으로 한 기획 보강  
+문서 상태: v0.2
+조사일: 2026-05-03
+범위: 인터뷰/설문 없이 공개 자료, 경쟁 서비스, 앱스토어/커뮤니티 신호를 바탕으로 한 기획 보강
 역할: build-first 개발이 “만드는 재미”로만 흐르지 않도록 시장/니즈/피벗 게이트를 둔다.
 
 ## 1. 결론
@@ -27,14 +27,16 @@ Commit-to-Unlock은 계속 만들 가치가 있다. 단, 일반적인 “스크�
 
 | 범주 | 예시 | 공개 가격/포지션 | 시사점 |
 | --- | --- | --- | --- |
-| 프리미엄 iOS 차단 | Opal, Roots | Opal Pro $99.99/year, Roots Plus $59.99/year | 강한 브랜드와 polished UX가 이미 있다. 같은 축으로 경쟁하면 불리하다. |
-| 크로스디바이스 차단 | Freedom | App Store 설명 기준 $39.99/year, multi-device | 개발자에게 desktop/mobile 동시 차단은 매력적이다. 우리도 장기적으로 desktop/browser fallback이 필요하다. |
+| 프리미엄 iOS 차단 | Opal, Roots | Opal Pro $99.99/year, lifetime $399, student discount | 강한 브랜드와 polished UX가 이미 있다. 같은 축으로 경쟁하면 불리하다. |
+| 크로스디바이스 차단 | Freedom | yearly $3.33/mo, monthly $8.99/mo, lifetime $99.50 | 개발자에게 desktop/mobile 동시 차단은 매력적이다. 우리도 장기적으로 desktop/browser fallback이 필요하다. |
 | 무료/기부형 | ScreenZen, TapBlok | ScreenZen free/donation, TapBlok free/open-source Android | 단순 local blocker는 가격 저항이 크다. 구독 명분이 약하다. |
 | 행동 마찰 | one sec, Jomo | one sec 14.99 EUR/year, Jomo $29.99/year | “차단 전 한 번 멈추게 하기” 수요가 있다. block screen도 설명/반성 중심이어야 한다. |
 | 물리적 마찰 | Brick, Unpluq, TapBlok | NFC/QR/태그 기반 | 사용자는 순수 소프트웨어보다 물리적 우회 비용을 신뢰하는 경우가 있다. |
 | 행동 보상형 unlock | Strut, Earn Scroll, EarnIt, Roots | 걸음/운동/학습/호흡으로 unlock | earn-to-unlock은 검증된 니즈지만, 이미 카테고리가 생기고 있다. |
-| 개발자 시간/성과 추적 | WakaTime, RescueTime | WakaTime Premium $14/mo, RescueTime Solo $7/mo annual | 개발자는 개발 데이터 기반 productivity에는 돈을 낼 수 있다. blocker보다 ledger/insight가 과금 명분이다. |
-| 계약/벌금형 습관 | Beeminder | free + $8/$16/$81 premium tiers, pledge model | 강한 동기부여 수요는 있으나 결제/분쟁/미성년자 리스크가 커서 MVP 제외가 맞다. |
+| 개발자 시간/성과 추적 | WakaTime, RescueTime | WakaTime Premium $14/mo, yearly $12.83/mo, commit/PR stats 포함 | 개발자는 개발 데이터 기반 productivity에는 돈을 낼 수 있다. blocker보다 ledger/insight가 과금 명분이다. |
+| 계약/벌금형 습관 | Beeminder | GitHub commits/issues 목표와 pledge model | 강한 동기부여 수요는 있으나 결제/분쟁/미성년자 리스크가 커서 MVP 제외가 맞다. |
+
+2026-05-03 재확인 결과도 같은 결론이다. Opal/Freedom은 이미 높은 가격의 paid focus system을 팔고, ScreenZen은 무료 기대치를 만든다. WakaTime은 developer stats에 월 구독을 붙이고, Beeminder는 GitHub commits/issues를 돈이 걸린 commitment로 연결한다. 따라서 Commit-to-Unlock이 돈을 받을 수 있는 축은 `local blocker`가 아니라 `developer proof ledger + cross-device policy + 설명 가능한 credit history`다.
 
 ### 공개 사용자 신호
 
@@ -162,7 +164,7 @@ Pivot A:
 
 - Android에서 선택 앱 foreground 감지와 overlay가 실제 기기에서 동작한다.
 - credit 0/credit > 0 상태 전환이 2초 안에 반영된다.
-- 권한 회수/서비스 중지 원인이 UI와 debug log에 드러난다.
+- 권한 회수/서비스 중지 원인이 UI와 dogfood event log에 드러난다.
 
 실패 시:
 
@@ -251,6 +253,7 @@ GitHub scoring을 붙이기 전 14일 동안 본인 활동 기준으로 판단�
 
 - Opal App Store: https://apps.apple.com/us/app/opal-screen-time-control/id1497465230
 - Opal pricing: https://opalapp.com/pricing
+- Freedom pricing: https://freedom.to/premium
 - Freedom App Store: https://apps.apple.com/us/app/freedom-screen-time-control/id1269788228
 - ScreenZen: https://screenzen.co/
 - one sec FAQ/pricing: https://one-sec.app/faq/
@@ -259,7 +262,7 @@ GitHub scoring을 붙이기 전 14일 동안 본인 활동 기준으로 판단�
 - Cold Turkey pricing: https://getcoldturkey.com/pricing/
 - WakaTime pricing: https://wakatime.com/pricing
 - RescueTime pricing: https://www.rescuetime.com/pricing
-- Beeminder pricing: https://www.beeminder.com/premium
+- Beeminder GitHub integration: https://www.beeminder.com/gitminder/
 - Strut: https://www.strut-app.com/
 - Earn Scroll: https://earnscroll.app/
 - EarnIt: https://www.earn-it.uk/
