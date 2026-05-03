@@ -55,6 +55,7 @@ Read the strategy docs before changing product direction:
 - [Market needs and pivot plan](docs/market-needs-and-pivot-plan.md)
 - [MVP progress audit](docs/mvp-progress-audit.md)
 - [Design research and UX direction](docs/design-research-and-ux-direction.md)
+- [Security and logic review](docs/security-and-logic-review.md)
 - [App design](docs/app-design.md)
 - [Build-first execution plan](docs/build-first-execution-plan.md)
 - [Decision log](docs/decision-log.md)

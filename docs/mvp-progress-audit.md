@@ -32,6 +32,7 @@
 | API | `/health` only | GitHub placeholder 제거 상태가 맞음 |
 | iOS | source/design skeleton | Xcode/entitlement 전에는 runnable 검증 불가 |
 | Design direction | documented from competitor/platform research | generic wellness blocker가 아니라 developer utility dashboard + playful edge로 고정 |
+| Security baseline | reviewed and hardened | API local-only/CORS-closed default, invalid timezone fallback, Gate D 추가 |
 | CI | TypeScript + Android | main 기준 통과 |
 
 ## 3. MVP Progress
@@ -161,7 +162,7 @@ GitHub-backed 개인 개발자 MVP 기준으로 보면 아직 30% 전후다. 이
 | Gate A: enforcement viability | needs_data | 코드/CI는 통과했지만 실제 기기 반복 로그 부족 | Android 실기기 smoke + export |
 | Gate B: dogfood need | needs_data | 14일 blocked attempt/override 데이터 없음 | 14일 TSV |
 | Gate C: developer proof supply | needs_data | local mock proof는 가능하나 실제 GitHub/WakaTime 빈도 미측정 | 14일 dev activity log |
-| Gate D: trust/privacy | needs_data | privacy 설계는 있으나 GitHub 연결 전 UI 없음 | metadata-only policy draft |
+| Gate D: trust/privacy | needs_data | [security-and-logic-review.md](security-and-logic-review.md)에서 신규 gate로 승격. privacy 설계는 있으나 GitHub 연결 전 UI/HMAC/dedupe/retention 구현 없음 | privacy screen, webhook HMAC/dedupe spec, retention/revoke/delete draft |
 | Gate E: monetization | blocked | paid feature 검증 전 | ledger가 blocker 없이 가치 있는지 확인 |
 
 ## 10. Recommended Next 4 PRs
