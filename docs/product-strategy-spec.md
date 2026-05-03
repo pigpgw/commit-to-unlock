@@ -251,7 +251,7 @@ flowchart LR
 
 ## 9. Product Gates
 
-### Gate 0: Local Enforcement Works
+### Gate A: Enforcement Viability
 
 통과 조건:
 
@@ -263,7 +263,7 @@ flowchart LR
 
 - 모바일-first를 중단하고 desktop/browser blocker first로 전환한다.
 
-### Gate 1: Dogfood Stickiness
+### Gate B: Dogfood Need
 
 14일 본인 사용 기준:
 
@@ -276,7 +276,7 @@ flowchart LR
 
 - 방해 앱 문제가 모바일에 있지 않거나, friction이 충분하지 않다는 뜻이다.
 
-### Gate 2: Proof Supply
+### Gate C: Developer Proof Supply
 
 14일 본인 개발 활동 기준:
 
@@ -287,7 +287,7 @@ flowchart LR
 
 - GitHub PR 중심 MVP를 좁히고, proof source를 넓힌다.
 
-### Gate 3: Trust
+### Gate D: Trust
 
 통과 조건:
 
@@ -299,7 +299,7 @@ flowchart LR
 
 - LLM/AI 표현을 줄이고 rules-first ledger로 더 강하게 고정한다.
 
-### Gate 4: Monetization
+### Gate E: Monetization
 
 통과 조건:
 
@@ -324,7 +324,7 @@ flowchart LR
 
 - 단순 차단은 무료/저가로 둔다.
 - 구독은 ongoing proof processing, sync, history, multi-device enforcement에 붙인다.
-- 결제는 Gate 4 전까지 구현하지 않는다.
+- 결제는 Gate E 전까지 구현하지 않는다.
 
 ## 11. Metrics
 
@@ -361,10 +361,11 @@ flowchart LR
 
 ### Add Before Sprint 4
 
-- local dogfood event export
-- proof supply checklist
-- block screen copy refinement
-- privacy promise draft
+- 14일 dogfood runbook과 Gate decision template
+- DogfoodEventStore export/parse unit tests
+- block screen/dogfood review copy refinement
+- GitHub metadata-only privacy promise draft
+- GitHub Sprint 4 entry spec
 
 ### Do Not Add Yet
 
@@ -392,7 +393,7 @@ flowchart LR
 2. Android local spend engine
 3. Android block overlay copy/state refinement
 4. iOS Xcode project and entitlement prep
-5. GitHub scoring only after Gate 1/2 review
+5. GitHub scoring only after Gate A/B/C review
 6. WakaTime/IDE proof spike if PR-only supply is weak
 7. Browser/desktop blocker spike if mobile enforcement is weak
 

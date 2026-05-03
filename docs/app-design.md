@@ -229,7 +229,7 @@ Sprint 4 API 최소 shape:
 
 ## 6. Roadmap
 
-### Gate 0: Android enforcement viability
+### Gate A: Android enforcement viability
 
 목표: 모바일 차단 루프가 실제 Android 기기에서 제품 가치의 최소 조건을 만족하는지 확인한다.
 

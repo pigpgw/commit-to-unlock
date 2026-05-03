@@ -5,7 +5,7 @@
 
 현재 Android dogfood TSV는 `pnpm android:dogfood:export`로 수집하고 `pnpm android:dogfood:analyze`로 요약한다. 분석 결과의 Data Quality, blocked attempts, policy reasons, emergency unlock, daily quest proof completion과 Gate A/B/C snapshot을 Gate 판단의 1차 입력으로 사용한다.
 
-제품/기술/UX의 기준 설계는 [app-design.md](app-design.md)를 따른다. proof/quest/요일/휴일/override 정책은 [proof-policy-mvp.md](proof-policy-mvp.md)를 따른다. 제품 전략/사업 패키징은 [product-strategy-spec.md](product-strategy-spec.md)를 따른다. 구현 판단은 [decision-log.md](decision-log.md)를 우선 확인한다. 시장/니즈/피벗 판단은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. 저장소 정리 기준은 [repository-audit-and-cleanup.md](repository-audit-and-cleanup.md)를 따른다. Android 상세 검증 기록은 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)를 따른다. 이 문서는 실행 순서와 milestone 기준을 관리한다.
+제품/기술/UX의 기준 설계는 [app-design.md](app-design.md)를 따른다. proof/quest/요일/휴일/override 정책은 [proof-policy-mvp.md](proof-policy-mvp.md)를 따른다. 제품 전략/사업 패키징은 [product-strategy-spec.md](product-strategy-spec.md)를 따른다. 구현 판단은 [decision-log.md](decision-log.md)를 우선 확인한다. 시장/니즈/피벗 판단은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. 현재 진행도와 다음 보완 우선순위는 [mvp-progress-audit.md](mvp-progress-audit.md)를 따른다. 저장소 정리 기준은 [repository-audit-and-cleanup.md](repository-audit-and-cleanup.md)를 따른다. Android 상세 검증 기록은 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)를 따른다. 이 문서는 실행 순서와 milestone 기준을 관리한다.
 
 ## 1. 바뀐 원칙
 
@@ -397,5 +397,6 @@ docs/
 1. Android dogfood TSV summary script 추가
 2. 실제 Android 기기에서 14일 dogfood 실행
 3. `pnpm android:dogfood:analyze`의 Data Quality와 Gate A/B/C snapshot으로 판단 기록 작성
-4. iOS Xcode project/entitlement 준비
-5. GitHub scoring 재개 또는 WakaTime/IDE/desktop proof spike 선택
+4. [mvp-progress-audit.md](mvp-progress-audit.md)의 next 4 PR 순서로 dogfood runbook, event store tests, dogfood review UX, GitHub Sprint 4 entry spec 작성
+5. iOS Xcode project/entitlement 준비
+6. GitHub scoring 재개 또는 WakaTime/IDE/desktop proof spike 선택
