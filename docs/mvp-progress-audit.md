@@ -14,8 +14,9 @@
 - `docs/dogfood-runbook`
 - `test/android-event-store`
 - `test/policy-golden-fixtures`
+- `feature/android-privacy-permissions`
 
-현재 다음 작업은 `feature/android-privacy-permissions`다.
+현재 다음 작업은 `feature/android-dogfood-review`다.
 
 ## 1. Executive Verdict
 
@@ -144,8 +145,8 @@ GitHub-backed 개인 개발자 MVP 기준으로 보면 아직 30% 전후다. 이
 
 ### Must Fix Before Sprint 4
 
-1. Android privacy and permission disclosure UI
-   Usage Access, Overlay, Notification, local event retention/export/clear, "not tamper-proof" 한계를 앱 안에서 설명한다.
+1. Android dogfood review UI
+   Data Quality와 Gate A/B/C/D 상태를 앱 안에서 최소한으로 확인할 수 있게 한다.
 
 2. Android device smoke checklist 실행
    permission missing, foreground changed, overlay shown, credit spend, free day, emergency unlock을 실제 기기에서 체크한다.
@@ -184,16 +185,14 @@ GitHub-backed 개인 개발자 MVP 기준으로 보면 아직 30% 전후다. 이
 - `docs/dogfood-runbook`
 - `test/android-event-store`
 - `test/policy-golden-fixtures`
+- `feature/android-privacy-permissions`
 
 다음:
 
-1. `feature/android-privacy-permissions`
-   Usage Access/Overlay/Notification disclosure와 local dogfood data clear/export 설명.
-
-2. `feature/android-dogfood-review`
+1. `feature/android-dogfood-review`
    [design-research-and-ux-direction.md](design-research-and-ux-direction.md)의 sectioning 기준으로 Data Quality/Gate summary를 앱 안에 최소 표시하거나 export 직후 확인 UX 추가.
 
-3. `docs/github-sprint4-entry`
+2. `docs/github-sprint4-entry`
    GitHub App permissions, webhook dedupe, enrichment, ledger write, privacy policy를 Sprint 4 착수 전 설계.
 
 위 선행 작업과 Gate D 보안 기준 전에는 GitHub scoring 구현을 다시 시작하지 않는다.

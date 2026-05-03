@@ -417,11 +417,11 @@ Completed after this runbook:
 
 - `test/android-event-store`
 - `test/policy-golden-fixtures`
+- `feature/android-privacy-permissions`
 
 Continue in this order:
 
-1. `feature/android-privacy-permissions`
-2. `feature/android-dogfood-review`
-3. `docs/github-sprint4-entry`
+1. `feature/android-dogfood-review`
+2. `docs/github-sprint4-entry`
 
 Do not resume GitHub scoring until Gate A/B/D have enough evidence and the Sprint 4 entry spec is complete.

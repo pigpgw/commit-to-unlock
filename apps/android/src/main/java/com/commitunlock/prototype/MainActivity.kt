@@ -30,6 +30,7 @@ class MainActivity : Activity() {
     private lateinit var monitorStateStore: MonitorStateStore
     private lateinit var policyStore: PolicyStore
     private lateinit var statusText: TextView
+    private lateinit var privacyDisclosureText: TextView
     private lateinit var recentPackagesText: TextView
     private lateinit var policySummaryText: TextView
     private lateinit var questSummaryText: TextView
@@ -176,6 +177,12 @@ class MainActivity : Activity() {
             setPadding(0, 0, 0, 18)
         }
 
+        privacyDisclosureText = TextView(this).apply {
+            textSize = 13f
+            setTextColor(0xFF334155.toInt())
+            setPadding(0, 0, 0, 18)
+        }
+
         packageInput = EditText(this).apply {
             hint = "Package names, comma separated (ex: com.instagram.android)"
             minLines = 2
@@ -251,6 +258,8 @@ class MainActivity : Activity() {
         root.addView(title)
         root.addView(subtitle)
         root.addView(statusText)
+        root.addView(sectionLabel("Privacy and permissions"))
+        root.addView(privacyDisclosureText)
         root.addView(button("Open Usage Access Settings") {
             startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
         })
@@ -571,6 +580,10 @@ class MainActivity : Activity() {
         val activeUnlocks = emergencyUnlockStore.active()
         val quests = dailyQuestStore.read(policy.timezone)
         val foregroundPackage = foregroundPackageOrNull()
+        val dogfoodSummary = dogfoodEventStore.summary()
+        val usageAccessGranted = PermissionChecks.hasUsageAccess(this)
+        val overlayGranted = PermissionChecks.canDrawOverlays(this)
+        val notificationGranted = PermissionChecks.hasNotificationPermission(this)
         val decision = PolicyDecisionEngine.evaluate(
             PolicyDecisionInput(
                 currentPackage = foregroundPackage,
@@ -594,9 +607,9 @@ class MainActivity : Activity() {
         val recentPackages = recentExternalPackages()
 
         statusText.text = listOf(
-            "Usage Access: ${if (PermissionChecks.hasUsageAccess(this)) "granted" else "missing"}",
-            "Overlay Permission: ${if (PermissionChecks.canDrawOverlays(this)) "granted" else "missing"}",
-            "Notification Permission: ${if (PermissionChecks.hasNotificationPermission(this)) "granted" else "missing"}",
+            "Usage Access: ${if (usageAccessGranted) "granted" else "missing"}",
+            "Overlay Permission: ${if (overlayGranted) "granted" else "missing"}",
+            "Notification Permission: ${if (notificationGranted) "granted" else "missing"}",
             "Monitor service: ${if (monitorStateStore.isRunning()) "running" else "stopped"}",
             "Current foreground: ${foregroundPackage ?: foregroundUnavailableReason()}",
             "Remaining mock credit: ${state.remainingMinutes} minutes",
@@ -605,6 +618,15 @@ class MainActivity : Activity() {
             "Strict mode: ${state.strictMode}",
             "Last updated: ${state.lastUpdatedAt}"
         ).joinToString("\n")
+
+        privacyDisclosureText.text = PermissionDisclosureCopy.build(
+            PermissionDisclosureState(
+                usageAccessGranted = usageAccessGranted,
+                overlayGranted = overlayGranted,
+                notificationGranted = notificationGranted,
+                dogfoodEventCount = dogfoodSummary.eventCount
+            )
+        )
 
         policySummaryText.text = listOf(
             "Policy summary",
@@ -629,22 +651,21 @@ class MainActivity : Activity() {
             }
         }
 
-        val summary = dogfoodEventStore.summary()
         dogfoodSummaryText.text = listOf(
             "Dogfood summary (last 14 days)",
-            "Monitor enabled days: ${summary.monitorEnabledDays} / 8 target",
-            "Blocked attempts: ${summary.blockedAttempts} / 8 target",
-            "Policy blocks: ${summary.policyBlocks}",
-            "Emergency unlocks: ${summary.emergencyUnlocks}",
-            "Mock free days: ${summary.freeDays}",
-            "Daily quests added: ${summary.dailyQuestsAdded}",
-            "Daily quest mock completions: ${summary.dailyQuestMockCompletions}",
-            "Permission failures: ${summary.permissionFailures}",
-            "Overlay open-app actions: ${summary.overlayOpens}",
-            "Overlay test-credit unlocks: ${summary.overlayCreditAdds}",
-            "Automatic credit spends: ${summary.automaticCreditSpends}",
-            "Manual credit changes: ${summary.manualCreditChanges}",
-            "Stored dogfood events: ${summary.eventCount}"
+            "Monitor enabled days: ${dogfoodSummary.monitorEnabledDays} / 8 target",
+            "Blocked attempts: ${dogfoodSummary.blockedAttempts} / 8 target",
+            "Policy blocks: ${dogfoodSummary.policyBlocks}",
+            "Emergency unlocks: ${dogfoodSummary.emergencyUnlocks}",
+            "Mock free days: ${dogfoodSummary.freeDays}",
+            "Daily quests added: ${dogfoodSummary.dailyQuestsAdded}",
+            "Daily quest mock completions: ${dogfoodSummary.dailyQuestMockCompletions}",
+            "Permission failures: ${dogfoodSummary.permissionFailures}",
+            "Overlay open-app actions: ${dogfoodSummary.overlayOpens}",
+            "Overlay test-credit unlocks: ${dogfoodSummary.overlayCreditAdds}",
+            "Automatic credit spends: ${dogfoodSummary.automaticCreditSpends}",
+            "Manual credit changes: ${dogfoodSummary.manualCreditChanges}",
+            "Stored dogfood events: ${dogfoodSummary.eventCount}"
         ).joinToString("\n")
 
         eventLogText.text = buildString {

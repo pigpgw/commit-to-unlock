@@ -217,7 +217,7 @@ Deliverables:
 
 ### PR 5: Android privacy and permission screen
 
-Status: next.
+Status: complete.
 
 Deliverables:
 
@@ -229,7 +229,7 @@ Deliverables:
 
 ### PR 6: Android UI section cleanup
 
-Status: pending.
+Status: next.
 
 Deliverables:
 
@@ -265,7 +265,7 @@ Deliverables:
 이 PR 이후 즉시 할 일:
 
 ```text
-feature/android-privacy-permissions
+feature/android-dogfood-review
 ```
 
-이유: runbook, event store tests, policy golden fixtures는 완료됐다. 다음 병목은 Gate D의 권한/개인정보 신뢰 UI다. 이 UI가 있어야 Usage Access, Overlay, Notification, local dogfood export/clear를 사용자에게 정직하게 설명하고 실기기 dogfood를 진행할 수 있다.
+이유: runbook, event store tests, policy golden fixtures, 권한/개인정보 disclosure는 완료됐다. 다음 병목은 dogfood 결과를 앱 안에서 바로 해석하는 Data Quality/Gate summary UX다.

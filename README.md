@@ -176,7 +176,7 @@ pnpm typecheck
 Current recommended sequence:
 
 1. Follow the [Android dogfood runbook](docs/android-dogfood-runbook.md) on a physical device.
-2. Add Android privacy and permission disclosure UI.
+2. Add Android dogfood review and Data Quality summary UI.
 3. Prepare the GitHub Sprint 4 entry spec only after Gate A/B/D have enough evidence.
 
 Do not build payments, school/parent mode, leaderboard, money stakes, or full-diff AI scoring yet.
