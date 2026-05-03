@@ -4,7 +4,7 @@
 역할: 제품/기술 통합 설계 기준 문서
 현재 최우선 구현: Android dogfood 데이터 수집과 Gate A/B/C 판단
 
-현재 실행 순서는 [mvp-execution-plan.md](mvp-execution-plan.md)를 우선한다. 상세 결정 기록은 [decision-log.md](decision-log.md)를 따른다. 제품 전략/UX/사업 패키징은 [product-strategy-spec.md](product-strategy-spec.md)를 따른다. 디자인 조사와 화면 톤은 [design-research-and-ux-direction.md](design-research-and-ux-direction.md)를 따른다. 보안/로직 점검은 [security-and-logic-review.md](security-and-logic-review.md)를 따른다. proof/quest/요일/휴일/override 정책은 [proof-policy-mvp.md](proof-policy-mvp.md)를 따른다. 시장/니즈/피벗 기준은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. Android 다음 구현 단위는 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)가 우선한다.
+현재 실행 순서는 [mvp-execution-plan.md](mvp-execution-plan.md)를 우선한다. 상세 결정 기록은 [decision-log.md](decision-log.md)를 따른다. 제품 전략/UX/사업 패키징은 [product-strategy-spec.md](product-strategy-spec.md)를 따른다. 디자인 조사와 화면 톤은 [design-research-and-ux-direction.md](design-research-and-ux-direction.md)를 따른다. 보안/로직 점검은 [security-and-logic-review.md](security-and-logic-review.md)를 따른다. GitHub runtime 진입 기준은 [github-sprint4-entry.md](github-sprint4-entry.md)를 따른다. proof/quest/요일/휴일/override 정책은 [proof-policy-mvp.md](proof-policy-mvp.md)를 따른다. 시장/니즈/피벗 기준은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. Android 다음 구현 단위는 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)가 우선한다.
 
 ## 1. 결정 요약
 

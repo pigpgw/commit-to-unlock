@@ -399,6 +399,6 @@ docs/
 1. Android dogfood TSV summary script 추가
 2. 실제 Android 기기에서 14일 dogfood 실행
 3. `pnpm android:dogfood:analyze`의 Data Quality와 Gate A/B/C snapshot으로 판단 기록 작성
-4. [mvp-progress-audit.md](mvp-progress-audit.md)의 next 4 PR 순서로 dogfood runbook, event store tests, dogfood review UX, GitHub Sprint 4 entry spec 작성
+4. [mvp-progress-audit.md](mvp-progress-audit.md)의 next PR 순서에 따라 dogfood runbook, event store tests, dogfood review UX, GitHub Sprint 4 entry spec 작성 완료
 5. iOS Xcode project/entitlement 준비
 6. GitHub scoring 재개 또는 WakaTime/IDE/desktop proof spike 선택

@@ -36,8 +36,9 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 | 2 | [android-dogfood-runbook.md](android-dogfood-runbook.md) | MVP-A 실기기 검증 절차 |
 | 3 | [decision-log.md](decision-log.md) | 다시 판단하지 않을 제품/기술 결정 |
 | 4 | [security-and-logic-review.md](security-and-logic-review.md) | 보안/정책/로직 gate |
-| 5 | [app-design.md](app-design.md) | 전체 제품/기술 설계 |
-| 6 | [proof-policy-mvp.md](proof-policy-mvp.md) | proof, quest, exception policy 상세 |
+| 5 | [github-sprint4-entry.md](github-sprint4-entry.md) | GitHub runtime 진입 기준 |
+| 6 | [app-design.md](app-design.md) | 전체 제품/기술 설계 |
+| 7 | [proof-policy-mvp.md](proof-policy-mvp.md) | proof, quest, exception policy 상세 |
 
 나머지 문서는 reference다. 충돌하면 이 문서와 decision log를 우선한다.
 
@@ -77,7 +78,7 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 | --- | --- | --- |
 | Android app | runnable local prototype | 현재 유일한 product surface |
 | Android dogfood | runbook/log/export/analyzer/in-app review 있음 | 14일 실기기 데이터 필요 |
-| Android UI | 기능은 많지만 한 화면이 길다 | dogfood review 후 section 리팩토링 |
+| Android UI | 긴 화면을 section helper로 분리함 | 실기기 dogfood fix만 추가 |
 | Shared policy | TS canonical + Android mirror + golden fixtures | 정책 drift 방지 기준 확보 |
 | Scoring package | pure rules scaffold | 유지. runtime 연결 금지 |
 | API | health-only, localhost/CORS-closed default | 유지. Sprint 4 전 auth/webhook 금지 |
@@ -94,6 +95,7 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 | `android-dogfood-runbook.md` | MVP-A 실기기 dogfood 절차와 gate decision template |
 | `decision-log.md` | 결정만 유지 |
 | `security-and-logic-review.md` | Gate D와 보안 기준 유지 |
+| `github-sprint4-entry.md` | GitHub Sprint 4 진입 기준 |
 | `app-design.md` | 기술/제품 설계 유지 |
 | `proof-policy-mvp.md` | 정책 상세 유지 |
 
@@ -241,7 +243,7 @@ Deliverables:
 
 ### PR 7: GitHub Sprint 4 entry spec
 
-Status: next after first real-device Gate A/D smoke evidence.
+Status: complete as planning gate. Runtime implementation still waits for real-device Gate A/D smoke evidence.
 
 Deliverables:
 
@@ -277,7 +279,7 @@ Deliverables:
 이 PR 이후 즉시 할 일:
 
 ```text
-real-device Android dogfood smoke, then docs/github-sprint4-entry
+real-device Android dogfood smoke, then Sprint 4 PR A: Webhook Security Foundation
 ```
 
-이유: runbook, event store tests, policy golden fixtures, 권한/개인정보 disclosure, in-app Data Quality/Gate review는 완료됐다. 이제 실제 기기에서 Gate A/D smoke evidence를 만든 뒤 GitHub Sprint 4의 HMAC/dedupe/retention/ledger 설계를 잠가야 한다.
+이유: runbook, event store tests, policy golden fixtures, 권한/개인정보 disclosure, in-app Data Quality/Gate review, GitHub Sprint 4 entry spec은 완료됐다. 이제 실제 기기에서 Gate A/D smoke evidence를 만든 뒤 [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A부터 구현한다.

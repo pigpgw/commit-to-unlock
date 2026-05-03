@@ -14,6 +14,7 @@
 | 제품 전략/UX/사업 패키징 | [product-strategy-spec.md](product-strategy-spec.md) |
 | 디자인 조사/화면 톤 | [design-research-and-ux-direction.md](design-research-and-ux-direction.md) |
 | 보안/로직 점검 | [security-and-logic-review.md](security-and-logic-review.md) |
+| GitHub Sprint 4 진입 기준 | [github-sprint4-entry.md](github-sprint4-entry.md) |
 | 실행 순서 | [build-first-execution-plan.md](build-first-execution-plan.md) |
 | 시장/니즈/피벗 게이트 | [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md) |
 | 현재 MVP 진행도/보완 우선순위 | [mvp-progress-audit.md](mvp-progress-audit.md) |
@@ -55,6 +56,7 @@
 | D-027 | `mvp-execution-plan.md`를 현재 실행 source of truth로 둔다 | 문서가 많아져 실행 순서가 분산됐다. 중복 문서를 삭제하기 전에 active/reference/archive 후보를 분리하고 PR 순서를 고정한다. | Accepted |
 | D-028 | Android MVP-A는 14일 dogfood runbook으로 Gate A/B/C/D를 판단한다 | 기능 추가보다 실기기 반복 데이터가 먼저다. runbook 없이 GitHub scoring이나 UI 확장을 진행하면 제품 리스크를 잘못 읽을 가능성이 높다. | Accepted |
 | D-029 | TypeScript와 Android 정책 엔진은 공통 golden fixture로 drift를 막는다 | 모바일 enforcement와 서버/공유 정책이 어긋나면 같은 사용자 상태에서 다른 차단 결과가 나온다. Sprint 4 전부터 공통 JSON fixture를 양쪽 테스트에 적용한다. | Accepted |
+| D-030 | GitHub Sprint 4는 HMAC/dedupe/retention/ledger idempotency부터 시작한다 | PR enrichment 없는 scoring이나 dedupe 없는 ledger write는 제품 신뢰와 privacy를 동시에 깨뜨린다. GitHub runtime은 [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A-F 순서를 따른다. | Accepted |
 
 ## Revisit Triggers
 

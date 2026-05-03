@@ -16,8 +16,10 @@
 - `test/policy-golden-fixtures`
 - `feature/android-privacy-permissions`
 - `feature/android-dogfood-review`
+- `refactor/android-main-sections`
+- `docs/github-sprint4-entry`
 
-현재 다음 작업은 실제 Android 기기 smoke evidence 확보 후 `docs/github-sprint4-entry`다.
+현재 다음 작업은 실제 Android 기기 smoke evidence 확보다. 이후 구현은 [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A 순서로 진행한다.
 
 ## 1. Executive Verdict
 
@@ -152,8 +154,8 @@ GitHub-backed 개인 개발자 MVP 기준으로 보면 아직 30% 전후다. 이
 2. 14일 dogfood export 수집
    analyzer 결과를 붙여 Gate A/B/C를 pass/fail/needs_data로 기록한다.
 
-3. GitHub Sprint 4 entry spec
-   webhook dedupe, PR enrichment, feature vector persistence, credit ledger write를 한 번에 설계해야 한다.
+3. GitHub Sprint 4 PR A 준비
+   [github-sprint4-entry.md](github-sprint4-entry.md)의 webhook HMAC, delivery dedupe, inbound event 저장 테스트부터 구현한다.
 
 ### Should Add If Dogfood Passes
 
@@ -171,7 +173,7 @@ GitHub-backed 개인 개발자 MVP 기준으로 보면 아직 30% 전후다. 이
 | Gate A: enforcement viability | needs_data | 코드/CI는 통과했지만 실제 기기 반복 로그 부족 | Android 실기기 smoke + export |
 | Gate B: dogfood need | needs_data | 14일 blocked attempt/override 데이터 없음 | 14일 TSV |
 | Gate C: developer proof supply | needs_data | local mock proof는 가능하나 실제 GitHub/WakaTime 빈도 미측정 | 14일 dev activity log |
-| Gate D: trust/privacy | needs_data | Android privacy UI와 in-app data-quality review는 있음. GitHub 연결 전 HMAC/dedupe/retention/revoke/delete 설계가 아직 없음 | real-device smoke, webhook HMAC/dedupe spec, retention/revoke/delete draft |
+| Gate D: trust/privacy | needs_data | Android privacy UI, in-app data-quality review, GitHub Sprint 4 entry spec은 있음. 실제 기기 smoke와 runtime HMAC/dedupe 구현은 아직 없음 | real-device smoke, webhook HMAC/dedupe implementation |
 | Gate E: monetization | blocked | paid feature 검증 전 | ledger가 blocker 없이 가치 있는지 확인 |
 
 ## 10. Recommended Next PRs
@@ -186,14 +188,15 @@ GitHub-backed 개인 개발자 MVP 기준으로 보면 아직 30% 전후다. 이
 - `feature/android-privacy-permissions`
 - `feature/android-dogfood-review`
 - `refactor/android-main-sections`
+- `docs/github-sprint4-entry`
 
 다음:
 
-1. `docs/github-sprint4-entry`
-   GitHub App permissions, webhook dedupe, enrichment, ledger write, privacy policy를 Sprint 4 착수 전 설계.
-
-2. Android real-device smoke evidence
+1. Android real-device smoke evidence
    Usage Access, overlay, credit spend, free day, emergency unlock, Gate A/D 상태를 실제 기기에서 확인한다.
+
+2. `feature/github-webhook-security`
+   [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A 기준으로 HMAC 검증, delivery dedupe, inbound event 저장 테스트부터 구현한다.
 
 위 선행 작업과 Gate D 보안 기준 전에는 GitHub scoring 구현을 다시 시작하지 않는다.
 
