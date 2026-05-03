@@ -205,6 +205,8 @@ Deliverables:
 
 ### PR 4: Policy golden fixtures
 
+Status: complete.
+
 Deliverables:
 
 - shared JSON fixtures

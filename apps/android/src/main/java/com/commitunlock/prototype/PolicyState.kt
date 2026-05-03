@@ -2,6 +2,7 @@ package com.commitunlock.prototype
 
 import java.time.Instant
 import java.time.ZoneId
+import java.time.ZoneOffset
 
 data class PolicyState(
     val activeWeekdays: List<Int>,
@@ -12,7 +13,7 @@ data class PolicyState(
     val timezone: String
 ) {
     fun isManualHolidayActive(now: Instant = Instant.now()): Boolean {
-        val zoneId = runCatching { ZoneId.of(timezone) }.getOrDefault(ZoneId.systemDefault())
+        val zoneId = runCatching { ZoneId.of(timezone) }.getOrDefault(ZoneOffset.UTC)
         return manualHolidayDate == now.atZone(zoneId).toLocalDate().toString()
     }
 }

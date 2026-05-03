@@ -64,7 +64,7 @@ own app / no foreground
 
 | 로직 | 현재 | 보완 |
 | --- | --- | --- |
-| timezone | Android는 system fallback, TS는 이제 UTC fallback | Sprint 4 API는 저장 시 IANA timezone allowlist/validation 추가 |
+| timezone | Android와 TS 모두 invalid timezone을 UTC로 fallback | Sprint 4 API는 저장 시 IANA timezone allowlist/validation 추가 |
 | active time | HH:mm 검증은 Android UI에서 함 | API policy write에도 같은 검증 필요 |
 | weekday empty | empty면 inactive | UI에서 "선택된 요일 없음 = 차단 비활성"을 명확히 표시 |
 | public holiday | 현재 placeholder false | 실제 공휴일 API 전까지 user-facing promise 금지 |
