@@ -19,28 +19,49 @@ This is the first runnable Commit-to-Unlock mobile prototype. It does not connec
 - Stores a structured dogfood event log for the last 1,000 local events and keeps a local TSV export file for `adb` collection.
 - Does not use AccessibilityService.
 
-## Local Run
+## Quick Dogfood Loop
 
-1. Install Android SDK 33 and JDK 17.
-2. Build:
+Use this path for repeated local testing on a physical device.
 
-   ```bash
-   ./gradlew :apps:android:assembleDebug
-   ```
-
-3. Install and launch:
+1. Connect one Android device with USB debugging enabled.
+2. Install and launch:
 
    ```bash
    pnpm android:dogfood
    ```
 
-4. Open the app and grant:
+3. Grant:
    - Usage Access
    - Display over other apps
    - Notifications, on Android 13+
 
-5. Add package names to block, for example `com.instagram.android`, or open a target app once and use `Add latest external package`.
-6. Start the monitor service.
+4. Run the smoke test below.
+5. Pull the latest dogfood TSV after testing:
+
+   ```bash
+   pnpm android:dogfood:export
+   ```
+
+When multiple devices are connected, set `ANDROID_SERIAL=<device-id>` before running dogfood scripts.
+
+## Manual Build
+
+Use this when checking Gradle output without installing on a device.
+
+```bash
+./gradlew :apps:android:assembleDebug
+./gradlew :apps:android:lintDebug
+```
+
+## Dogfood Scripts
+
+| Command | Purpose |
+| --- | --- |
+| `pnpm android:dogfood` | Build, install, and launch the debug app. |
+| `pnpm android:dogfood -- --skip-build` | Install the existing debug APK without rebuilding. |
+| `pnpm android:dogfood -- --no-launch` | Install but do not launch the app. |
+| `pnpm android:dogfood:export` | Pull the current dogfood TSV into `artifacts/android-dogfood/`. |
+| `pnpm android:dogfood:export -- path/to/file.tsv` | Pull the current dogfood TSV to a chosen path. |
 
 ## Device Smoke Test
 
@@ -50,7 +71,7 @@ This is the first runnable Commit-to-Unlock mobile prototype. It does not connec
    ~/Library/Android/sdk/platform-tools/adb devices -l
    ```
 
-2. Install the debug APK:
+2. Install and launch the debug APK:
 
    ```bash
    pnpm android:dogfood
@@ -101,3 +122,34 @@ pnpm android:dogfood:export
 ```
 
 By default this writes to `artifacts/android-dogfood/`. Set `ANDROID_SERIAL` first when multiple devices are connected.
+
+## Troubleshooting
+
+### `No connected Android device found`
+
+- Check USB debugging is enabled.
+- Run `adb devices -l`.
+- Reconnect the device and accept the trust prompt.
+
+### `Multiple Android devices found`
+
+Set the target explicitly:
+
+```bash
+ANDROID_SERIAL=<device-id> pnpm android:dogfood
+ANDROID_SERIAL=<device-id> pnpm android:dogfood:export
+```
+
+### Dogfood export is empty
+
+- Open the app once after installing.
+- Start and stop the monitor, or save targets, to create at least one dogfood event.
+- Then run `pnpm android:dogfood:export` again.
+
+### Overlay does not appear
+
+- Confirm Usage Access is granted.
+- Confirm Display over other apps is granted.
+- Confirm the blocked package exactly matches the foreground package shown in the app.
+- Reset credit to `0`.
+- Confirm monitor service is running.
