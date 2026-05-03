@@ -1,6 +1,6 @@
 # MVP Progress Audit
 
-문서 상태: v0.1
+문서 상태: v0.1, snapshot reference. 현재 실행 순서는 [mvp-execution-plan.md](mvp-execution-plan.md)를 우선한다.
 점검일: 2026-05-03
 역할: 현재 구현/문서/시장 근거를 한 번에 점검하고, 다음 MVP 진행 판단을 고정한다.
 
@@ -165,7 +165,9 @@ GitHub-backed 개인 개발자 MVP 기준으로 보면 아직 30% 전후다. 이
 | Gate D: trust/privacy | needs_data | [security-and-logic-review.md](security-and-logic-review.md)에서 신규 gate로 승격. privacy 설계는 있으나 GitHub 연결 전 UI/HMAC/dedupe/retention 구현 없음 | privacy screen, webhook HMAC/dedupe spec, retention/revoke/delete draft |
 | Gate E: monetization | blocked | paid feature 검증 전 | ledger가 blocker 없이 가치 있는지 확인 |
 
-## 10. Recommended Next 4 PRs
+## 10. Recommended Next PRs
+
+현재 최신 PR 순서는 [mvp-execution-plan.md](mvp-execution-plan.md)의 `Next PR Sequence`를 따른다. 이 snapshot 기준 다음 작업은 아래와 같다.
 
 1. `docs/dogfood-runbook`
    14일 Android dogfood 실행법, 파일명 규칙, Gate decision template.
@@ -173,13 +175,19 @@ GitHub-backed 개인 개발자 MVP 기준으로 보면 아직 30% 전후다. 이
 2. `test/android-event-store`
    DogfoodEventStore export/parse/sanitize/max events unit tests.
 
-3. `feature/android-dogfood-review`
+3. `test/policy-golden-fixtures`
+   TypeScript shared policy와 Android Kotlin policy mirror가 같은 fixture 결과를 내도록 검증.
+
+4. `feature/android-privacy-permissions`
+   Usage Access/Overlay/Notification disclosure와 local dogfood data clear/export 설명.
+
+5. `feature/android-dogfood-review`
    [design-research-and-ux-direction.md](design-research-and-ux-direction.md)의 sectioning 기준으로 Data Quality/Gate summary를 앱 안에 최소 표시하거나 export 직후 확인 UX 추가.
 
-4. `docs/github-sprint4-entry`
+6. `docs/github-sprint4-entry`
    GitHub App permissions, webhook dedupe, enrichment, ledger write, privacy policy를 Sprint 4 착수 전 설계.
 
-이 4개 전에는 GitHub scoring 구현을 다시 시작하지 않는다.
+위 선행 작업과 Gate D 보안 기준 전에는 GitHub scoring 구현을 다시 시작하지 않는다.
 
 ## 11. Updated MVP Definition
 

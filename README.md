@@ -48,17 +48,21 @@ Core principles:
 - No shame copy.
 - Policy-compliant control.
 
-Read the strategy docs before changing product direction:
+Read these docs in order before changing product direction or implementation priority:
 
-- [Product strategy](docs/product-strategy-spec.md)
-- [Proof policy MVP](docs/proof-policy-mvp.md)
-- [Market needs and pivot plan](docs/market-needs-and-pivot-plan.md)
-- [MVP progress audit](docs/mvp-progress-audit.md)
-- [Design research and UX direction](docs/design-research-and-ux-direction.md)
+- [MVP execution plan](docs/mvp-execution-plan.md)
+- [Decision log](docs/decision-log.md)
 - [Security and logic review](docs/security-and-logic-review.md)
 - [App design](docs/app-design.md)
+- [Proof policy MVP](docs/proof-policy-mvp.md)
+
+Reference docs:
+
+- [Product strategy](docs/product-strategy-spec.md)
+- [Design research and UX direction](docs/design-research-and-ux-direction.md)
+- [Market needs and pivot plan](docs/market-needs-and-pivot-plan.md)
+- [MVP progress audit](docs/mvp-progress-audit.md)
 - [Build-first execution plan](docs/build-first-execution-plan.md)
-- [Decision log](docs/decision-log.md)
 - [Repository audit and cleanup](docs/repository-audit-and-cleanup.md)
 
 ## Repository Layout
