@@ -23,21 +23,12 @@ importers:
 
   apps/api:
     dependencies:
-      '@commit-to-unlock/scoring':
-        specifier: workspace:*
-        version: link:../../packages/scoring
-      '@commit-to-unlock/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
       '@fastify/cors':
         specifier: ^11.0.1
         version: 11.2.0
       fastify:
         specifier: ^5.3.2
         version: 5.8.5
-      zod:
-        specifier: ^3.24.3
-        version: 3.25.76
 
   packages/scoring:
     devDependencies:
@@ -777,9 +768,6 @@ packages:
     engines: {node: '>=8'}
     hasBin: true
 
-  zod@3.25.76:
-    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
-
 snapshots:
 
   '@esbuild/aix-ppc64@0.27.7':
@@ -1415,5 +1403,3 @@ snapshots:
     dependencies:
       siginfo: 2.0.0
       stackback: 0.0.2
-
-  zod@3.25.76: {}
