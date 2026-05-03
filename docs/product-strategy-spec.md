@@ -1,10 +1,11 @@
 # Commit-to-Unlock Product Strategy Spec
 
-문서 상태: v0.4
+문서 상태: v0.5
 역할: 기획, UX, 사업 모델, 개발 우선순위를 하나의 실행 기준으로 묶는다.  
 전제: 인터뷰/설문/fake-door 없이 build-first로 간다. 단, 제품이 약하면 빠르게 축소하거나 피벗한다.
 
 기획/보안/개인정보/platform policy의 hardening gate는 [product-security-hardening-plan.md](product-security-hardening-plan.md)를 따른다.
+경쟁 서비스 기준의 차별화와 paid moat는 [competitive-service-review.md](competitive-service-review.md)를 따른다.
 
 ## 1. Product Thesis
 
@@ -32,6 +33,14 @@ Commit-to-Unlock은 차단 앱이 아니다. 개발자가 실제로 만든 작�
 
 디자인 포지션은 [design-research-and-ux-direction.md](design-research-and-ux-direction.md)의 `developer utility dashboard + playful edge`를 따른다. Opal, one sec, Freedom, Jomo는 차단 UX 참고 대상이고, GitHub Primer/WakaTime은 제품 표면의 시각 언어 참고 대상이다.
 
+2026-05-04 경쟁 조사 이후 문구는 더 좁힌다.
+
+```text
+Verified dev work becomes guilt-free leisure credit.
+```
+
+`earn screen time`은 걸음/운동/학습 앱들도 이미 쓰는 category language다. 제품 전면 문구는 반드시 `developer proof`, `ledger`, `selected distracting apps`를 포함해야 한다.
+
 ### Do Not Compete As
 
 | 피해야 할 포지션 | 이유 |
@@ -49,6 +58,7 @@ Commit-to-Unlock은 차단 앱이 아니다. 개발자가 실제로 만든 작�
 | earn-to-unlock app | 보상 근거가 걸음/운동/퀴즈가 아니라 개발자의 실제 산출물이다. |
 | WakaTime/RescueTime | 측정에서 끝나지 않고 credit ledger와 enforcement로 이어진다. |
 | Beeminder류 | 금전 벌금보다 낮은 법무 리스크로 accountability를 만든다. |
+| Cold Turkey/FocusMe류 desktop blocker | credit ledger를 desktop/browser companion과 연결하면 개발자의 실제 방해 환경에 더 가까워진다. |
 
 ## 3. Target Users
 
@@ -116,6 +126,7 @@ Job-to-be-done:
 | Trust before sync | GitHub sync 전 [security-and-logic-review.md](security-and-logic-review.md)의 Gate D를 통과한다. |
 | User control | 앱 삭제 가능, 선택 target만 차단, 계정 삭제 가능 원칙은 [control-account-design.md](control-account-design.md)를 따른다. |
 | Security before scale | 신규 기능은 [product-security-hardening-plan.md](product-security-hardening-plan.md)의 invariants, threat model, stop list를 먼저 만족한다. |
+| Paid moat over blocker | 유료 명분은 [competitive-service-review.md](competitive-service-review.md)의 proof history, cross-device sync, browser/desktop enforcement, multi-source proof에서 나온다. |
 
 ## 5. Core Product Loops
 
@@ -332,6 +343,8 @@ flowchart LR
 
 - 단순 차단은 무료/저가로 둔다.
 - 구독은 ongoing proof processing, sync, history, multi-device enforcement에 붙인다.
+- Android-only local blocker는 paid subscription으로 팔지 않는다.
+- Local Plus one-time은 Android보다 desktop/browser utility에 더 적합하다.
 - 결제는 Gate E 전까지 구현하지 않는다.
 
 ## 11. Metrics
@@ -364,6 +377,7 @@ flowchart LR
 
 - Android local blocker hardening
 - 실기기 dogfood log 확보
+- desktop/browser companion spike
 - iOS FamilyControls 준비
 - mobile credit contract 유지
 
@@ -374,6 +388,7 @@ flowchart LR
 - block screen/dogfood review copy refinement: done
 - GitHub metadata-only privacy promise draft: done in [github-sprint4-entry.md](github-sprint4-entry.md)
 - GitHub Sprint 4 entry spec: done
+- Competitive service review: done
 
 ### Do Not Add Yet
 
@@ -400,9 +415,11 @@ flowchart LR
 1. Android dogfood event logging
 2. Android local spend engine
 3. Android block overlay copy/state refinement
-4. iOS Xcode project and entitlement prep
-5. GitHub scoring only after Gate A/B/C review
-6. WakaTime/IDE proof spike if PR-only supply is weak
-7. Browser/desktop blocker spike if mobile enforcement is weak
+4. Android target guardrails
+5. Android real-device dogfood smoke
+6. Browser/desktop companion spike
+7. iOS Xcode project and entitlement prep
+8. GitHub scoring only after Gate A/B/C/D review
+9. WakaTime/IDE proof spike if PR-only supply is weak
 
 이 순서는 시장/제품 리스크를 줄이기 위한 것이다. GitHub scoring을 먼저 고도화하면 기술적으로는 재미있지만, 사용자가 실제로 차단 루프를 켜두지 않는 문제를 늦게 발견한다.

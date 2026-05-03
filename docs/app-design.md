@@ -4,7 +4,7 @@
 역할: 제품/기술 통합 설계 기준 문서
 현재 최우선 구현: Android dogfood 데이터 수집과 Gate A/B/C 판단
 
-현재 실행 순서는 [mvp-execution-plan.md](mvp-execution-plan.md)를 우선한다. 신규 기능의 기획/보안/개인정보/platform gate는 [product-security-hardening-plan.md](product-security-hardening-plan.md)를 따른다. 상세 결정 기록은 [decision-log.md](decision-log.md)를 따른다. 제품 전략/UX/사업 패키징은 [product-strategy-spec.md](product-strategy-spec.md)를 따른다. 디자인 조사와 화면 톤은 [design-research-and-ux-direction.md](design-research-and-ux-direction.md)를 따른다. 보안/로직 점검은 [security-and-logic-review.md](security-and-logic-review.md)를 따른다. GitHub runtime 진입 기준은 [github-sprint4-entry.md](github-sprint4-entry.md)를 따른다. 차단 범위와 계정/탈퇴 UX는 [control-account-design.md](control-account-design.md)를 따른다. proof/quest/요일/휴일/override 정책은 [proof-policy-mvp.md](proof-policy-mvp.md)를 따른다. 시장/니즈/피벗 기준은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. Android 다음 구현 단위는 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)가 우선한다.
+현재 실행 순서는 [mvp-execution-plan.md](mvp-execution-plan.md)를 우선한다. 신규 기능의 기획/보안/개인정보/platform gate는 [product-security-hardening-plan.md](product-security-hardening-plan.md)를 따른다. 경쟁 서비스 기준의 차별화와 paid moat는 [competitive-service-review.md](competitive-service-review.md)를 따른다. 상세 결정 기록은 [decision-log.md](decision-log.md)를 따른다. 제품 전략/UX/사업 패키징은 [product-strategy-spec.md](product-strategy-spec.md)를 따른다. 디자인 조사와 화면 톤은 [design-research-and-ux-direction.md](design-research-and-ux-direction.md)를 따른다. 보안/로직 점검은 [security-and-logic-review.md](security-and-logic-review.md)를 따른다. GitHub runtime 진입 기준은 [github-sprint4-entry.md](github-sprint4-entry.md)를 따른다. 차단 범위와 계정/탈퇴 UX는 [control-account-design.md](control-account-design.md)를 따른다. proof/quest/요일/휴일/override 정책은 [proof-policy-mvp.md](proof-policy-mvp.md)를 따른다. 시장/니즈/피벗 기준은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. Android 다음 구현 단위는 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)가 우선한다.
 
 ## 1. 결정 요약
 
@@ -25,6 +25,7 @@ Commit-to-Unlock은 “개발 활동을 했다고 직접 체크하면 앱을 열
 - 신규 기능은 [product-security-hardening-plan.md](product-security-hardening-plan.md)의 non-negotiable invariants를 먼저 만족해야 한다.
 - Credit state는 로컬 mock contract를 유지하고, 서버 API는 나중에 같은 의미의 contract로 맞춘다.
 - GitHub scoring은 PR 중심, rules-first, ledger-first로 재개한다. LLM은 판정자가 아니라 설명 보조층이다.
+- paid 제품은 Android-only blocker가 아니라 proof ledger, browser/desktop companion, cross-device sync, multi-source proof로 설계한다.
 
 제품 약속 문구는 다음으로 고정한다.
 

@@ -1,9 +1,12 @@
 # Commit-to-Unlock Market Needs And Pivot Plan
 
-문서 상태: v0.2
+문서 상태: v0.3
 조사일: 2026-05-03
+최신 경쟁 보강: 2026-05-04
 범위: 인터뷰/설문 없이 공개 자료, 경쟁 서비스, 앱스토어/커뮤니티 신호를 바탕으로 한 기획 보강
 역할: build-first 개발이 “만드는 재미”로만 흐르지 않도록 시장/니즈/피벗 게이트를 둔다.
+
+상세 경쟁 서비스 teardown은 [competitive-service-review.md](competitive-service-review.md)를 따른다.
 
 ## 1. 결론
 
@@ -37,6 +40,13 @@ Commit-to-Unlock은 계속 만들 가치가 있다. 단, 일반적인 “스크�
 | 계약/벌금형 습관 | Beeminder | GitHub commits/issues 목표와 pledge model | 강한 동기부여 수요는 있으나 결제/분쟁/미성년자 리스크가 커서 MVP 제외가 맞다. |
 
 2026-05-03 재확인 결과도 같은 결론이다. Opal/Freedom은 이미 높은 가격의 paid focus system을 팔고, ScreenZen은 무료 기대치를 만든다. WakaTime은 developer stats에 월 구독을 붙이고, Beeminder는 GitHub commits/issues를 돈이 걸린 commitment로 연결한다. 따라서 Commit-to-Unlock이 돈을 받을 수 있는 축은 `local blocker`가 아니라 `developer proof ledger + cross-device policy + 설명 가능한 credit history`다.
+
+2026-05-04 추가 경쟁 조사 결론:
+
+- Jomo, Unpluq, one sec은 unlock friction과 local/privacy copy가 이미 성숙하다. 우리 차별점은 friction 자체가 아니라 외부 개발 proof다.
+- Cold Turkey, FocusMe, Freedom은 desktop/browser blocking이 paid value임을 보여준다. 개발자 제품에서 mobile-only는 dogfood surface이지 최종 paid surface가 아니다.
+- Strut, Walki, Earn Scroll, EarnIt류는 "earn screen time" 카테고리가 이미 있음을 보여준다. 따라서 문구는 `earn screen time`보다 `verified dev work -> leisure credit ledger`가 강하다.
+- WakaTime과 Beeminder는 개발 activity 기반 paid/accountability 수요를 증명한다. 다만 money pledge는 MVP에서 제외하고, WakaTime/IDE proof는 PR-only가 부족할 때 capped provisional credit fallback으로 설계한다.
 
 ### 공개 사용자 신호
 
@@ -243,11 +253,13 @@ GitHub scoring을 붙이기 전 14일 동안 본인 활동 기준으로 판단�
 
 1. Android 실기기 차단 hardening
 2. 14일 dogfood logging
-3. iOS Xcode/entitlement 준비
-4. 경쟁 앱 직접 teardown: Opal, ScreenZen, one sec, Jomo, WakaTime
-5. Gate A/B/C 통과 여부 판단
-6. 통과하면 GitHub scoring Sprint 4 진행
-7. 실패하면 desktop/browser 또는 WakaTime/IDE proof channel로 전환
+3. Android target guardrails
+4. desktop/browser companion spike
+5. iOS Xcode/entitlement 준비
+6. Gate A/B/C/D 통과 여부 판단
+7. 통과하면 GitHub scoring Sprint 4 진행
+8. PR-only가 약하면 WakaTime/IDE proof channel을 capped provisional credit로 추가
+9. mobile enforcement가 약하면 desktop/browser-first로 전환
 
 ## 8. Sources
 
@@ -260,12 +272,17 @@ GitHub scoring을 붙이기 전 14일 동안 본인 활동 기준으로 판단�
 - Jomo pricing: https://jomo.so/pricing
 - Roots pricing: https://www.getroots.app/pricing
 - Cold Turkey pricing: https://getcoldturkey.com/pricing/
+- Cold Turkey features: https://getcoldturkey.com/features/
+- FocusMe pricing: https://focusme.com/pricing/
+- FocusMe features: https://focusme.com/how-it-works/
 - WakaTime pricing: https://wakatime.com/pricing
 - RescueTime pricing: https://www.rescuetime.com/pricing
 - Beeminder GitHub integration: https://www.beeminder.com/gitminder/
 - Strut: https://www.strut-app.com/
 - Earn Scroll: https://earnscroll.app/
 - EarnIt: https://www.earn-it.uk/
+- ScrollToll: https://scrolltoll.com/
+- Repscroll: https://repscroll.com/
 - TapBlok: https://tapblok.com/
 - GitHub Octoverse 2025: https://github.blog/news-insights/octoverse/octoverse-a-new-developer-joins-github-every-second-as-ai-leads-typescript-to-1/
 - Stack Overflow 2025 Developer Survey press release: https://stackoverflow.co/company/press/archive/stack-overflow-2025-developer-survey/

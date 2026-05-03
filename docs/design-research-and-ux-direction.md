@@ -1,8 +1,11 @@
 # Design Research And UX Direction
 
-문서 상태: v0.1
+문서 상태: v0.2
 조사일: 2026-05-03
+최신 경쟁 보강: 2026-05-04
 역할: 인터넷 기반 디자인 조사, UX 방향, Android/iOS 화면 보완 기준
+
+경쟁 서비스별 제품/수익화 teardown은 [competitive-service-review.md](competitive-service-review.md)를 따른다.
 
 ## 1. Decision
 
@@ -28,6 +31,9 @@
 | Cross-device blocker | Freedom | block apps/sites/internet, scheduling, locked mode, blocklists | schedule/blocklist UX는 참고. 전체 인터넷 차단 포지션은 피함 |
 | Modern iOS blocker | Jomo | unlocks, strict mode, journaling, safe/unlock copy | strict/gentle 선택과 "you stay in control" copy를 참고 |
 | Developer metrics | WakaTime | project/file/branch/commit/language metrics dashboard | Proof Feed와 Ledger는 metrics dashboard처럼 설계 |
+| Desktop blocker | Cold Turkey, FocusMe | desktop app/site blocking, locking, allowance, local stats/export | browser/desktop companion의 UX와 Local Plus 후보로 참고 |
+| Physical friction | Unpluq | NFC/digital barriers, emergency mode, selected app limits | hardware는 제외하고 emergency/barrier copy만 참고 |
+| Earn-to-unlock | Strut, Earn Scroll, EarnIt | steps/exercise/quiz to unlock | daily wallet UX는 참고하되 developer proof로 좁힘 |
 | Developer UI system | GitHub Primer | GitHub의 color, typography, UI pattern foundation | 색/상태/리스트/타임라인의 기본 언어로 채택 |
 | Platform design | Android Material 3 | Compose Material 3 components, type scale, Android app quality | Android prototype UI 개선 기준 |
 | Platform design | Apple HIG | color consistency, typography legibility, icons, iOS characteristics | iOS prototype UI 기준 |
@@ -104,6 +110,34 @@ WakaTime은 개발 활동을 프로젝트, 파일, 브랜치, 커밋, 언어 단
 피할 것:
 
 - 코드 시간을 그대로 productivity score로 만들지 않는다. 목표는 time tracking이 아니라 unlock ledger다.
+
+### Desktop Blockers
+
+Cold Turkey와 FocusMe는 desktop app/site blocking, locked mode, allowance, statistics/export가 paid desktop utility로 성립할 수 있음을 보여준다.
+
+가져올 것:
+
+- desktop/browser companion은 paid moat 후보로 둔다.
+- allowance/break 모델은 credit ledger spend UX와 연결한다.
+- local stats/export는 개발자 신뢰를 만든다.
+
+피할 것:
+
+- OS를 통제한다는 과장 문구.
+- 계정/삭제/권한 접근을 막는 strict mode.
+
+### Earn-To-Unlock Apps
+
+Strut, Earn Scroll, EarnIt류는 screen time을 특정 proof로 벌어 쓰는 모델이 직관적임을 보여준다.
+
+가져올 것:
+
+- daily wallet, midnight reset, selected locked apps, earned/spent minutes 표현.
+
+피할 것:
+
+- 운동/학습 앱과 같은 범용 "earn screen time" 포지션.
+- 카메라/HealthKit/학습 콘텐츠 같은 별도 privacy/content burden.
 
 ### GitHub Primer
 
@@ -298,14 +332,14 @@ expires: 22:10
 
 ## 10. Next Design PRs
 
-1. Android UI sectioning
-   `MainActivity`의 현재 긴 제어 화면을 Status, Permissions, Targets, Quest, Emergency, Dogfood section으로 나눈다.
-
-2. Android overlay copy polish
+1. Android overlay copy polish
    `PolicyDecision.reason`별 사용자-facing copy map을 만들고, block overlay에 next action을 표시한다.
 
-3. Dogfood review surface
-   analyzer 결과의 Data Quality/Gate snapshot을 앱 안에서 최소 요약한다.
+2. Proof Feed and Ledger row design
+   `+25 min PR merged`, `0 min duplicate patch`, `-10 min emergency unlock`처럼 developer ledger row를 compact하게 설계한다.
+
+3. Desktop/browser companion wireframe
+   Freedom, Cold Turkey, FocusMe류의 desktop/browser blocker pattern을 proof ledger와 연결한다.
 
 4. iOS prototype wireframe
    FamilyActivityPicker, shield toggle, opaque target count, local credit state를 기준으로 SwiftUI 화면 skeleton을 확정한다.
@@ -320,6 +354,10 @@ expires: 22:10
 - one sec official site: https://one-sec.app/
 - Freedom official site: https://freedom.to/
 - Jomo official site: https://jomo.so/
+- Cold Turkey features: https://getcoldturkey.com/features/
+- FocusMe features: https://focusme.com/how-it-works/
+- Unpluq FAQ: https://www.unpluq.com/faq
+- Earn Scroll: https://earnscroll.app/
 - WakaTime metrics: https://wakatime.com/metrics-for-programming
 - GitHub Primer design system: https://primer.github.io/design/
 - Android Compose Material 3: https://developer.android.com/develop/ui/compose/designsystems/material3

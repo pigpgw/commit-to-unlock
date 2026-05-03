@@ -34,13 +34,14 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 | --- | --- | --- |
 | 1 | [mvp-execution-plan.md](mvp-execution-plan.md) | 지금 무엇을 할지 결정하는 실행 계획 |
 | 2 | [product-security-hardening-plan.md](product-security-hardening-plan.md) | 기획/보안/개인정보/platform policy hardening gate |
-| 3 | [android-dogfood-runbook.md](android-dogfood-runbook.md) | MVP-A 실기기 검증 절차 |
-| 4 | [decision-log.md](decision-log.md) | 다시 판단하지 않을 제품/기술 결정 |
-| 5 | [security-and-logic-review.md](security-and-logic-review.md) | 보안/정책/로직 gate |
-| 6 | [github-sprint4-entry.md](github-sprint4-entry.md) | GitHub runtime 진입 기준 |
-| 7 | [control-account-design.md](control-account-design.md) | 차단 범위, 계정, 탈퇴 UX |
-| 8 | [app-design.md](app-design.md) | 전체 제품/기술 설계 |
-| 9 | [proof-policy-mvp.md](proof-policy-mvp.md) | proof, quest, exception policy 상세 |
+| 3 | [competitive-service-review.md](competitive-service-review.md) | 경쟁 서비스 조사와 차별화/수익화 gate |
+| 4 | [android-dogfood-runbook.md](android-dogfood-runbook.md) | MVP-A 실기기 검증 절차 |
+| 5 | [decision-log.md](decision-log.md) | 다시 판단하지 않을 제품/기술 결정 |
+| 6 | [security-and-logic-review.md](security-and-logic-review.md) | 보안/정책/로직 gate |
+| 7 | [github-sprint4-entry.md](github-sprint4-entry.md) | GitHub runtime 진입 기준 |
+| 8 | [control-account-design.md](control-account-design.md) | 차단 범위, 계정, 탈퇴 UX |
+| 9 | [app-design.md](app-design.md) | 전체 제품/기술 설계 |
+| 10 | [proof-policy-mvp.md](proof-policy-mvp.md) | proof, quest, exception policy 상세 |
 
 나머지 문서는 reference다. 충돌하면 이 문서와 decision log를 우선한다.
 
@@ -95,6 +96,7 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 | --- | --- |
 | `mvp-execution-plan.md` | 신규 단일 실행 계획 |
 | `product-security-hardening-plan.md` | 신규 기능의 기획/보안/개인정보/platform hardening gate |
+| `competitive-service-review.md` | 경쟁 서비스 조사, paid moat, desktop/browser companion, WakaTime fallback 판단 |
 | `android-dogfood-runbook.md` | MVP-A 실기기 dogfood 절차와 gate decision template |
 | `decision-log.md` | 결정만 유지 |
 | `security-and-logic-review.md` | Gate D와 보안 기준 유지 |
@@ -281,6 +283,17 @@ Deliverables:
 - Android/iOS/GitHub/scoring/account hardening 기준
 - immediate implementation queue
 
+### PR 10: Competitive service review
+
+Status: complete as planning gate.
+
+Deliverables:
+
+- blocker, earn-to-unlock, desktop blocker, developer productivity 서비스 비교
+- paid moat를 proof ledger, cross-device sync, browser/desktop companion으로 재정의
+- Android-only blocker 과금 금지 기준 보강
+- desktop/browser companion과 WakaTime/IDE proof spike를 다음 설계 후보로 승격
+
 ## 9. Work Rules
 
 - 한 PR에 unrelated scope를 섞지 않는다.
@@ -289,6 +302,7 @@ Deliverables:
 - Sprint 4 전까지 mobile mock credit을 API와 연결하지 않는다.
 - GitHub sync는 [product-security-hardening-plan.md](product-security-hardening-plan.md)의 Gate D와 [github-sprint4-entry.md](github-sprint4-entry.md)를 통과하기 전까지 구현하지 않는다.
 - 로그인/회원가입/로그아웃/회원탈퇴 구현은 [control-account-design.md](control-account-design.md)의 삭제/권한/target guard를 먼저 만족해야 한다.
+- Android-only local blocker를 유료 제품으로 포장하지 않는다. paid work는 [competitive-service-review.md](competitive-service-review.md)의 proof ledger/cross-device moat 기준을 따른다.
 - 결제/부모/학교/MDM/money stake는 계속 금지한다.
 
 ## 10. Immediate Next Action
@@ -296,7 +310,7 @@ Deliverables:
 이 PR 이후 즉시 할 일:
 
 ```text
-Android target guardrails, real-device Android dogfood smoke, then Sprint 4 PR A: Webhook Security Foundation
+Android target guardrails, real-device Android dogfood smoke, desktop/browser companion spike, then Sprint 4 PR A: Webhook Security Foundation
 ```
 
-이유: runbook, event store tests, policy golden fixtures, 권한/개인정보 disclosure, in-app Data Quality/Gate review, GitHub Sprint 4 entry spec, product/security hardening gate는 완료됐다. 이제 Android target guardrail을 코드로 고정하고, 실제 기기에서 Gate A/D smoke evidence를 만든 뒤 [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A부터 구현한다.
+이유: runbook, event store tests, policy golden fixtures, 권한/개인정보 disclosure, in-app Data Quality/Gate review, GitHub Sprint 4 entry spec, product/security hardening gate, competitive service review는 완료됐다. 이제 Android target guardrail을 코드로 고정하고, 실제 기기에서 Gate A/D smoke evidence를 만든다. 그 다음 Freedom/Cold Turkey/FocusMe류가 보여준 desktop/browser paid moat를 우리 proof ledger에 연결하는 spike를 작성한 뒤 [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A부터 구현한다.
