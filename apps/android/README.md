@@ -4,6 +4,10 @@ This is the first runnable Commit-to-Unlock mobile prototype. It does not connec
 
 ## Behavior
 
+- Shows a first-launch developer gate:
+  - `예` stores local acceptance and opens the prototype.
+  - `아니오` shows a playful rejection screen and exits.
+  - This is product tone, not real identity verification.
 - Stores local mock credit state:
   - `remainingMinutes`
   - `blockedTargets`
@@ -82,20 +86,21 @@ Use this when checking Gradle output without installing on a device.
    - Display over other apps
    - Notifications on Android 13+
 
-4. Tap `Refresh status` and confirm:
+4. On first launch, answer `예, 커밋으로 증명하겠습니다`.
+5. Tap `Refresh status` and confirm:
    - `Usage Access: granted`
    - `Overlay Permission: granted`
    - `Monitor service: stopped`
 
-5. Open Chrome once, return to Commit Unlock, and confirm `com.android.chrome` appears under recent external packages.
-6. Tap `Add latest external package`, or manually put `com.android.chrome` in blocked packages and tap `Save blocked packages`.
-7. Tap `Reset credit to 0`.
-8. Tap `Start monitor service`.
-9. Open Chrome. The blocking overlay should appear within a few seconds and show target, remaining credit, strict mode, and next action text.
-10. Return to Commit Unlock and tap `Add 5 test minutes`.
-11. Open Chrome again. The overlay should not stay visible while mock credit is above `0`.
-12. Keep Chrome foreground for at least 60 seconds and confirm one minute is spent automatically.
-13. Enable strict mode, reset credit to `0`, and open Chrome again. The overlay should not show the `Add 5 test minutes` shortcut.
+6. Open Chrome once, return to Commit Unlock, and confirm `com.android.chrome` appears under recent external packages.
+7. Tap `Add latest external package`, or manually put `com.android.chrome` in blocked packages and tap `Save blocked packages`.
+8. Tap `Reset credit to 0`.
+9. Tap `Start monitor service`.
+10. Open Chrome. The blocking overlay should appear within a few seconds and show target, remaining credit, strict mode, and next action text.
+11. Return to Commit Unlock and tap `Add 5 test minutes`.
+12. Open Chrome again. The overlay should not stay visible while mock credit is above `0`.
+13. Keep Chrome foreground for at least 60 seconds and confirm one minute is spent automatically.
+14. Enable strict mode, reset credit to `0`, and open Chrome again. The overlay should not show the `Add 5 test minutes` shortcut.
 
 Use the in-app dogfood event log to inspect permission, foreground, target-match, overlay, and credit events.
 

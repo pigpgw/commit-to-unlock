@@ -18,6 +18,7 @@ import java.time.Instant
 
 class MainActivity : Activity() {
     private lateinit var creditStore: CreditStore
+    private lateinit var developerGateStore: DeveloperGateStore
     private lateinit var dogfoodEventStore: DogfoodEventStore
     private lateinit var foregroundReader: ForegroundAppReader
     private lateinit var monitorStateStore: MonitorStateStore
@@ -31,9 +32,18 @@ class MainActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         creditStore = CreditStore(this)
+        developerGateStore = DeveloperGateStore(this)
         dogfoodEventStore = DogfoodEventStore(this)
         foregroundReader = ForegroundAppReader(this)
         monitorStateStore = MonitorStateStore(this)
+        if (developerGateStore.isAccepted()) {
+            showMainPrototype()
+        } else {
+            setContentView(buildDeveloperGate())
+        }
+    }
+
+    private fun showMainPrototype() {
         requestNotificationPermission()
         setContentView(buildContent())
         renderState()
@@ -41,7 +51,84 @@ class MainActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
-        renderState()
+        if (developerGateStore.isAccepted()) {
+            renderState()
+        }
+    }
+
+    private fun buildDeveloperGate(): ScrollView {
+        val root = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_HORIZONTAL
+            setPadding(36, 72, 36, 48)
+        }
+
+        val title = TextView(this).apply {
+            text = "개발자지만 난 괜찮아"
+            textSize = 28f
+            gravity = Gravity.CENTER
+            setTextColor(0xFF111827.toInt())
+        }
+
+        val question = TextView(this).apply {
+            text = "개발자이신가요?"
+            textSize = 22f
+            gravity = Gravity.CENTER
+            setTextColor(0xFF111827.toInt())
+            setPadding(0, 24, 0, 12)
+        }
+
+        val message = TextView(this).apply {
+            text = "이 앱은 커밋, PR, 빌드 실패, 그리고 새벽 2시의 이상한 자신감을 이해하는 사람만 입장할 수 있습니다."
+            textSize = 16f
+            gravity = Gravity.CENTER
+            setTextColor(0xFF475569.toInt())
+            setPadding(0, 0, 0, 28)
+        }
+
+        root.addView(title)
+        root.addView(question)
+        root.addView(message)
+        root.addView(button("예, 커밋으로 증명하겠습니다") {
+            developerGateStore.accept()
+            dogfoodEventStore.record("developer_gate_accepted")
+            showMainPrototype()
+        })
+        root.addView(button("아니오, 그냥 스크롤하러 왔습니다") {
+            dogfoodEventStore.record("developer_gate_rejected")
+            setContentView(buildRejectedGate())
+        })
+
+        return ScrollView(this).apply { addView(root) }
+    }
+
+    private fun buildRejectedGate(): ScrollView {
+        val root = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_HORIZONTAL
+            setPadding(36, 72, 36, 48)
+        }
+
+        val title = TextView(this).apply {
+            text = "403: 개발자 인증 실패"
+            textSize = 26f
+            gravity = Gravity.CENTER
+            setTextColor(0xFF111827.toInt())
+        }
+
+        val message = TextView(this).apply {
+            text = "저리가. 여긴 SNS를 줄이려는 개발자 전용 던전입니다. 농담이고, 진짜 개발자라면 앱을 다시 열고 예를 누르세요."
+            textSize = 16f
+            gravity = Gravity.CENTER
+            setTextColor(0xFF475569.toInt())
+            setPadding(0, 20, 0, 28)
+        }
+
+        root.addView(title)
+        root.addView(message)
+        root.addView(button("퇴장하기") { finishAndRemoveTask() })
+
+        return ScrollView(this).apply { addView(root) }
     }
 
     private fun buildContent(): ScrollView {
@@ -51,13 +138,13 @@ class MainActivity : Activity() {
         }
 
         val title = TextView(this).apply {
-            text = "Commit Unlock Prototype"
+            text = "개발자지만 난 괜찮아"
             textSize = 24f
             setTextColor(0xFF111827.toInt())
         }
 
         val subtitle = TextView(this).apply {
-            text = "Local Android blocker using Usage Access + overlay. No GitHub or server sync yet."
+            text = "코드를 냈으면 쉬는 시간도 떳떳하게. 지금은 로컬 Android 차단 프로토타입입니다."
             textSize = 15f
             setTextColor(0xFF475569.toInt())
             setPadding(0, 8, 0, 20)
