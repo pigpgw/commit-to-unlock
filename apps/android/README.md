@@ -59,6 +59,12 @@ Use this path for repeated local testing on a physical device.
    pnpm android:dogfood:export
    ```
 
+6. Analyze the exported TSV:
+
+   ```bash
+   pnpm android:dogfood:analyze
+   ```
+
 When multiple devices are connected, set `ANDROID_SERIAL=<device-id>` before running dogfood scripts.
 
 ## Manual Build
@@ -79,6 +85,8 @@ Use this when checking Gradle output without installing on a device.
 | `pnpm android:dogfood -- --no-launch` | Install but do not launch the app. |
 | `pnpm android:dogfood:export` | Pull the current dogfood TSV into `artifacts/android-dogfood/`. |
 | `pnpm android:dogfood:export -- path/to/file.tsv` | Pull the current dogfood TSV to a chosen path. |
+| `pnpm android:dogfood:analyze` | Analyze the newest exported TSV and print a Markdown report. |
+| `pnpm android:dogfood:analyze path/to/file.tsv --json` | Analyze a specific TSV and print JSON. |
 
 ## Device Smoke Test
 
@@ -147,9 +155,18 @@ For repeat dogfood runs on a debug build, pull the latest export from the connec
 
 ```bash
 pnpm android:dogfood:export
+pnpm android:dogfood:analyze
 ```
 
-By default this writes to `artifacts/android-dogfood/`. Set `ANDROID_SERIAL` first when multiple devices are connected.
+By default export writes to `artifacts/android-dogfood/`, and analyze reads the newest TSV in that directory. Set `ANDROID_SERIAL` first when multiple devices are connected.
+
+The analyzer reports:
+
+- core counts for blocked attempts, policy blocks, free days, emergency unlocks, quest proof completions, and credit spends
+- top policy reasons such as `credit_empty`, `free_day`, or `emergency_unlock`
+- top target packages
+- daily summary rows
+- recommendations for whether to keep dogfooding, improve permissions, adjust policy strictness, or test quest proof more
 
 ## Troubleshooting
 

@@ -1,0 +1,400 @@
+#!/usr/bin/env tsx
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { basename, join, resolve } from "node:path";
+
+interface DogfoodEvent {
+  timestamp: Date;
+  timestampRaw: string;
+  type: string;
+  detail: string;
+}
+
+interface DailySummary {
+  date: string;
+  events: number;
+  blockedAttempts: number;
+  policyBlocks: number;
+  emergencyUnlocks: number;
+  freeDays: number;
+  dailyQuestAdds: number;
+  dailyQuestMockCompletions: number;
+  autoCreditSpends: number;
+}
+
+interface DogfoodAnalysis {
+  file: string;
+  eventCount: number;
+  firstEventAt: string | null;
+  lastEventAt: string | null;
+  activeDays: number;
+  counts: Record<string, number>;
+  metrics: Record<string, number>;
+  policyReasons: Record<string, number>;
+  targets: Record<string, number>;
+  daily: DailySummary[];
+  recommendations: string[];
+}
+
+interface CliOptions {
+  inputPath?: string;
+  json: boolean;
+  help: boolean;
+}
+
+const eventTypes = {
+  blockedAttempts: ["blocked_attempt"],
+  policyBlocks: ["policy_blocked"],
+  permissionFailures: ["permission_missing"],
+  overlayOpens: ["overlay_open_app"],
+  overlayCreditAdds: ["overlay_add_credit"],
+  autoCreditSpends: ["credit_auto_spent"],
+  manualCreditChanges: ["credit_added", "credit_spent", "credit_reset"],
+  freeDays: ["free_day_set"],
+  emergencyUnlocks: ["emergency_unlock_started"],
+  dailyQuestAdds: ["daily_quest_added"],
+  dailyQuestMockCompletions: ["daily_quest_mock_completed"]
+} as const;
+
+function usage(): string {
+  return `Usage: pnpm android:dogfood:analyze [dogfood-export.tsv] [--json]
+
+If no file is provided, the newest artifacts/android-dogfood/*.tsv export is used.
+
+Options:
+  --json      Print machine-readable JSON instead of Markdown.
+  -h, --help  Show this help text.
+`;
+}
+
+function parseArgs(argv: string[]): CliOptions {
+  const options: CliOptions = { json: false, help: false };
+
+  for (const arg of argv) {
+    if (arg === "--") continue;
+    if (arg === "--json") {
+      options.json = true;
+      continue;
+    }
+    if (arg === "-h" || arg === "--help") {
+      options.help = true;
+      continue;
+    }
+    if (arg.startsWith("-")) {
+      throw new Error(`Unknown option: ${arg}`);
+    }
+    if (options.inputPath) {
+      throw new Error(`Too many input files: ${arg}`);
+    }
+    options.inputPath = arg;
+  }
+
+  return options;
+}
+
+function newestDogfoodExport(): string {
+  const artifactDir = resolve("artifacts/android-dogfood");
+  if (!existsSync(artifactDir)) {
+    throw new Error("No artifacts/android-dogfood directory found. Run pnpm android:dogfood:export first.");
+  }
+
+  const candidates = readdirSync(artifactDir)
+    .filter((file) => file.endsWith(".tsv"))
+    .map((file) => join(artifactDir, file))
+    .filter((file) => statSync(file).isFile())
+    .sort((left, right) => statSync(right).mtimeMs - statSync(left).mtimeMs);
+
+  const newest = candidates.at(0);
+  if (!newest) {
+    throw new Error("No dogfood TSV exports found under artifacts/android-dogfood.");
+  }
+  return newest;
+}
+
+function parseTsv(filePath: string): DogfoodEvent[] {
+  const raw = readFileSync(filePath, "utf8").trim();
+  if (!raw) return [];
+
+  const lines = raw.split(/\r?\n/);
+  const header = lines.shift()?.split("\t") ?? [];
+  const timestampIndex = header.indexOf("timestamp");
+  const typeIndex = header.indexOf("type");
+  const detailIndex = header.indexOf("detail");
+
+  if (timestampIndex < 0 || typeIndex < 0 || detailIndex < 0) {
+    throw new Error("Expected TSV header with timestamp, type, and detail columns.");
+  }
+
+  return lines
+    .map((line, index) => {
+      const columns = line.split("\t");
+      const timestampRaw = columns[timestampIndex]?.trim() ?? "";
+      const type = columns[typeIndex]?.trim() ?? "";
+      const detail = columns.slice(detailIndex).join("\t").trim();
+      const timestamp = new Date(timestampRaw);
+
+      if (!timestampRaw || Number.isNaN(timestamp.getTime()) || !type) {
+        throw new Error(`Invalid dogfood row at line ${index + 2}: ${line}`);
+      }
+
+      return { timestamp, timestampRaw, type, detail };
+    })
+    .sort((left, right) => left.timestamp.getTime() - right.timestamp.getTime());
+}
+
+function analyze(filePath: string, events: DogfoodEvent[]): DogfoodAnalysis {
+  const counts = countBy(events, (event) => event.type);
+  const policyReasons = countPolicyReasons(events);
+  const targets = targetCounts(events);
+  const daily = dailySummaries(events);
+  const activeDays = new Set(events.map((event) => dayKey(event.timestamp))).size;
+  const metrics = Object.fromEntries(
+    Object.entries(eventTypes).map(([metric, types]) => [
+      metric,
+      events.filter((event) => (types as readonly string[]).includes(event.type)).length
+    ])
+  );
+
+  const analysis: DogfoodAnalysis = {
+    file: filePath,
+    eventCount: events.length,
+    firstEventAt: events.at(0)?.timestamp.toISOString() ?? null,
+    lastEventAt: events.at(-1)?.timestamp.toISOString() ?? null,
+    activeDays,
+    counts,
+    metrics,
+    policyReasons,
+    targets,
+    daily,
+    recommendations: []
+  };
+  analysis.recommendations = recommendations(analysis);
+  return analysis;
+}
+
+function countBy<T>(items: T[], key: (item: T) => string): Record<string, number> {
+  return items.reduce<Record<string, number>>((accumulator, item) => {
+    const value = key(item);
+    accumulator[value] = (accumulator[value] ?? 0) + 1;
+    return accumulator;
+  }, {});
+}
+
+function countPolicyReasons(events: DogfoodEvent[]): Record<string, number> {
+  const policyReasonTypes = new Set([
+    "overlay_hidden",
+    "policy_allowed",
+    "policy_blocked",
+    "target_matched",
+    "target_use_stopped"
+  ]);
+  return countDetails(
+    events.filter((event) => policyReasonTypes.has(event.type)),
+    "reason"
+  );
+}
+
+function countDetails(events: DogfoodEvent[], key: string): Record<string, number> {
+  const pattern = new RegExp(`(?:^|\\s)${escapeRegExp(key)}=([^\\s]+)`);
+  return events.reduce<Record<string, number>>((accumulator, event) => {
+    const match = event.detail.match(pattern);
+    if (!match?.[1]) return accumulator;
+    accumulator[match[1]] = (accumulator[match[1]] ?? 0) + 1;
+    return accumulator;
+  }, {});
+}
+
+function targetCounts(events: DogfoodEvent[]): Record<string, number> {
+  const targetLikeEvents = new Set([
+    "blocked_attempt",
+    "foreground_changed",
+    "overlay_open_app",
+    "policy_allowed",
+    "policy_blocked",
+    "target_matched",
+    "target_use_started",
+    "target_use_stopped"
+  ]);
+
+  const targets: Record<string, number> = {};
+  for (const event of events) {
+    if (!targetLikeEvents.has(event.type)) continue;
+    const target = detailValue(event.detail, "target") ??
+      detailValue(event.detail, "package") ??
+      (event.detail.includes("=") ? null : event.detail.trim());
+    if (!target) continue;
+    targets[target] = (targets[target] ?? 0) + 1;
+  }
+  return sortRecord(targets);
+}
+
+function detailValue(detail: string, key: string): string | null {
+  const match = detail.match(new RegExp(`(?:^|\\s)${escapeRegExp(key)}=([^\\s]+)`));
+  return match?.[1] ?? null;
+}
+
+function dailySummaries(events: DogfoodEvent[]): DailySummary[] {
+  const byDay = new Map<string, DogfoodEvent[]>();
+  for (const event of events) {
+    const key = dayKey(event.timestamp);
+    byDay.set(key, [...(byDay.get(key) ?? []), event]);
+  }
+
+  return [...byDay.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([date, dayEvents]) => ({
+      date,
+      events: dayEvents.length,
+      blockedAttempts: countTypes(dayEvents, eventTypes.blockedAttempts),
+      policyBlocks: countTypes(dayEvents, eventTypes.policyBlocks),
+      emergencyUnlocks: countTypes(dayEvents, eventTypes.emergencyUnlocks),
+      freeDays: countTypes(dayEvents, eventTypes.freeDays),
+      dailyQuestAdds: countTypes(dayEvents, eventTypes.dailyQuestAdds),
+      dailyQuestMockCompletions: countTypes(dayEvents, eventTypes.dailyQuestMockCompletions),
+      autoCreditSpends: countTypes(dayEvents, eventTypes.autoCreditSpends)
+    }));
+}
+
+function countTypes(events: DogfoodEvent[], types: readonly string[]): number {
+  return events.filter((event) => types.includes(event.type)).length;
+}
+
+function dayKey(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+function recommendations(analysis: DogfoodAnalysis): string[] {
+  const metrics = analysis.metrics;
+  const notes: string[] = [];
+
+  if (analysis.eventCount === 0) {
+    return ["No events found. Run a device dogfood session before making product calls."];
+  }
+
+  if (analysis.activeDays < 3) {
+    notes.push("Collect at least 3 active dogfood days before deciding whether the blocker loop is sticky.");
+  }
+  if ((metrics.blockedAttempts ?? 0) < 8) {
+    notes.push("Blocked attempts are below the current 8-attempt signal target; keep testing selected-app blocking.");
+  }
+  if ((metrics.permissionFailures ?? 0) > (metrics.blockedAttempts ?? 0)) {
+    notes.push("Permission failures exceed blocked attempts; improve onboarding and permission recovery before adding more features.");
+  }
+  if ((metrics.dailyQuestAdds ?? 0) > 0 && (metrics.dailyQuestMockCompletions ?? 0) === 0) {
+    notes.push("Daily quests are being planned but not completed with proof; test the mock proof loop before GitHub scoring.");
+  }
+  if ((metrics.emergencyUnlocks ?? 0) > (metrics.freeDays ?? 0) + (metrics.autoCreditSpends ?? 0)) {
+    notes.push("Emergency unlocks dominate earned/free usage; policy may be too strict or credit earning may be too slow.");
+  }
+  if ((metrics.overlayCreditAdds ?? 0) > (metrics.autoCreditSpends ?? 0) + (metrics.dailyQuestMockCompletions ?? 0)) {
+    notes.push("Overlay test-credit unlocks dominate proof/usage; consider enabling strict mode during dogfood.");
+  }
+
+  if (notes.length === 0) {
+    notes.push("No obvious dogfood risk flags. Continue collecting sessions and inspect top policy reasons.");
+  }
+  return notes;
+}
+
+function renderMarkdown(analysis: DogfoodAnalysis): string {
+  const lines = [
+    "# Android Dogfood Analysis",
+    "",
+    `File: \`${analysis.file}\``,
+    `Events: ${analysis.eventCount}`,
+    `Window: ${analysis.firstEventAt ?? "n/a"} -> ${analysis.lastEventAt ?? "n/a"}`,
+    `Active days: ${analysis.activeDays}`,
+    "",
+    "## Core Metrics",
+    "",
+    table(
+      ["Metric", "Count"],
+      Object.entries(analysis.metrics).map(([key, value]) => [key, String(value)])
+    ),
+    "",
+    "## Policy Reasons",
+    "",
+    recordTable(analysis.policyReasons),
+    "",
+    "## Top Targets",
+    "",
+    recordTable(analysis.targets, 10),
+    "",
+    "## Daily Summary",
+    "",
+    table(
+      ["Date", "Events", "Blocks", "Policy Blocks", "Free Days", "Emergency", "Quest Adds", "Quest Proofs", "Auto Spends"],
+      analysis.daily.map((day) => [
+        day.date,
+        String(day.events),
+        String(day.blockedAttempts),
+        String(day.policyBlocks),
+        String(day.freeDays),
+        String(day.emergencyUnlocks),
+        String(day.dailyQuestAdds),
+        String(day.dailyQuestMockCompletions),
+        String(day.autoCreditSpends)
+      ])
+    ),
+    "",
+    "## Recommendations",
+    "",
+    ...analysis.recommendations.map((item) => `- ${item}`)
+  ];
+
+  return lines.join("\n");
+}
+
+function recordTable(record: Record<string, number>, limit = 20): string {
+  const rows = Object.entries(sortRecord(record))
+    .slice(0, limit)
+    .map(([key, value]) => [key, String(value)]);
+  return table(["Value", "Count"], rows);
+}
+
+function table(headers: string[], rows: string[][]): string {
+  if (rows.length === 0) {
+    return "_No data._";
+  }
+
+  return [
+    `| ${headers.join(" | ")} |`,
+    `| ${headers.map(() => "---").join(" | ")} |`,
+    ...rows.map((row) => `| ${row.join(" | ")} |`)
+  ].join("\n");
+}
+
+function sortRecord(record: Record<string, number>): Record<string, number> {
+  return Object.fromEntries(
+    Object.entries(record).sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+  );
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function main(): void {
+  const options = parseArgs(process.argv.slice(2));
+  if (options.help) {
+    process.stdout.write(usage());
+    return;
+  }
+
+  const inputPath = resolve(options.inputPath ?? newestDogfoodExport());
+  if (!existsSync(inputPath)) {
+    throw new Error(`Dogfood export not found: ${inputPath}`);
+  }
+
+  const events = parseTsv(inputPath);
+  const analysis = analyze(basename(inputPath), events);
+  process.stdout.write(options.json ? `${JSON.stringify(analysis, null, 2)}\n` : `${renderMarkdown(analysis)}\n`);
+}
+
+try {
+  main();
+} catch (error) {
+  const message = error instanceof Error ? error.message : String(error);
+  process.stderr.write(`android-dogfood-analyze: ${message}\n`);
+  process.stderr.write(usage());
+  process.exit(1);
+}
