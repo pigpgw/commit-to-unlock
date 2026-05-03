@@ -19,7 +19,7 @@ It can:
 - spend `1` mock credit minute after `60` seconds of foreground use on blocked targets
 - show a dogfood summary for the last 14 days
 - show a recent dogfood event log in the app
-- export dogfood events as TSV through Android share sheet or `adb`
+- export structured dogfood events as TSV through Android share sheet or `adb`
 
 It does not yet:
 
@@ -166,7 +166,7 @@ Current recommended sequence:
 
 1. Run the Android prototype on a physical device for repeated dogfood sessions.
 2. Analyze exports with `pnpm android:dogfood:analyze`.
-3. Decide Gate A/B/C from dogfood data before returning to GitHub scoring.
+3. Check Data Quality and decide Gate A/B/C from dogfood data before returning to GitHub scoring.
 4. Prepare iOS Xcode project and Family Controls entitlement work.
 
 Do not build payments, school/parent mode, leaderboard, money stakes, or full-diff AI scoring yet.
