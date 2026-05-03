@@ -19,7 +19,6 @@ This is the first runnable Commit-to-Unlock mobile prototype. It does not connec
   - active weekdays
   - optional active time window
   - manual holiday today
-  - public holiday behavior placeholder
   - timezone
 - Stores emergency unlocks locally with reason, duration, `startedAt`, and `expiresAt`.
 - Stores today's daily quests locally:

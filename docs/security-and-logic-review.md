@@ -71,7 +71,7 @@ own app / no foreground
 | timezone | Android와 TS 모두 invalid timezone을 UTC로 fallback | Sprint 4 API는 저장 시 IANA timezone allowlist/validation 추가 |
 | active time | HH:mm 검증은 Android UI에서 함 | API policy write에도 같은 검증 필요 |
 | weekday empty | empty면 inactive | UI에서 "선택된 요일 없음 = 차단 비활성"을 명확히 표시 |
-| public holiday | 현재 placeholder false | 실제 공휴일 API 전까지 user-facing promise 금지 |
+| public holiday | policy engine은 injected flag를 지원하지만 Android local MVP는 항상 false로 평가하고 UI에 노출하지 않음 | 실제 공휴일 source 전까지 user-facing promise 금지 |
 | emergency unlock | daily/weekly cap 있음 | 서버 sync 후 append-only ledger event로 기록 |
 | strict mode | test shortcut 제한 | 삭제 방지/권한 회수 방지라는 의미로 확장 금지 |
 | free day | mock proof로 local midnight까지 | GitHub proof 이후에는 reversible ledger source와 연결 |
@@ -86,7 +86,7 @@ own app / no foreground
 - own package는 차단/차감하지 않음
 - 권한 missing 상태에서는 overlay/spend 중단
 - device not interactive 상태에서는 spend 중단
-- free day/emergency/manual holiday/public holiday skip은 spend하지 않음
+- free day/emergency/manual holiday는 spend하지 않음. public holiday skip은 실제 holiday source가 연결된 뒤에만 사용
 - 모든 manual/test credit mutation은 dogfood event에 기록
 
 보완할 점:
