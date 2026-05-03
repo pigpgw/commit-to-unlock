@@ -24,6 +24,7 @@ class MonitorService : Service() {
     private lateinit var overlay: BlockOverlay
     private val handler = Handler(Looper.getMainLooper())
     private var lastForegroundPackage: String? = null
+    private var lastResolvedForegroundPackage: String? = null
     private var lastPolicyDecisionKey: String? = null
     private var showingBlockedPackage: String? = null
     private var showingStrictMode: Boolean? = null
@@ -86,8 +87,15 @@ class MonitorService : Service() {
         var state = creditStore.read()
         val policyState = policyStore.read()
         val activeUnlocks = emergencyUnlockStore.active()
-        val foregroundPackage = foregroundReader.currentForegroundPackage()
+        val rawForegroundPackage = foregroundReader.currentForegroundPackage()
+        val foregroundPackage = ForegroundPackageResolver.resolveForPolicy(
+            rawForegroundPackage = rawForegroundPackage,
+            ownPackage = packageName,
+            showingBlockedPackage = showingBlockedPackage,
+            lastResolvedPackage = lastResolvedForegroundPackage
+        )
         val deviceInteractive = isDeviceInteractive()
+        lastResolvedForegroundPackage = foregroundPackage
 
         if (foregroundPackage != null && foregroundPackage != lastForegroundPackage) {
             lastForegroundPackage = foregroundPackage
@@ -272,6 +280,7 @@ class MonitorService : Service() {
                     policyReason = reason.code,
                     creditRemaining = creditStore.read().remainingMinutes
                 )
+                hideOverlay("open_app")
                 openMainActivity()
             },
             onAddCredit = {
