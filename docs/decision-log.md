@@ -1,6 +1,6 @@
 # Commit-to-Unlock Decision Log
 
-문서 상태: v0.2
+문서 상태: v0.3
 목적: 구현자가 다시 판단하지 않아도 되는 제품/기술 결정 기록
 
 ## Current Source Of Truth
@@ -38,6 +38,7 @@
 | D-016 | 결제 구현은 Gate 4 전까지 금지 | 단순 blocker 구독은 가격 저항이 크다. proof ledger가 blocker 없이도 가치 있음을 확인하기 전에는 결제 기능을 만들지 않는다. | Accepted |
 | D-017 | Android는 별도 debug log를 제거하고 dogfood event log를 단일 source of truth로 사용 | 같은 이벤트를 두 저장소에 쓰면 UI/TSV/summary가 어긋난다. | Accepted |
 | D-018 | GitHub webhook placeholder는 API에서 제거 | 실제 PR enrichment 없이 scoring decision을 반환하면 제품/테스트 신뢰를 깎는다. Sprint 4에서 dedupe/enrichment/ledger와 함께 다시 추가한다. | Accepted |
+| D-019 | 브랜드 톤은 “개발자지만 난 괜찮아”처럼 재미있고 개발자스럽게 간다 | 일반 blocker로 보이면 차별화가 약하다. 단, 장난 UX는 보안/권한/데이터 삭제와 분리한다. | Accepted |
 
 ## Revisit Triggers
 
