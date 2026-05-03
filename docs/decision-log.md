@@ -8,6 +8,7 @@
 | 주제 | 기준 문서 |
 | --- | --- |
 | 전체 제품/기술 설계 | [app-design.md](app-design.md) |
+| proof/quest/policy MVP | [proof-policy-mvp.md](proof-policy-mvp.md) |
 | 제품 전략/UX/사업 패키징 | [product-strategy-spec.md](product-strategy-spec.md) |
 | 실행 순서 | [build-first-execution-plan.md](build-first-execution-plan.md) |
 | 시장/니즈/피벗 게이트 | [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md) |
@@ -39,6 +40,8 @@
 | D-017 | Android는 별도 debug log를 제거하고 dogfood event log를 단일 source of truth로 사용 | 같은 이벤트를 두 저장소에 쓰면 UI/TSV/summary가 어긋난다. | Accepted |
 | D-018 | GitHub webhook placeholder는 API에서 제거 | 실제 PR enrichment 없이 scoring decision을 반환하면 제품/테스트 신뢰를 깎는다. Sprint 4에서 dedupe/enrichment/ledger와 함께 다시 추가한다. | Accepted |
 | D-019 | 브랜드 톤은 “개발자지만 난 괜찮아”처럼 재미있고 개발자스럽게 간다 | 일반 blocker로 보이면 차별화가 약하다. 단, 장난 UX는 보안/권한/데이터 삭제와 분리한다. | Accepted |
+| D-020 | 수동 todo 완료만으로 unlock하지 않는다 | 제품 차별점은 self-report가 아니라 개발 증거 기반 credit이다. Todo는 quest label이고 proof-backed completion만 policy에 영향을 준다. | Accepted |
+| D-021 | 요일/휴일/free day/emergency unlock은 credit보다 상위 정책으로 둔다 | 예외 정책이 없으면 사용자는 앱을 삭제하거나 권한을 꺼버린다. 단, 모든 예외는 event log와 ledger에 남긴다. | Accepted |
 
 ## Revisit Triggers
 
