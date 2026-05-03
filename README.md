@@ -166,7 +166,7 @@ Current recommended sequence:
 
 1. Run the Android prototype on a physical device for repeated dogfood sessions.
 2. Analyze exports with `pnpm android:dogfood:analyze`.
-3. Decide Gate 1 and Gate 2 from dogfood data before returning to GitHub scoring.
+3. Decide Gate A/B/C from dogfood data before returning to GitHub scoring.
 4. Prepare iOS Xcode project and Family Controls entitlement work.
 
 Do not build payments, school/parent mode, leaderboard, money stakes, or full-diff AI scoring yet.

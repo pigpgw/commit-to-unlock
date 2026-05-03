@@ -8,9 +8,10 @@
     "android:dogfood:analyze": "tsx scripts/android-dogfood-analyze.ts",
     "android:dogfood:export": "bash scripts/android-dogfood-export.sh",
     "build": "pnpm -r build",
+    "check:dogfood-analyzer": "tsc --noEmit --module NodeNext --moduleResolution NodeNext --target ES2022 --strict --esModuleInterop --skipLibCheck --noUncheckedIndexedAccess scripts/android-dogfood-analyze.ts",
     "dev:api": "pnpm --filter @commit-to-unlock/api dev",
     "test": "pnpm -r test",
-    "typecheck": "pnpm build && pnpm -r typecheck"
+    "typecheck": "pnpm build && pnpm -r typecheck && pnpm check:dogfood-analyzer"
   },
   "devDependencies": {
     "@types/node": "^22.15.3",

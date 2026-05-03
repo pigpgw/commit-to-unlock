@@ -103,7 +103,7 @@ MainActivity에는 별도 debug log가 아니라 단일 dogfood event log를 표
 - SharedPreferences에 최근 1,000개 event를 저장한다.
 - 앱 화면에는 최근 50개를 최신순으로 표시한다.
 - TSV export는 오래된 순으로 정렬한다.
-- TSV analyzer는 export 파일을 읽어 core metrics, policy reason, target package, daily summary, recommendation을 출력한다.
+- TSV analyzer는 export 파일을 읽어 core metrics, Gate A/B/C snapshot, policy reason, target package, daily summary, recommendation을 출력한다.
 - 이벤트는 개발 검증용이며 서버로 전송하지 않는다.
 
 ## 4. Implementation Notes

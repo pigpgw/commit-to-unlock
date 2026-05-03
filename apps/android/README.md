@@ -163,6 +163,7 @@ By default export writes to `artifacts/android-dogfood/`, and analyze reads the 
 The analyzer reports:
 
 - core counts for blocked attempts, policy blocks, free days, emergency unlocks, quest proof completions, and credit spends
+- Gate A/B/C snapshot for enforcement viability, dogfood need, and proof supply
 - top policy reasons such as `credit_empty`, `free_day`, or `emergency_unlock`
 - top target packages
 - daily summary rows
