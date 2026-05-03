@@ -4,11 +4,13 @@
 역할: 제품/기술 통합 설계 기준 문서  
 현재 최우선 구현: Android 실기기 차단 검증
 
-상세 결정 기록은 [decision-log.md](decision-log.md)를 따른다. Android 다음 구현 단위는 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)가 우선한다.
+상세 결정 기록은 [decision-log.md](decision-log.md)를 따른다. 시장/니즈/피벗 기준은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. Android 다음 구현 단위는 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)가 우선한다.
 
 ## 1. 결정 요약
 
 Commit-to-Unlock은 “개발 활동을 했다고 직접 체크하면 앱을 열어주는 서비스”가 아니라, 검증 가능한 개발 이벤트를 크레딧 장부로 바꾸고 그 장부가 선택 앱 접근을 열고 닫는 제품이다.
+
+시장 포지션은 generic screen-time blocker가 아니라 `developer proof ledger + optional blocking`이다. 차단 앱 자체는 무료/저가 경쟁이 강하고, 2026년에는 운동/걸음/학습 기반 earn-to-unlock 앱도 이미 보인다. 따라서 차별점은 “무언가를 하면 앱을 여는 것”이 아니라 “개발자의 검증 가능한 산출물을 설명 가능한 leisure credit으로 바꾸는 것”이다.
 
 최적 결정은 다음과 같다.
 
@@ -22,6 +24,12 @@ Commit-to-Unlock은 “개발 활동을 했다고 직접 체크하면 앱을 열
 제품 약속 문구는 다음으로 고정한다.
 
 > Verified dev work earns credits for selected distracting apps.
+
+사용자-facing 카피는 처벌보다 회복/보상 언어를 쓴다.
+
+- Ship code. Earn guilt-free screen time.
+- Verified work becomes leisure credits.
+- 코드를 냈으면, 쉬는 시간도 떳떳하게.
 
 금지 문구:
 
