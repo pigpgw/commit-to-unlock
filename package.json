@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "android:dogfood": "bash scripts/android-dogfood-install.sh",
     "build": "pnpm -r build",
     "dev:api": "pnpm --filter @commit-to-unlock/api dev",
     "test": "pnpm -r test",
