@@ -11,18 +11,23 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.PowerManager
 import android.os.SystemClock
+import java.time.Instant
 import java.time.LocalDate
 
 class MonitorService : Service() {
     private lateinit var creditStore: CreditStore
     private lateinit var dogfoodEventStore: DogfoodEventStore
+    private lateinit var emergencyUnlockStore: EmergencyUnlockStore
     private lateinit var foregroundReader: ForegroundAppReader
     private lateinit var monitorStateStore: MonitorStateStore
+    private lateinit var policyStore: PolicyStore
     private lateinit var overlay: BlockOverlay
     private val handler = Handler(Looper.getMainLooper())
     private var lastForegroundPackage: String? = null
+    private var lastPolicyDecisionKey: String? = null
     private var showingBlockedPackage: String? = null
     private var showingStrictMode: Boolean? = null
+    private var showingReason: PolicyDecisionReason? = null
     private var lastHeartbeatDay: String? = null
     private var activeSpendPackage: String? = null
     private var lastSpendTickMs: Long? = null
@@ -39,8 +44,10 @@ class MonitorService : Service() {
         super.onCreate()
         creditStore = CreditStore(this)
         dogfoodEventStore = DogfoodEventStore(this)
+        emergencyUnlockStore = EmergencyUnlockStore(this)
         foregroundReader = ForegroundAppReader(this)
         monitorStateStore = MonitorStateStore(this)
+        policyStore = PolicyStore(this)
         overlay = BlockOverlay(this)
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, notification("Monitoring selected apps"))
@@ -77,6 +84,8 @@ class MonitorService : Service() {
         }
 
         var state = creditStore.read()
+        val policyState = policyStore.read()
+        val activeUnlocks = emergencyUnlockStore.active()
         val foregroundPackage = foregroundReader.currentForegroundPackage()
         val deviceInteractive = isDeviceInteractive()
 
@@ -85,38 +94,35 @@ class MonitorService : Service() {
             dogfoodEventStore.record("foreground_changed", foregroundPackage)
         }
 
-        val isTrackedTarget = foregroundPackage != null &&
-            foregroundPackage != packageName &&
-            state.blockedTargets.contains(foregroundPackage)
+        if (!deviceInteractive) {
+            stopSpendSession(
+                reason = "device_not_interactive",
+                clearAccumulator = state.remainingMinutes <= 0
+            )
+            hideOverlay("device_not_interactive")
+            return
+        }
 
-        if (foregroundPackage != null && isTrackedTarget && state.remainingMinutes > 0 && deviceInteractive) {
+        var decision = evaluatePolicy(foregroundPackage, state, policyState, activeUnlocks)
+        recordPolicyDecision(decision)
+
+        if (decision.shouldSpendCredit && foregroundPackage != null) {
             state = accrueSpend(foregroundPackage, state)
+            decision = evaluatePolicy(foregroundPackage, state, policyState, activeUnlocks)
+            recordPolicyDecision(decision)
         } else {
             stopSpendSession(
-                when {
-                    !deviceInteractive -> "device_not_interactive"
-                    foregroundPackage == null -> "foreground_unknown"
-                    !isTrackedTarget -> "target_mismatch"
-                    else -> "no_credit"
-                },
+                reason = decision.reason.code,
                 clearAccumulator = state.remainingMinutes <= 0
             )
         }
 
-        val shouldBlock = isTrackedTarget && state.remainingMinutes <= 0
-
-        if (shouldBlock) {
-            val blockedPackage = foregroundPackage
-            dogfoodEventStore.record("target_matched", blockedPackage)
-            showOverlay(blockedPackage, state.strictMode)
+        if (!decision.allowed) {
+            val blockedPackage = decision.matchedTarget ?: foregroundPackage ?: return
+            dogfoodEventStore.record("target_matched", "package=$blockedPackage reason=${decision.reason.code}")
+            showOverlay(blockedPackage, state.strictMode, decision.reason)
         } else {
-            hideOverlay(
-                when {
-                    foregroundPackage == null -> "foreground_unknown"
-                    state.remainingMinutes > 0 -> "credit_available"
-                    else -> "target_mismatch"
-                }
-            )
+            hideOverlay(decision.reason.code)
         }
     }
 
@@ -179,14 +185,59 @@ class MonitorService : Service() {
         return powerManager.isInteractive
     }
 
-    private fun showOverlay(foregroundPackage: String, strictMode: Boolean) {
-        if (showingBlockedPackage == foregroundPackage && showingStrictMode == strictMode) return
+    private fun evaluatePolicy(
+        foregroundPackage: String?,
+        state: CreditState,
+        policyState: PolicyState,
+        activeUnlocks: List<EmergencyUnlock>
+    ): PolicyDecision {
+        return PolicyDecisionEngine.evaluate(
+            PolicyDecisionInput(
+                currentPackage = foregroundPackage,
+                ownPackage = packageName,
+                now = Instant.now(),
+                creditState = state,
+                policyState = policyState,
+                activeEmergencyUnlocks = activeUnlocks,
+                isPublicHoliday = false
+            )
+        )
+    }
+
+    private fun recordPolicyDecision(decision: PolicyDecision) {
+        val key = listOf(
+            decision.matchedTarget.orEmpty(),
+            decision.reason.code,
+            decision.allowed.toString(),
+            decision.shouldSpendCredit.toString(),
+            decision.activeEmergencyUnlockId.orEmpty()
+        ).joinToString("|")
+
+        if (key == lastPolicyDecisionKey) return
+        lastPolicyDecisionKey = key
+        dogfoodEventStore.record(
+            if (decision.allowed) "policy_allowed" else "policy_blocked",
+            "reason=${decision.reason.code} target=${decision.matchedTarget.orEmpty()} spend=${decision.shouldSpendCredit}"
+        )
+    }
+
+    private fun showOverlay(
+        foregroundPackage: String,
+        strictMode: Boolean,
+        reason: PolicyDecisionReason
+    ) {
+        if (
+            showingBlockedPackage == foregroundPackage &&
+            showingStrictMode == strictMode &&
+            showingReason == reason
+        ) return
 
         dogfoodEventStore.record("blocked_attempt", foregroundPackage)
         overlay.hide()
         overlay.show(
             packageName = foregroundPackage,
             strictMode = strictMode,
+            reasonCode = reason.code,
             onOpenApp = {
                 dogfoodEventStore.record("overlay_open_app", foregroundPackage)
                 openMainActivity()
@@ -199,6 +250,7 @@ class MonitorService : Service() {
         )
         showingBlockedPackage = foregroundPackage
         showingStrictMode = strictMode
+        showingReason = reason
         dogfoodEventStore.record("overlay_shown", foregroundPackage)
     }
 
@@ -209,6 +261,7 @@ class MonitorService : Service() {
         overlay.hide()
         showingBlockedPackage = null
         showingStrictMode = null
+        showingReason = null
     }
 
     private fun openMainActivity() {
