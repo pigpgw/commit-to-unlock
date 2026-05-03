@@ -15,7 +15,6 @@ import java.time.LocalDate
 
 class MonitorService : Service() {
     private lateinit var creditStore: CreditStore
-    private lateinit var debugLogStore: DebugLogStore
     private lateinit var dogfoodEventStore: DogfoodEventStore
     private lateinit var foregroundReader: ForegroundAppReader
     private lateinit var monitorStateStore: MonitorStateStore
@@ -39,7 +38,6 @@ class MonitorService : Service() {
     override fun onCreate() {
         super.onCreate()
         creditStore = CreditStore(this)
-        debugLogStore = DebugLogStore(this)
         dogfoodEventStore = DogfoodEventStore(this)
         foregroundReader = ForegroundAppReader(this)
         monitorStateStore = MonitorStateStore(this)
@@ -47,7 +45,6 @@ class MonitorService : Service() {
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, notification("Monitoring selected apps"))
         monitorStateStore.setRunning(true)
-        debugLogStore.record("monitor_started")
         dogfoodEventStore.record("monitor_started")
         handler.post(pollRunnable)
     }
@@ -56,7 +53,6 @@ class MonitorService : Service() {
         handler.removeCallbacks(pollRunnable)
         hideOverlay("monitor_stopped")
         monitorStateStore.setRunning(false)
-        debugLogStore.record("monitor_stopped")
         dogfoodEventStore.record("monitor_stopped")
         super.onDestroy()
     }
@@ -67,7 +63,6 @@ class MonitorService : Service() {
         recordHeartbeat()
 
         if (!PermissionChecks.hasUsageAccess(this)) {
-            debugLogStore.record("usage_access_missing")
             dogfoodEventStore.record("permission_missing", "usage_access")
             stopSpendSession("usage_access_missing")
             hideOverlay("usage_access_missing")
@@ -75,7 +70,6 @@ class MonitorService : Service() {
         }
 
         if (!PermissionChecks.canDrawOverlays(this)) {
-            debugLogStore.record("overlay_permission_missing")
             dogfoodEventStore.record("permission_missing", "overlay")
             stopSpendSession("overlay_permission_missing")
             hideOverlay("overlay_permission_missing")
@@ -88,7 +82,6 @@ class MonitorService : Service() {
 
         if (foregroundPackage != null && foregroundPackage != lastForegroundPackage) {
             lastForegroundPackage = foregroundPackage
-            debugLogStore.record("foreground_changed:$foregroundPackage")
             dogfoodEventStore.record("foreground_changed", foregroundPackage)
         }
 
@@ -114,7 +107,7 @@ class MonitorService : Service() {
 
         if (shouldBlock) {
             val blockedPackage = foregroundPackage
-            debugLogStore.record("target_matched:$blockedPackage")
+            dogfoodEventStore.record("target_matched", blockedPackage)
             showOverlay(blockedPackage, state.strictMode)
         } else {
             hideOverlay(
@@ -141,7 +134,6 @@ class MonitorService : Service() {
             stopSpendSession("target_changed")
             activeSpendPackage = foregroundPackage
             lastSpendTickMs = nowMs
-            debugLogStore.record("target_use_started:$foregroundPackage")
             dogfoodEventStore.record("target_use_started", foregroundPackage)
             return state
         }
@@ -156,7 +148,6 @@ class MonitorService : Service() {
             spendAccumulatorMs -= CREDIT_SPEND_INTERVAL_MS
             creditStore.spendMinute()
             updatedState = creditStore.read()
-            debugLogStore.record("credit_auto_spent:$foregroundPackage")
             dogfoodEventStore.record(
                 "credit_auto_spent",
                 "package=$foregroundPackage minutes=1 remaining=${updatedState.remainingMinutes}"
@@ -172,7 +163,6 @@ class MonitorService : Service() {
 
     private fun stopSpendSession(reason: String, clearAccumulator: Boolean = false) {
         val packageName = activeSpendPackage ?: return
-        debugLogStore.record("target_use_stopped:$reason")
         dogfoodEventStore.record(
             "target_use_stopped",
             "package=$packageName reason=$reason pending_ms=$spendAccumulatorMs"
@@ -203,20 +193,17 @@ class MonitorService : Service() {
             },
             onAddCredit = {
                 creditStore.addMinutes(5)
-                debugLogStore.record("credit_added:5")
                 dogfoodEventStore.record("overlay_add_credit", "package=$foregroundPackage minutes=5")
                 hideOverlay("credit_added")
             }
         )
         showingBlockedPackage = foregroundPackage
         showingStrictMode = strictMode
-        debugLogStore.record("overlay_shown:$foregroundPackage")
         dogfoodEventStore.record("overlay_shown", foregroundPackage)
     }
 
     private fun hideOverlay(reason: String) {
         if (showingBlockedPackage != null) {
-            debugLogStore.record("overlay_hidden:$reason")
             dogfoodEventStore.record("overlay_hidden", "package=$showingBlockedPackage reason=$reason")
         }
         overlay.hide()

@@ -13,7 +13,7 @@ This is the first runnable Commit-to-Unlock mobile prototype. It does not connec
 - Uses Android overlay permission to show a blocking screen when a blocked package is foreground and mock credit is `0`.
 - Automatically spends `1` local credit minute for every `60` seconds of foreground use on blocked targets while the device is interactive.
 - Shows target, remaining credit, strict mode, and next action copy on the blocking overlay.
-- Shows the latest detected foreground package and a bounded local debug log for device testing.
+- Shows the latest detected foreground package and a recent local dogfood event log for device testing.
 - Shows recent foreground packages from UsageStats so a target can be added without installed-app scanning.
 - Hides the overlay test-credit shortcut when strict mode is enabled.
 - Stores a structured dogfood event log for the last 1,000 local events and keeps a local TSV export file for `adb` collection.
@@ -97,7 +97,7 @@ Use this when checking Gradle output without installing on a device.
 12. Keep Chrome foreground for at least 60 seconds and confirm one minute is spent automatically.
 13. Enable strict mode, reset credit to `0`, and open Chrome again. The overlay should not show the `Add 5 test minutes` shortcut.
 
-Use the in-app debug log to inspect permission, foreground, target-match, overlay, and credit events.
+Use the in-app dogfood event log to inspect permission, foreground, target-match, overlay, and credit events.
 
 ## Dogfood Export
 

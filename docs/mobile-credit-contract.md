@@ -17,13 +17,14 @@ export interface MobileCreditState {
 - `blockedTargets` is platform-specific. Do not assume values are human-readable across platforms.
 - `strictMode` means local convenience shortcuts are reduced. It does not mean tamper-proof control.
 - `lastUpdatedAt` is an ISO 8601 UTC string.
-- Sprint 1-3 do not automatically spend credit by elapsed foreground time.
+- Android local dogfood automatically spends 1 minute after 60 seconds of interactive foreground use on a blocked target.
 
 ## Android Mapping
 
 - `blockedTargets`: Android package names, for example `com.instagram.android`.
 - `remainingMinutes == 0`: show overlay when a blocked package is foreground.
 - `remainingMinutes > 0`: allow access.
+- `remainingMinutes > 0` while a blocked target stays foreground: spend 1 minute per 60 seconds of interactive use.
 - Target selection starts as manual package input. Production Android should prefer recent UsageStats-derived package suggestions over broad installed-app scanning.
 
 ## iOS Mapping
@@ -40,5 +41,5 @@ export interface MobileCreditState {
 ## Out of Scope
 
 - GitHub/API sync.
-- Real credit spending by elapsed usage time.
+- iOS elapsed-usage spend before DeviceActivity validation.
 - Parental controls or managed-device policy.

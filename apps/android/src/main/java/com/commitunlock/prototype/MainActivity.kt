@@ -18,21 +18,19 @@ import java.time.Instant
 
 class MainActivity : Activity() {
     private lateinit var creditStore: CreditStore
-    private lateinit var debugLogStore: DebugLogStore
     private lateinit var dogfoodEventStore: DogfoodEventStore
     private lateinit var foregroundReader: ForegroundAppReader
     private lateinit var monitorStateStore: MonitorStateStore
     private lateinit var statusText: TextView
     private lateinit var recentPackagesText: TextView
     private lateinit var dogfoodSummaryText: TextView
-    private lateinit var debugLogText: TextView
+    private lateinit var eventLogText: TextView
     private lateinit var packageInput: EditText
     private lateinit var strictModeInput: CheckBox
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         creditStore = CreditStore(this)
-        debugLogStore = DebugLogStore(this)
         dogfoodEventStore = DogfoodEventStore(this)
         foregroundReader = ForegroundAppReader(this)
         monitorStateStore = MonitorStateStore(this)
@@ -92,7 +90,7 @@ class MainActivity : Activity() {
             setPadding(0, 20, 0, 0)
         }
 
-        debugLogText = TextView(this).apply {
+        eventLogText = TextView(this).apply {
             textSize = 13f
             setTextColor(0xFF334155.toInt())
             setPadding(0, 20, 0, 0)
@@ -117,19 +115,16 @@ class MainActivity : Activity() {
         root.addView(button("Add latest external package") { addLatestExternalPackage() })
         root.addView(button("Add 5 test minutes") {
             creditStore.addMinutes(5)
-            debugLogStore.record("credit_added:5")
             dogfoodEventStore.record("credit_added", "source=main minutes=5")
             renderState()
         })
         root.addView(button("Spend 1 test minute") {
             creditStore.spendMinute()
-            debugLogStore.record("credit_spent:1")
             dogfoodEventStore.record("credit_spent", "source=main minutes=1")
             renderState()
         })
         root.addView(button("Reset credit to 0") {
             creditStore.resetCredit()
-            debugLogStore.record("credit_reset")
             dogfoodEventStore.record("credit_reset", "source=main")
             renderState()
         })
@@ -152,11 +147,7 @@ class MainActivity : Activity() {
             dogfoodEventStore.clear()
             renderState()
         })
-        root.addView(button("Clear debug log") {
-            debugLogStore.clear()
-            renderState()
-        })
-        root.addView(debugLogText)
+        root.addView(eventLogText)
 
         return ScrollView(this).apply { addView(root) }
     }
@@ -182,14 +173,12 @@ class MainActivity : Activity() {
             strictMode = strictModeInput.isChecked,
             lastUpdatedAt = Instant.now().toString()
         ))
-        debugLogStore.record("blocked_targets_saved:${targets.size}")
         dogfoodEventStore.record("targets_saved", "count=${targets.size} strict=${strictModeInput.isChecked}")
         renderState()
     }
 
     private fun addLatestExternalPackage() {
         if (!PermissionChecks.hasUsageAccess(this)) {
-            debugLogStore.record("usage_access_missing")
             dogfoodEventStore.record("permission_missing", "usage_access")
             renderState()
             return
@@ -199,7 +188,7 @@ class MainActivity : Activity() {
             .firstOrNull { it != packageName }
 
         if (latestExternalPackage == null) {
-            debugLogStore.record("recent_external_package_missing")
+            dogfoodEventStore.record("recent_external_package_missing")
             renderState()
             return
         }
@@ -214,7 +203,6 @@ class MainActivity : Activity() {
             strictMode = strictModeInput.isChecked,
             lastUpdatedAt = Instant.now().toString()
         ))
-        debugLogStore.record("blocked_target_added:$latestExternalPackage")
         dogfoodEventStore.record("target_added", latestExternalPackage)
         renderState()
     }
@@ -259,15 +247,21 @@ class MainActivity : Activity() {
             "Stored dogfood events: ${summary.eventCount}"
         ).joinToString("\n")
 
-        debugLogText.text = buildString {
-            append("Debug log\n")
-            val events = debugLogStore.read()
+        eventLogText.text = buildString {
+            append("Dogfood event log\n")
+            val events = dogfoodEventStore.read().take(50)
             if (events.isEmpty()) {
                 append("none")
             } else {
-                append(events.joinToString("\n"))
+                append(events.joinToString("\n") { event -> formatDogfoodEvent(event) })
             }
         }
+    }
+
+    private fun formatDogfoodEvent(event: DogfoodEvent): String {
+        return listOf(event.timestamp.toString(), event.type, event.detail)
+            .filter { it.isNotEmpty() }
+            .joinToString(" ")
     }
 
     private fun recentExternalPackages(): List<String> {

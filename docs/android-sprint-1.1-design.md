@@ -1,7 +1,8 @@
 # Android Sprint 1.1 Design
 
-문서 상태: v0.1  
+문서 상태: v0.2
 목표: Android 로컬 차단 프로토타입을 실기기에서 검증 가능한 상태로 보강
+현재 상태: 구현 완료. 다음 단계는 dogfood TSV를 분석해 Gate A/B/C를 판단하는 것이다.
 
 ## 1. Scope
 
@@ -18,7 +19,6 @@ Out of scope:
 - 앱 삭제 방지
 - 전체 기기 잠금
 - 설치 앱 전체 목록 조회
-- 실제 사용 시간 자동 차감
 - 서버 sync
 
 ## 2. Required Behavior
@@ -79,29 +79,31 @@ overlay는 full-screen으로 표시한다.
 
 overlay는 `remainingMinutes > 0`, target mismatch, 권한 missing, service stop 중 하나가 되면 숨긴다.
 
-## 3. Debugging UX
+## 3. Dogfood Event UX
 
-MainActivity에 bounded debug log를 추가한다.
+MainActivity에는 별도 debug log가 아니라 단일 dogfood event log를 표시한다. 같은 이벤트 저장소가 in-app log, 14일 summary, TSV export의 source of truth다.
 
 필수 event:
 
-- `usage_access_missing`
-- `overlay_permission_missing`
+- `permission_missing`
 - `monitor_started`
 - `monitor_stopped`
-- `foreground_changed:<package>`
-- `target_matched:<package>`
-- `overlay_shown:<package>`
-- `overlay_hidden:<reason>`
-- `credit_added:<minutes>`
-- `credit_spent:1`
+- `foreground_changed`
+- `target_matched`
+- `blocked_attempt`
+- `overlay_shown`
+- `overlay_hidden`
+- `credit_added`
+- `credit_spent`
+- `credit_auto_spent`
 - `credit_reset`
 
 저장 방식:
 
-- SharedPreferences에 최근 50개만 저장한다.
-- 최신 event가 위에 보이게 한다.
-- 로그는 개발 검증용이며 서버로 전송하지 않는다.
+- SharedPreferences에 최근 1,000개 event를 저장한다.
+- 앱 화면에는 최근 50개를 최신순으로 표시한다.
+- TSV export는 오래된 순으로 정렬한다.
+- 이벤트는 개발 검증용이며 서버로 전송하지 않는다.
 
 ## 4. Implementation Notes
 
@@ -110,7 +112,7 @@ MainActivity에 bounded debug log를 추가한다.
 - `CreditStore`에 `resetCredit()` 추가.
 - `BlockOverlay.show(...)`에 `strictMode` 또는 `canAddCredit` 인자를 추가.
 - `MonitorService`에서 overlay 표시 판단 시 state.strictMode를 넘긴다.
-- `DebugLogStore`를 추가해 MainActivity와 MonitorService가 같은 로그를 쓴다.
+- `DogfoodEventStore`를 MainActivity와 MonitorService가 함께 쓴다.
 - `MainActivity`는 `onResume`에서 permission/state/log를 다시 렌더링한다.
 - foreground package 표시가 필요하면 MainActivity에서도 `ForegroundAppReader`를 읽는다.
 
@@ -149,9 +151,8 @@ Device:
 
 | 실패 | 처리 |
 | --- | --- |
-| Usage Access가 이벤트를 반환하지 않음 | UI에 `unknown` 표시, debug log 기록 |
+| Usage Access가 이벤트를 반환하지 않음 | UI에 `unknown` 표시, dogfood event 기록 |
 | Overlay 권한이 회수됨 | overlay 숨김, permission missing 표시 |
 | Foreground service가 OS에 의해 중지됨 | 사용자가 앱으로 돌아오면 monitor stopped로 표시 |
 | target package를 잘못 입력함 | overlay가 안 뜨는 것이 정상. 최근 foreground package 표시로 사용자가 수정 |
 | Android 13 notification denied | monitor 가능 여부와 별개로 permission warning 표시 |
-
