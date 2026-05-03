@@ -51,6 +51,7 @@ Core principles:
 Read these docs in order before changing product direction or implementation priority:
 
 - [MVP execution plan](docs/mvp-execution-plan.md)
+- [Android dogfood runbook](docs/android-dogfood-runbook.md)
 - [Decision log](docs/decision-log.md)
 - [Security and logic review](docs/security-and-logic-review.md)
 - [App design](docs/app-design.md)
@@ -112,6 +113,8 @@ Use `ANDROID_SERIAL=<device-id>` when more than one Android device is connected.
 
 ## Android Dogfood Flow
 
+For repeated device testing and gate decisions, follow the detailed [Android dogfood runbook](docs/android-dogfood-runbook.md).
+
 1. Connect an Android device with USB debugging enabled.
 2. Install and launch:
 
@@ -171,10 +174,10 @@ pnpm typecheck
 
 Current recommended sequence:
 
-1. Follow the [MVP progress audit](docs/mvp-progress-audit.md) and do not resume GitHub scoring yet.
-2. Run the Android prototype on a physical device for repeated dogfood sessions.
-3. Analyze exports with `pnpm android:dogfood:analyze`.
-4. Check Data Quality and decide Gate A/B/C from dogfood data before returning to GitHub scoring.
-5. Prepare iOS Xcode project and Family Controls entitlement work.
+1. Follow the [Android dogfood runbook](docs/android-dogfood-runbook.md) on a physical device.
+2. Add tests for `DogfoodEventStore` export, parsing, sanitization, retention, and dedupe behavior.
+3. Add shared policy golden fixtures for TypeScript and Android.
+4. Add Android privacy and permission disclosure UI.
+5. Prepare the GitHub Sprint 4 entry spec only after Gate A/B/D have enough evidence.
 
 Do not build payments, school/parent mode, leaderboard, money stakes, or full-diff AI scoring yet.
