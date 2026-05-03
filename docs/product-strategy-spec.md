@@ -1,8 +1,10 @@
 # Commit-to-Unlock Product Strategy Spec
 
-문서 상태: v0.3
+문서 상태: v0.4
 역할: 기획, UX, 사업 모델, 개발 우선순위를 하나의 실행 기준으로 묶는다.  
 전제: 인터뷰/설문/fake-door 없이 build-first로 간다. 단, 제품이 약하면 빠르게 축소하거나 피벗한다.
+
+기획/보안/개인정보/platform policy의 hardening gate는 [product-security-hardening-plan.md](product-security-hardening-plan.md)를 따른다.
 
 ## 1. Product Thesis
 
@@ -113,6 +115,7 @@ Job-to-be-done:
 | Developer tool density | 마케팅/웰빙 앱보다 GitHub/WakaTime처럼 상태, 장부, 이유를 빠르게 스캔하게 한다. |
 | Trust before sync | GitHub sync 전 [security-and-logic-review.md](security-and-logic-review.md)의 Gate D를 통과한다. |
 | User control | 앱 삭제 가능, 선택 target만 차단, 계정 삭제 가능 원칙은 [control-account-design.md](control-account-design.md)를 따른다. |
+| Security before scale | 신규 기능은 [product-security-hardening-plan.md](product-security-hardening-plan.md)의 invariants, threat model, stop list를 먼저 만족한다. |
 
 ## 5. Core Product Loops
 

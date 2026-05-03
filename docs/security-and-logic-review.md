@@ -1,8 +1,11 @@
 # Security And Logic Review
 
-문서 상태: v0.1
+문서 상태: v0.2
 점검일: 2026-05-03
+최신 보강: 2026-05-04
 역할: 전체 로직, 계획, 정책, 보안 설계 점검 및 보완 기준
+
+기획/보안/개인정보/platform policy의 상위 hardening gate는 [product-security-hardening-plan.md](product-security-hardening-plan.md)를 따른다.
 
 ## 1. Executive Verdict
 
@@ -20,6 +23,7 @@
 - API CORS 기본값을 open origin에서 disabled로 바꾸고, `ALLOWED_ORIGINS` allowlist를 추가한다.
 - API config test를 추가했다.
 - shared policy의 invalid timezone 입력이 서버 예외로 이어지지 않도록 UTC fallback을 추가했다.
+- 제품/보안 hardening gate를 [product-security-hardening-plan.md](product-security-hardening-plan.md)로 분리해 신규 기능의 선행 조건으로 승격했다.
 
 ## 2. Current System Surface
 
@@ -321,6 +325,7 @@ MVP 전 대응:
 
 통과 조건:
 
+- [product-security-hardening-plan.md](product-security-hardening-plan.md)의 non-negotiable invariants 만족.
 - Android privacy/permission screen 존재.
 - GitHub data retention draft 존재. 상세 기준은 [github-sprint4-entry.md](github-sprint4-entry.md)를 따른다.
 - 계정 생성/삭제/로그아웃 UX 기준은 [control-account-design.md](control-account-design.md)를 따른다.
@@ -361,19 +366,26 @@ Completed after this review:
 - `feature/android-dogfood-review`
 - `refactor/android-main-sections`
 - `docs/github-sprint4-entry`
+- `docs/control-account-design`
+- `docs/product-security-hardening-plan`
 
 Continue in this order:
 
-1. Android real-device dogfood smoke
+1. Android target guardrails
+   own package 제거, empty/duplicate normalization, dangerous/system target denylist draft, unit tests를 추가한다.
+
+2. Android real-device dogfood smoke
    권한, overlay, local log/export, Gate A/D copy가 실제 기기에서 납득되는지 확인한다.
 
-2. `feature/github-webhook-security`
+3. `feature/github-webhook-security`
    [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A 기준으로 signature verification, delivery dedupe, inbound event tests를 구현한다.
 
 ## 16. Sources Checked
 
 - GitHub webhook validation: https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries
 - GitHub webhook events and payloads: https://docs.github.com/en/webhooks/webhook-events-and-payloads
+- OWASP API Security Top 10 2023: https://owasp.org/API-Security/editions/2023/en/0x10-api-security-risks/
+- OWASP MASVS: https://mas.owasp.org/MASVS/
 - Android UsageStatsManager: https://developer.android.com/reference/android/app/usage/UsageStatsManager
 - Android app security best practices: https://developer.android.com/privacy-and-security/security-best-practices
 - Google Play AccessibilityService API policy: https://support.google.com/googleplay/android-developer/answer/10964491
