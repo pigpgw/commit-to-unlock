@@ -8,6 +8,7 @@
 | 주제 | 기준 문서 |
 | --- | --- |
 | 전체 제품/기술 설계 | [app-design.md](app-design.md) |
+| 제품 전략/UX/사업 패키징 | [product-strategy-spec.md](product-strategy-spec.md) |
 | 실행 순서 | [build-first-execution-plan.md](build-first-execution-plan.md) |
 | 시장/니즈/피벗 게이트 | [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md) |
 | Android Sprint 1.1 | [android-sprint-1.1-design.md](android-sprint-1.1-design.md) |
@@ -39,6 +40,8 @@ Background only:
 | D-012 | 금전 스테이크, 부모/학교, 삭제 방지는 MVP 제외 | 결제/미성년자/MDM/스토어 정책 리스크가 핵심 검증을 흐린다. | Accepted |
 | D-013 | 제품 포지션을 generic blocker가 아니라 developer proof ledger로 고정 | 차단 앱 시장은 붐비고 무료/저가 대안이 많다. 수익 명분은 차단 자체가 아니라 검증 가능한 개발 활동 ledger와 설명 가능한 credit 정책에서 나온다. | Accepted |
 | D-014 | Sprint 4 전 market/dogfood gate를 추가 | GitHub scoring을 본격 구현하기 전에 모바일 차단 효용, 본인 반복 사용, 자연스러운 scorable dev event 빈도를 확인해야 한다. | Accepted |
+| D-015 | 사용자-facing 제품은 score가 아니라 ledger/minutes/reasons 중심으로 설계 | raw score를 전면 노출하면 점수 게임을 유도한다. 사용자는 minutes, proof tier, reasons, risk flags만 보면 된다. | Accepted |
+| D-016 | 결제 구현은 Gate 4 전까지 금지 | 단순 blocker 구독은 가격 저항이 크다. proof ledger가 blocker 없이도 가치 있음을 확인하기 전에는 결제 기능을 만들지 않는다. | Accepted |
 
 ## Revisit Triggers
 

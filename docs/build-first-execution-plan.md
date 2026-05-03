@@ -3,7 +3,7 @@
 결정: 인터뷰/설문 없이 만든다.  
 전략: 고객 검증을 말로 하지 않고, 먼저 `로컬 모바일 차단 -> mock credit -> selected app shield/block` 루프를 실제 기기/에뮬레이터에서 검증한다. GitHub scoring은 모바일 차단 가능성이 확인된 뒤 재개한다.
 
-제품/기술/UX의 기준 설계는 [app-design.md](app-design.md)를 따른다. 구현 판단은 [decision-log.md](decision-log.md)를 우선 확인한다. 시장/니즈/피벗 판단은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. Android 다음 구현 단위는 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)를 따른다. 이 문서는 실행 순서와 milestone 기준을 관리한다.
+제품/기술/UX의 기준 설계는 [app-design.md](app-design.md)를 따른다. 제품 전략/사업 패키징은 [product-strategy-spec.md](product-strategy-spec.md)를 따른다. 구현 판단은 [decision-log.md](decision-log.md)를 우선 확인한다. 시장/니즈/피벗 판단은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. Android 다음 구현 단위는 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)를 따른다. 이 문서는 실행 순서와 milestone 기준을 관리한다.
 
 ## 1. 바뀐 원칙
 
@@ -248,6 +248,9 @@ docs/
 - bounded debug log
 - credit 0 reset button
 - strictMode일 때 overlay shortcut 제한
+- dogfood event logging/export
+- local spend engine
+- block overlay copy/state refinement
 
 ### iOS
 
@@ -355,3 +358,14 @@ docs/
 7. iOS SwiftUI/FamilyControls source skeleton
 8. mobile credit contract 문서화
 9. repo build/test/typecheck 기준선 확인
+
+## 9. 보강된 다음 실행 순서
+
+현재 저장소는 1차 Android prototype과 Sprint 1.1 hardening이 들어간 상태다. 다음 개발은 아래 순서로 간다.
+
+1. Android dogfood event logging
+2. Android local spend engine
+3. Android block overlay copy/state refinement
+4. 14일 dogfood 기준으로 Gate 1/2 판단
+5. iOS Xcode project/entitlement 준비
+6. GitHub scoring 재개 또는 WakaTime/IDE proof spike 선택
