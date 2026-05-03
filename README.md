@@ -56,6 +56,7 @@ Read these docs in order before changing product direction or implementation pri
 - [Decision log](docs/decision-log.md)
 - [Security and logic review](docs/security-and-logic-review.md)
 - [GitHub Sprint 4 entry spec](docs/github-sprint4-entry.md)
+- [Control and account design](docs/control-account-design.md)
 - [App design](docs/app-design.md)
 - [Proof policy MVP](docs/proof-policy-mvp.md)
 
@@ -179,6 +180,6 @@ Current recommended sequence:
 
 1. Follow the [Android dogfood runbook](docs/android-dogfood-runbook.md) on a physical device.
 2. Use the [GitHub Sprint 4 entry spec](docs/github-sprint4-entry.md) as the implementation gate for webhook/security work.
-3. Keep Android changes limited to dogfood fixes until Gate A/D has real-device evidence.
+3. Keep Android changes limited to dogfood fixes and the control/account UX rules until Gate A/D has real-device evidence.
 
 Do not build payments, school/parent mode, leaderboard, money stakes, or full-diff AI scoring yet.
