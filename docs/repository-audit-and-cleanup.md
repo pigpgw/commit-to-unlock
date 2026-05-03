@@ -84,7 +84,7 @@ flowchart LR
 1. `DogfoodEventStore`에 event type 상수 또는 sealed class를 도입할지 검토한다.
 2. `packages/shared`의 `MobileCreditState`를 Android/iOS 문서와 자동 비교하는 작은 contract test를 추가한다.
 3. iOS skeleton은 Xcode project 생성 전까지 문서 수준으로만 유지한다.
-4. [product-security-hardening-plan.md](product-security-hardening-plan.md)의 immediate queue에 따라 Android target guardrail을 먼저 구현한다.
+4. [android-dogfood-runbook.md](android-dogfood-runbook.md)에 따라 실제 기기 smoke evidence를 확보한다.
 5. [competitive-service-review.md](competitive-service-review.md)에 따라 desktop/browser companion spike를 작성한다.
 6. [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A 기준으로 `apps/api`에 webhook HMAC/dedupe foundation을 추가한다. scoring route는 enrichment와 ledger가 함께 준비될 때만 복구한다.
 
@@ -100,6 +100,7 @@ flowchart LR
 - Control/account design spec 추가.
 - Product/security hardening plan 추가.
 - Competitive service review 추가.
+- Android target guardrail 구현.
 
 ## 6. Do Not Build Yet
 

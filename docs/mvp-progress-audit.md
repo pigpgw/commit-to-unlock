@@ -1,8 +1,8 @@
 # MVP Progress Audit
 
-문서 상태: v0.2, snapshot reference. 현재 실행 순서는 [mvp-execution-plan.md](mvp-execution-plan.md)를 우선한다.
+문서 상태: v0.3, snapshot reference. 현재 실행 순서는 [mvp-execution-plan.md](mvp-execution-plan.md)를 우선한다.
 점검일: 2026-05-03
-최신 정리: 2026-05-03
+최신 정리: 2026-05-04
 역할: 현재 구현/문서/시장 근거를 한 번에 점검하고, 다음 MVP 진행 판단을 고정한다.
 
 ## 0. Current Cleanup Note
@@ -21,8 +21,9 @@
 - `docs/control-account-design`
 - `docs/product-security-hardening-plan`
 - `docs/competitive-service-review`
+- `feature/android-target-guardrails`
 
-현재 다음 작업은 Android target guardrail 구현과 실제 Android 기기 smoke evidence 확보다. 이후 desktop/browser companion spike를 작성하고 [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A 순서로 진행한다.
+현재 다음 작업은 실제 Android 기기 smoke evidence 확보다. 이후 desktop/browser companion spike를 작성하고 [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A 순서로 진행한다.
 
 ## 1. Executive Verdict
 
@@ -39,7 +40,7 @@
 
 ## 2. Current Repo Snapshot
 
-현재 tracked source는 77개 파일, 약 9.2k lines다. 핵심 구성은 아래와 같다.
+현재 tracked source는 97개 파일, 약 14.7k lines다. 핵심 구성은 아래와 같다.
 
 | 영역 | 상태 | 판단 |
 | --- | --- | --- |
@@ -64,7 +65,7 @@
 | 단계 | 목표 | 현재 진행도 | 상태 |
 | --- | --- | ---: | --- |
 | Sprint 0 | repo 정리, CI, build baseline | 100% | 완료 |
-| Sprint 1 | Android local blocker runnable | 80% | 구현됨, 실기기 반복 검증 필요 |
+| Sprint 1 | Android local blocker runnable | 85% | 구현됨, target guardrails 완료, 실기기 반복 검증 필요 |
 | Sprint 1.1 | policy controls, quest, exception, dogfood log | 85% | 구현됨, event quality 개선됨 |
 | Sprint 1.2 | dogfood analyzer and Gate snapshot | 90% | 구현됨 |
 | Sprint 2 | iOS FamilyControls prototype | 20% | 구조만 있음 |
@@ -82,6 +83,7 @@ GitHub-backed 개인 개발자 MVP 기준으로 보면 아직 30% 전후다. 이
 - 첫 실행 시 playful developer gate.
 - Usage Access, Overlay, Notification permission 상태 표시.
 - manual package target 입력과 recent foreground package 추가.
+- target package 저장 전 own package, empty/duplicate, launcher/settings/permission-controller/core service 차단.
 - `UsageStatsManager` 기반 foreground package 감지.
 - foreground service 기반 monitor.
 - selected target + credit 0일 때 full-screen overlay.
@@ -194,25 +196,26 @@ GitHub-backed 개인 개발자 MVP 기준으로 보면 아직 30% 전후다. 이
 - `feature/android-dogfood-review`
 - `refactor/android-main-sections`
 - `docs/github-sprint4-entry`
+- `docs/control-account-design`
+- `docs/product-security-hardening-plan`
+- `docs/competitive-service-review`
+- `feature/android-target-guardrails`
 
 다음:
 
-1. Android target guardrails
-   own package 제거, empty/duplicate normalization, dangerous/system target denylist draft, unit tests를 구현한다.
-
-2. Android real-device smoke evidence
+1. Android real-device smoke evidence
    Usage Access, overlay, credit spend, free day, emergency unlock, Gate A/D 상태를 실제 기기에서 확인한다.
 
-3. `docs/desktop-browser-companion-spike`
+2. `docs/desktop-browser-companion-spike`
    Freedom, one sec, Jomo, Cold Turkey, FocusMe가 보여준 cross-device/desktop paid moat를 Commit-to-Unlock proof ledger와 연결한다.
 
-4. `feature/github-webhook-security`
+3. `feature/github-webhook-security`
    [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A 기준으로 HMAC 검증, delivery dedupe, inbound event 저장 테스트부터 구현한다.
 
-5. `docs/wakatime-ide-proof-spike`
+4. `docs/wakatime-ide-proof-spike`
    PR-only가 부족할 때 WakaTime/IDE proof를 capped provisional credit fallback으로 설계한다.
 
-6. `feature/account-lifecycle`
+5. `feature/account-lifecycle`
    서버 계정 구현을 시작할 때 [control-account-design.md](control-account-design.md)의 로그인/로그아웃/회원탈퇴/데이터 삭제 기준을 먼저 만족한다.
 
 위 선행 작업과 Gate D 보안 기준 전에는 GitHub scoring 구현을 다시 시작하지 않는다.

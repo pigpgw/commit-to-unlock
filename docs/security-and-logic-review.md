@@ -369,19 +369,17 @@ Completed after this review:
 - `docs/control-account-design`
 - `docs/product-security-hardening-plan`
 - `docs/competitive-service-review`
+- `feature/android-target-guardrails`
 
 Continue in this order:
 
-1. Android target guardrails
-   own package 제거, empty/duplicate normalization, dangerous/system target denylist draft, unit tests를 추가한다.
-
-2. Android real-device dogfood smoke
+1. Android real-device dogfood smoke
    권한, overlay, local log/export, Gate A/D copy가 실제 기기에서 납득되는지 확인한다.
 
-3. `docs/desktop-browser-companion-spike`
+2. `docs/desktop-browser-companion-spike`
    경쟁 서비스 조사상 desktop/browser enforcement가 paid moat가 될 가능성이 높다. GitHub webhook runtime 전에 proof ledger와 desktop/browser policy 연결 설계를 작성한다.
 
-4. `feature/github-webhook-security`
+3. `feature/github-webhook-security`
    [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A 기준으로 signature verification, delivery dedupe, inbound event tests를 구현한다.
 
 ## 16. Sources Checked
