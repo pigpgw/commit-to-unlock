@@ -421,10 +421,11 @@ Completed after this runbook:
 - `feature/android-privacy-permissions`
 - `feature/android-dogfood-review`
 - `refactor/android-main-sections`
+- `docs/github-sprint4-entry`
 
 Continue in this order:
 
-1. `docs/github-sprint4-entry`
-2. Real-device 14-day dogfood collection
+1. Real-device smoke and 14-day dogfood collection
+2. Sprint 4 PR A only after Gate A/D evidence
 
 Do not resume GitHub scoring until Gate A/B/D have enough evidence and the Sprint 4 entry spec is complete.

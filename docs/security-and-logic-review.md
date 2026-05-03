@@ -320,7 +320,7 @@ MVP 전 대응:
 통과 조건:
 
 - Android privacy/permission screen 존재.
-- GitHub data retention draft 존재.
+- GitHub data retention draft 존재. 상세 기준은 [github-sprint4-entry.md](github-sprint4-entry.md)를 따른다.
 - private repo raw diff 기본 저장 금지.
 - user revoke/delete path 설계.
 - webhook HMAC/dedupe 구현 전에는 GitHub sync 금지.
@@ -357,14 +357,15 @@ Completed after this review:
 - `feature/android-privacy-permissions`
 - `feature/android-dogfood-review`
 - `refactor/android-main-sections`
+- `docs/github-sprint4-entry`
 
 Continue in this order:
 
-1. `docs/github-sprint4-security-entry`
-   GitHub App permissions, webhook HMAC, delivery dedupe, retention, ledger idempotency.
-
-2. Android real-device dogfood smoke
+1. Android real-device dogfood smoke
    권한, overlay, local log/export, Gate A/D copy가 실제 기기에서 납득되는지 확인한다.
+
+2. `feature/github-webhook-security`
+   [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A 기준으로 signature verification, delivery dedupe, inbound event tests를 구현한다.
 
 ## 16. Sources Checked
 

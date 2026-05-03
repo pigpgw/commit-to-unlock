@@ -84,7 +84,7 @@ flowchart LR
 1. `DogfoodEventStore`에 event type 상수 또는 sealed class를 도입할지 검토한다.
 2. `packages/shared`의 `MobileCreditState`를 Android/iOS 문서와 자동 비교하는 작은 contract test를 추가한다.
 3. iOS skeleton은 Xcode project 생성 전까지 문서 수준으로만 유지한다.
-4. Sprint 4 착수 전 `apps/api`에 persistence/dedupe 설계부터 추가하고, webhook route는 enrichment와 ledger가 함께 준비될 때만 복구한다.
+4. [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A 기준으로 `apps/api`에 webhook HMAC/dedupe foundation을 추가한다. scoring route는 enrichment와 ledger가 함께 준비될 때만 복구한다.
 
 완료된 정리:
 
@@ -94,6 +94,7 @@ flowchart LR
 - Android privacy/permission disclosure UI 추가.
 - Android dogfood review/Data Quality/Gate UI 추가.
 - Android MainActivity section helper 분리.
+- GitHub Sprint 4 entry spec 추가.
 
 ## 6. Do Not Build Yet
 

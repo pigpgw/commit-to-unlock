@@ -365,11 +365,11 @@ flowchart LR
 
 ### Add Before Sprint 4
 
-- 14일 dogfood runbook과 Gate decision template
-- DogfoodEventStore export/parse unit tests
-- block screen/dogfood review copy refinement
-- GitHub metadata-only privacy promise draft
-- GitHub Sprint 4 entry spec
+- 14일 dogfood runbook과 Gate decision template: done
+- DogfoodEventStore export/parse unit tests: done
+- block screen/dogfood review copy refinement: done
+- GitHub metadata-only privacy promise draft: done in [github-sprint4-entry.md](github-sprint4-entry.md)
+- GitHub Sprint 4 entry spec: done
 
 ### Do Not Add Yet
 
