@@ -32,9 +32,11 @@ data class DogfoodSummary(
     val eventCount: Int
 )
 
-class DogfoodEventStore(context: Context) {
-    private val appContext = context.applicationContext
-    private val prefs = context.getSharedPreferences("dogfood_events", Context.MODE_PRIVATE)
+class DogfoodEventStore internal constructor(
+    private val storage: DogfoodEventStorage,
+    private val now: () -> Instant = { Instant.now() }
+) {
+    constructor(context: Context) : this(AndroidDogfoodEventStorage(context))
 
     init {
         writeExportFile()
@@ -60,7 +62,7 @@ class DogfoodEventStore(context: Context) {
 
         val current = readRaw()
         val nextLine = listOf(
-            Instant.now().toString(),
+            now().toString(),
             cleanType,
             cleanTarget,
             cleanPolicyReason,
@@ -75,9 +77,7 @@ class DogfoodEventStore(context: Context) {
             .plus(current)
             .take(MAX_EVENTS)
 
-        val saved = prefs.edit()
-            .putString(KEY_EVENTS, next.joinToString("\n"))
-            .commit()
+        val saved = storage.writeRaw(next)
 
         if (saved) {
             writeExportFile(next)
@@ -128,18 +128,14 @@ class DogfoodEventStore(context: Context) {
     }
 
     fun clear() {
-        val cleared = prefs.edit().remove(KEY_EVENTS).commit()
+        val cleared = storage.writeRaw(emptyList())
         if (cleared) {
             writeExportFile(emptyList())
         }
     }
 
     private fun readRaw(): List<String> {
-        return prefs.getString(KEY_EVENTS, "")
-            .orEmpty()
-            .lines()
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
+        return storage.readRaw()
     }
 
     private fun parse(line: String): DogfoodEvent? {
@@ -179,9 +175,7 @@ class DogfoodEventStore(context: Context) {
             .filter { it.isNotEmpty() }
             .joinToString("\n")
 
-        appContext.openFileOutput(DOGFOOD_EXPORT_FILE_NAME, Context.MODE_PRIVATE).use { output ->
-            output.write(export.toByteArray(Charsets.UTF_8))
-        }
+        storage.writeExport(export)
     }
 
     private fun sanitize(value: String): String {
@@ -203,9 +197,45 @@ class DogfoodEventStore(context: Context) {
     }
 
     companion object {
-        private const val KEY_EVENTS = "events"
         private const val MAX_EVENTS = 1_000
         private const val SUMMARY_DAYS = 14L
         private const val EXPORT_HEADER = "timestamp\ttype\ttarget\tpolicy_reason\tcredit_remaining\tdetail"
+    }
+}
+
+internal interface DogfoodEventStorage {
+    fun readRaw(): List<String>
+    fun writeRaw(events: List<String>): Boolean
+    fun writeExport(export: String)
+}
+
+private class AndroidDogfoodEventStorage(context: Context) : DogfoodEventStorage {
+    private val appContext = context.applicationContext
+    private val prefs = appContext.getSharedPreferences("dogfood_events", Context.MODE_PRIVATE)
+
+    override fun readRaw(): List<String> {
+        return prefs.getString(KEY_EVENTS, "")
+            .orEmpty()
+            .lines()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+    }
+
+    override fun writeRaw(events: List<String>): Boolean {
+        return if (events.isEmpty()) {
+            prefs.edit().remove(KEY_EVENTS).commit()
+        } else {
+            prefs.edit().putString(KEY_EVENTS, events.joinToString("\n")).commit()
+        }
+    }
+
+    override fun writeExport(export: String) {
+        appContext.openFileOutput(DOGFOOD_EXPORT_FILE_NAME, Context.MODE_PRIVATE).use { output ->
+            output.write(export.toByteArray(Charsets.UTF_8))
+        }
+    }
+
+    private companion object {
+        private const val KEY_EVENTS = "events"
     }
 }

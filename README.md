@@ -175,9 +175,8 @@ pnpm typecheck
 Current recommended sequence:
 
 1. Follow the [Android dogfood runbook](docs/android-dogfood-runbook.md) on a physical device.
-2. Add tests for `DogfoodEventStore` export, parsing, sanitization, retention, and dedupe behavior.
-3. Add shared policy golden fixtures for TypeScript and Android.
-4. Add Android privacy and permission disclosure UI.
-5. Prepare the GitHub Sprint 4 entry spec only after Gate A/B/D have enough evidence.
+2. Add shared policy golden fixtures for TypeScript and Android.
+3. Add Android privacy and permission disclosure UI.
+4. Prepare the GitHub Sprint 4 entry spec only after Gate A/B/D have enough evidence.
 
 Do not build payments, school/parent mode, leaderboard, money stakes, or full-diff AI scoring yet.
