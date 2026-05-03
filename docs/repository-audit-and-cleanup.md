@@ -4,6 +4,8 @@
 작성일: 2026-05-03  
 역할: 저장소에서 무엇을 남기고, 무엇을 제거하고, 무엇을 다음에 정리할지 판단하는 기준 문서
 
+현재 정리 실행 순서는 [mvp-execution-plan.md](mvp-execution-plan.md)를 우선한다. 이 문서는 cleanup 판단 reference로 유지한다.
+
 ## 1. Current Diagnosis
 
 현재 저장소의 핵심 산출물은 Android local blocker prototype이다. 실제 실행 가치가 있는 코드는 `apps/android`, local dogfood scripts, mobile credit contract다.

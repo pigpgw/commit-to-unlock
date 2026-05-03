@@ -7,6 +7,7 @@
 
 | 주제 | 기준 문서 |
 | --- | --- |
+| 현재 MVP 실행 계획 | [mvp-execution-plan.md](mvp-execution-plan.md) |
 | 전체 제품/기술 설계 | [app-design.md](app-design.md) |
 | proof/quest/policy MVP | [proof-policy-mvp.md](proof-policy-mvp.md) |
 | 제품 전략/UX/사업 패키징 | [product-strategy-spec.md](product-strategy-spec.md) |
@@ -50,6 +51,7 @@
 | D-024 | 디자인 방향은 developer utility dashboard + playful edge로 고정 | Opal/one sec/Freedom/Jomo는 차단 UX가 강하지만 generic blocker 시장이 붐빈다. 수익 명분은 GitHub/WakaTime류 개발자 proof ledger를 전면에 두는 데 있다. | Accepted |
 | D-025 | API는 local-only/CORS-closed 기본값으로 둔다 | 현재 API는 health-only scaffold다. Sprint 4 전까지 외부 네트워크와 browser origin을 기본 허용하면 불필요한 공격면이 생긴다. | Accepted |
 | D-026 | Gate D: Trust And Privacy를 GitHub sync 착수 조건으로 승격 | 제품의 핵심 리스크는 강제 차단보다 package/repo/diff/privacy 데이터 최소화다. webhook HMAC, dedupe, retention, revoke/delete가 없으면 Sprint 4를 시작하지 않는다. | Accepted |
+| D-027 | `mvp-execution-plan.md`를 현재 실행 source of truth로 둔다 | 문서가 많아져 실행 순서가 분산됐다. 중복 문서를 삭제하기 전에 active/reference/archive 후보를 분리하고 PR 순서를 고정한다. | Accepted |
 
 ## Revisit Triggers
 

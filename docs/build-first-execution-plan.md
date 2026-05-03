@@ -1,11 +1,13 @@
 # Commit-to-Unlock Build-First 실행 계획
 
+문서 상태: reference. 현재 실행 순서와 다음 PR은 [mvp-execution-plan.md](mvp-execution-plan.md)를 우선한다.
+
 결정: 인터뷰/설문 없이 만든다.  
 전략: 고객 검증을 말로 하지 않고, 먼저 `로컬 모바일 차단 -> mock credit -> selected app shield/block` 루프를 실제 기기/에뮬레이터에서 검증한다. GitHub scoring은 모바일 차단 가능성이 확인된 뒤 재개한다.
 
 현재 Android dogfood TSV는 `pnpm android:dogfood:export`로 수집하고 `pnpm android:dogfood:analyze`로 요약한다. 분석 결과의 Data Quality, blocked attempts, policy reasons, emergency unlock, daily quest proof completion과 Gate A/B/C snapshot을 Gate 판단의 1차 입력으로 사용한다.
 
-제품/기술/UX의 기준 설계는 [app-design.md](app-design.md)를 따른다. proof/quest/요일/휴일/override 정책은 [proof-policy-mvp.md](proof-policy-mvp.md)를 따른다. 제품 전략/사업 패키징은 [product-strategy-spec.md](product-strategy-spec.md)를 따른다. 디자인 조사와 화면 톤은 [design-research-and-ux-direction.md](design-research-and-ux-direction.md)를 따른다. 보안/로직 점검은 [security-and-logic-review.md](security-and-logic-review.md)를 따른다. 구현 판단은 [decision-log.md](decision-log.md)를 우선 확인한다. 시장/니즈/피벗 판단은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. 현재 진행도와 다음 보완 우선순위는 [mvp-progress-audit.md](mvp-progress-audit.md)를 따른다. 저장소 정리 기준은 [repository-audit-and-cleanup.md](repository-audit-and-cleanup.md)를 따른다. Android 상세 검증 기록은 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)를 따른다. 이 문서는 실행 순서와 milestone 기준을 관리한다.
+현재 MVP 실행 계획은 [mvp-execution-plan.md](mvp-execution-plan.md)를 따른다. 제품/기술/UX의 기준 설계는 [app-design.md](app-design.md)를 따른다. proof/quest/요일/휴일/override 정책은 [proof-policy-mvp.md](proof-policy-mvp.md)를 따른다. 제품 전략/사업 패키징은 [product-strategy-spec.md](product-strategy-spec.md)를 따른다. 디자인 조사와 화면 톤은 [design-research-and-ux-direction.md](design-research-and-ux-direction.md)를 따른다. 보안/로직 점검은 [security-and-logic-review.md](security-and-logic-review.md)를 따른다. 구현 판단은 [decision-log.md](decision-log.md)를 우선 확인한다. 시장/니즈/피벗 판단은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. 현재 진행도와 다음 보완 우선순위는 [mvp-progress-audit.md](mvp-progress-audit.md)를 따른다. 저장소 정리 기준은 [repository-audit-and-cleanup.md](repository-audit-and-cleanup.md)를 따른다. Android 상세 검증 기록은 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)를 따른다.
 
 ## 1. 바뀐 원칙
 
