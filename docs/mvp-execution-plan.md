@@ -255,12 +255,12 @@ Deliverables:
 
 ### PR 8: Android UI section cleanup
 
-Status: pending.
+Status: complete.
 
 Deliverables:
 
 - MainActivity section helpers
-- Status / Permissions / Targets / Policy / Quest / Emergency / Dogfood sections
+- Header / Permissions / Targets / Policy / Quest / Emergency / Credit / Monitor-Dogfood helpers
 - no behavior change
 
 ## 9. Work Rules

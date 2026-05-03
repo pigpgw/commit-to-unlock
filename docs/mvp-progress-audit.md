@@ -185,14 +185,15 @@ GitHub-backed 개인 개발자 MVP 기준으로 보면 아직 30% 전후다. 이
 - `test/policy-golden-fixtures`
 - `feature/android-privacy-permissions`
 - `feature/android-dogfood-review`
+- `refactor/android-main-sections`
 
 다음:
 
 1. `docs/github-sprint4-entry`
    GitHub App permissions, webhook dedupe, enrichment, ledger write, privacy policy를 Sprint 4 착수 전 설계.
 
-2. `refactor/android-main-sections`
-   현재 긴 MainActivity 화면을 작은 section helpers로 나누되 동작은 바꾸지 않는다.
+2. Android real-device smoke evidence
+   Usage Access, overlay, credit spend, free day, emergency unlock, Gate A/D 상태를 실제 기기에서 확인한다.
 
 위 선행 작업과 Gate D 보안 기준 전에는 GitHub scoring 구현을 다시 시작하지 않는다.
 

@@ -356,14 +356,15 @@ Completed after this review:
 - `test/policy-golden-fixtures`
 - `feature/android-privacy-permissions`
 - `feature/android-dogfood-review`
+- `refactor/android-main-sections`
 
 Continue in this order:
 
 1. `docs/github-sprint4-security-entry`
    GitHub App permissions, webhook HMAC, delivery dedupe, retention, ledger idempotency.
 
-2. `refactor/android-main-sections`
-   긴 Android prototype 화면을 section helper로 나눠 보안/정책 copy가 묻히지 않게 한다.
+2. Android real-device dogfood smoke
+   권한, overlay, local log/export, Gate A/D copy가 실제 기기에서 납득되는지 확인한다.
 
 ## 16. Sources Checked
 
