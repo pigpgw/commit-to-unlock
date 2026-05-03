@@ -111,6 +111,7 @@ Job-to-be-done:
 | Policy-compliant control | 전체 폰 잠금, 삭제 방지, 우회적인 Accessibility 사용은 피한다. |
 | Proof-backed quests | 오늘 할 일은 등록할 수 있지만, unlock은 개발 증거가 있어야 한다. |
 | Developer tool density | 마케팅/웰빙 앱보다 GitHub/WakaTime처럼 상태, 장부, 이유를 빠르게 스캔하게 한다. |
+| Trust before sync | GitHub sync 전 [security-and-logic-review.md](security-and-logic-review.md)의 Gate D를 통과한다. |
 
 ## 5. Core Product Loops
 

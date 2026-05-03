@@ -11,6 +11,7 @@
 | proof/quest/policy MVP | [proof-policy-mvp.md](proof-policy-mvp.md) |
 | 제품 전략/UX/사업 패키징 | [product-strategy-spec.md](product-strategy-spec.md) |
 | 디자인 조사/화면 톤 | [design-research-and-ux-direction.md](design-research-and-ux-direction.md) |
+| 보안/로직 점검 | [security-and-logic-review.md](security-and-logic-review.md) |
 | 실행 순서 | [build-first-execution-plan.md](build-first-execution-plan.md) |
 | 시장/니즈/피벗 게이트 | [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md) |
 | 현재 MVP 진행도/보완 우선순위 | [mvp-progress-audit.md](mvp-progress-audit.md) |
@@ -47,6 +48,8 @@
 | D-022 | GitHub scoring 재개 전 MVP progress audit을 통과 기준으로 사용 | 현재 병목은 scoring 코드가 아니라 실기기 dogfood 데이터 부재다. Gate A/B/C 판단 없이 Sprint 4로 가면 잘못된 product risk를 늦게 발견한다. | Accepted |
 | D-023 | 다음 4개 PR은 dogfood runbook, event store tests, dogfood review UX, GitHub Sprint 4 entry spec 순서로 진행 | 모바일 차단 가치와 데이터 품질을 확인한 뒤 proof ledger로 넘어가야 한다. | Accepted |
 | D-024 | 디자인 방향은 developer utility dashboard + playful edge로 고정 | Opal/one sec/Freedom/Jomo는 차단 UX가 강하지만 generic blocker 시장이 붐빈다. 수익 명분은 GitHub/WakaTime류 개발자 proof ledger를 전면에 두는 데 있다. | Accepted |
+| D-025 | API는 local-only/CORS-closed 기본값으로 둔다 | 현재 API는 health-only scaffold다. Sprint 4 전까지 외부 네트워크와 browser origin을 기본 허용하면 불필요한 공격면이 생긴다. | Accepted |
+| D-026 | Gate D: Trust And Privacy를 GitHub sync 착수 조건으로 승격 | 제품의 핵심 리스크는 강제 차단보다 package/repo/diff/privacy 데이터 최소화다. webhook HMAC, dedupe, retention, revoke/delete가 없으면 Sprint 4를 시작하지 않는다. | Accepted |
 
 ## Revisit Triggers
 

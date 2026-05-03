@@ -152,8 +152,9 @@ function isWithinActiveTime(now: LocalDateTime, policy: PolicyState): boolean {
 }
 
 function localDateTime(now: Date, timezone: string): LocalDateTime {
+  const resolvedTimeZone = resolveTimeZone(timezone);
   const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: timezone,
+    timeZone: resolvedTimeZone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -181,6 +182,15 @@ function localDateTime(now: Date, timezone: string): LocalDateTime {
     hour: value("hour"),
     minute: value("minute")
   };
+}
+
+function resolveTimeZone(timezone: string): string {
+  try {
+    Intl.DateTimeFormat(undefined, { timeZone: timezone }).format();
+    return timezone;
+  } catch {
+    return "UTC";
+  }
 }
 
 function parseTimeToMinutes(value: string): number {
