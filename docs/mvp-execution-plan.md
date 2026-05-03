@@ -1,8 +1,8 @@
 # MVP Execution Plan
 
-문서 상태: v0.2
+문서 상태: v0.3
 작성일: 2026-05-03
-최종 정리: 2026-05-03
+최종 정리: 2026-05-04
 역할: 현재 MVP의 단일 실행 계획, 남은 작업 목록, 문서/코드 정리 기준
 
 ## 1. Current Decision
@@ -79,7 +79,7 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 
 | 영역 | 상태 | 판단 |
 | --- | --- | --- |
-| Android app | runnable local prototype | 현재 유일한 product surface |
+| Android app | runnable local prototype + target guardrails | 현재 유일한 product surface |
 | Android dogfood | runbook/log/export/analyzer/in-app review 있음 | 14일 실기기 데이터 필요 |
 | Android UI | 긴 화면을 section helper로 분리함 | 실기기 dogfood fix만 추가 |
 | Shared policy | TS canonical + Android mirror + golden fixtures | 정책 drift 방지 기준 확보 |
@@ -294,6 +294,18 @@ Deliverables:
 - Android-only blocker 과금 금지 기준 보강
 - desktop/browser companion과 WakaTime/IDE proof spike를 다음 설계 후보로 승격
 
+### PR 11: Android target guardrails
+
+Status: complete.
+
+Deliverables:
+
+- target normalization before save/read
+- own package, empty target, duplicate target rejection
+- launcher/settings/permission-controller/core service denylist draft
+- rejected-target dogfood events
+- Android unit tests
+
 ## 9. Work Rules
 
 - 한 PR에 unrelated scope를 섞지 않는다.
@@ -310,7 +322,7 @@ Deliverables:
 이 PR 이후 즉시 할 일:
 
 ```text
-Android target guardrails, real-device Android dogfood smoke, desktop/browser companion spike, then Sprint 4 PR A: Webhook Security Foundation
+real-device Android dogfood smoke, desktop/browser companion spike, then Sprint 4 PR A: Webhook Security Foundation
 ```
 
-이유: runbook, event store tests, policy golden fixtures, 권한/개인정보 disclosure, in-app Data Quality/Gate review, GitHub Sprint 4 entry spec, product/security hardening gate, competitive service review는 완료됐다. 이제 Android target guardrail을 코드로 고정하고, 실제 기기에서 Gate A/D smoke evidence를 만든다. 그 다음 Freedom/Cold Turkey/FocusMe류가 보여준 desktop/browser paid moat를 우리 proof ledger에 연결하는 spike를 작성한 뒤 [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A부터 구현한다.
+이유: runbook, event store tests, policy golden fixtures, 권한/개인정보 disclosure, in-app Data Quality/Gate review, GitHub Sprint 4 entry spec, product/security hardening gate, competitive service review, Android target guardrails는 완료됐다. 이제 실제 기기에서 Gate A/D smoke evidence를 만든다. 그 다음 Freedom/Cold Turkey/FocusMe류가 보여준 desktop/browser paid moat를 우리 proof ledger에 연결하는 spike를 작성한 뒤 [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A부터 구현한다.

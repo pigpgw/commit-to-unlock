@@ -413,7 +413,7 @@ Gate D는 Sprint 4의 hard blocker다. HMAC, dedupe, retention, revoke/delete �
 
 ## 14. Immediate Implementation Queue
 
-다음 작업 순서는 이렇다.
+완료된 immediate queue:
 
 1. `docs/product-security-hardening-plan`
    이 문서와 source-of-truth 링크를 반영한다.
@@ -421,19 +421,21 @@ Gate D는 Sprint 4의 hard blocker다. HMAC, dedupe, retention, revoke/delete �
 2. `feature/android-target-guardrails`
    own package 제거, empty/duplicate normalization, dangerous/system target denylist draft, unit tests.
 
-3. `test/android-real-device-smoke`
+남은 작업 순서는 이렇다.
+
+1. `test/android-real-device-smoke`
    실제 기기 runbook 결과를 문서화하고 Gate A/D evidence를 남긴다.
 
-4. `docs/desktop-browser-companion-spike`
+2. `docs/desktop-browser-companion-spike`
    [competitive-service-review.md](competitive-service-review.md)의 Freedom, Cold Turkey, FocusMe 교훈을 바탕으로 proof ledger와 desktop/browser enforcement를 연결하는 설계를 작성한다.
 
-5. `feature/github-webhook-security`
+3. `feature/github-webhook-security`
    HMAC verification, delivery dedupe, inbound event store, tests. Ledger write는 아직 하지 않는다.
 
-6. `docs/wakatime-ide-proof-spike`
+4. `docs/wakatime-ide-proof-spike`
    GitHub PR-only 공급이 약할 때 capped provisional credit fallback을 설계한다.
 
-7. `feature/account-lifecycle-contract`
+5. `feature/account-lifecycle-contract`
    signup/login/logout/delete/export/revoke API contract와 UI skeleton. GitHub sync 전 deletion path를 먼저 고정한다.
 
 이 순서가 중요한 이유는 간단하다. 사용자가 신뢰할 수 없는 차단 앱은 오래 켜두지 않고, 개인정보를 설명하지 못하는 GitHub 연동은 설치되지 않는다.

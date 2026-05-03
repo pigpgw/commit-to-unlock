@@ -16,6 +16,7 @@ It can:
 - add daily quest plans and complete them with local mock proof before free day is granted
 - detect the foreground app through `UsageStatsManager`
 - block selected package names with an overlay when credit is `0`
+- normalize/reject unsafe target packages before saving, including this app, empty/duplicate entries, launcher/settings/permission-controller, and core system services
 - spend `1` mock credit minute after `60` seconds of foreground use on blocked targets
 - show a dogfood summary for the last 14 days
 - show an in-app dogfood review with Data Quality and Gate A/B/C/D status
@@ -182,9 +183,8 @@ Current recommended sequence:
 
 1. Keep new work inside the guardrails in the [product and security hardening plan](docs/product-security-hardening-plan.md).
 2. Use the [competitive service review](docs/competitive-service-review.md) to keep the product out of generic blocker pricing traps.
-3. Add Android target guardrails for own package, empty/duplicate packages, and dangerous/system targets.
-4. Follow the [Android dogfood runbook](docs/android-dogfood-runbook.md) on a physical device.
-5. Draft the desktop/browser companion spike before treating mobile-only as a paid product.
-6. Use the [GitHub Sprint 4 entry spec](docs/github-sprint4-entry.md) as the implementation gate for webhook/security work.
+3. Follow the [Android dogfood runbook](docs/android-dogfood-runbook.md) on a physical device.
+4. Draft the desktop/browser companion spike before treating mobile-only as a paid product.
+5. Use the [GitHub Sprint 4 entry spec](docs/github-sprint4-entry.md) as the implementation gate for webhook/security work.
 
 Do not build payments, school/parent mode, leaderboard, money stakes, or full-diff AI scoring yet.

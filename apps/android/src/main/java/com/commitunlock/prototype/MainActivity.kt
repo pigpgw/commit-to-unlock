@@ -419,11 +419,11 @@ class MainActivity : Activity() {
     }
 
     private fun saveTargets() {
-        val targets = packageInput.text.toString()
-            .split(",")
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
-            .distinct()
+        val result = TargetGuardrails.normalizeTargets(
+            packageInput.text.toString().split(","),
+            packageName
+        )
+        val targets = result.accepted
 
         val current = creditStore.read()
         creditStore.save(current.copy(
@@ -431,7 +431,12 @@ class MainActivity : Activity() {
             strictMode = strictModeInput.isChecked,
             lastUpdatedAt = Instant.now().toString()
         ))
-        dogfoodEventStore.record("targets_saved", "count=${targets.size} strict=${strictModeInput.isChecked}")
+        dogfoodEventStore.record(
+            "targets_saved",
+            "count=${targets.size} rejected=${result.rejected.size} strict=${strictModeInput.isChecked}"
+        )
+        recordRejectedTargets(result.rejected)
+        showRejectedTargetToast(result.rejected)
         renderState()
     }
 
@@ -589,7 +594,9 @@ class MainActivity : Activity() {
         }
 
         val latestExternalPackage = foregroundReader.recentForegroundPackages()
-            .firstOrNull { it != packageName }
+            .firstOrNull {
+                TargetGuardrails.normalizeTargets(listOf(it), packageName).accepted.isNotEmpty()
+            }
 
         if (latestExternalPackage == null) {
             dogfoodEventStore.record("recent_external_package_missing")
@@ -598,20 +605,43 @@ class MainActivity : Activity() {
         }
 
         val current = creditStore.read()
-        val nextTargets = current.blockedTargets
-            .plus(latestExternalPackage)
-            .distinct()
+        val result = TargetGuardrails.normalizeTargets(
+            current.blockedTargets.plus(latestExternalPackage),
+            packageName
+        )
+        val nextTargets = result.accepted
 
         creditStore.save(current.copy(
             blockedTargets = nextTargets,
             strictMode = strictModeInput.isChecked,
             lastUpdatedAt = Instant.now().toString()
         ))
+        recordRejectedTargets(result.rejected)
         dogfoodEventStore.recordStructured(
             type = "target_added",
             target = latestExternalPackage
         )
         renderState()
+    }
+
+    private fun recordRejectedTargets(rejected: List<TargetRejection>) {
+        rejected.forEach { rejection ->
+            dogfoodEventStore.recordStructured(
+                type = "target_rejected",
+                target = rejection.normalizedTarget,
+                detail = "reason=${rejection.reason.code}"
+            )
+        }
+    }
+
+    private fun showRejectedTargetToast(rejected: List<TargetRejection>) {
+        if (rejected.isEmpty()) return
+        val summary = rejected
+            .groupingBy { it.reason.code }
+            .eachCount()
+            .entries
+            .joinToString(", ") { "${it.key}=${it.value}" }
+        Toast.makeText(this, "Skipped unsafe targets: $summary", Toast.LENGTH_LONG).show()
     }
 
     private fun renderState() {
