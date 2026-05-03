@@ -11,7 +11,7 @@ const app = Fastify({
 });
 
 await app.register(cors, {
-  origin: true
+  origin: config.allowedOrigins.length > 0 ? config.allowedOrigins : false
 });
 
 app.addContentTypeParser(
@@ -31,4 +31,4 @@ app.addContentTypeParser(
 
 await registerHealthRoutes(app);
 
-await app.listen({ port: config.port, host: "0.0.0.0" });
+await app.listen({ port: config.port, host: config.host });

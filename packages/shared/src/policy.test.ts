@@ -192,4 +192,21 @@ describe("evaluatePolicyDecision", () => {
     expect(decision.reason).toBe("credit_empty");
     expect(decision.allowed).toBe(false);
   });
+
+  it("falls back to UTC instead of throwing on invalid policy timezone", () => {
+    const decision = evaluatePolicyDecision({
+      ...baseInput,
+      now: new Date("2026-05-04T23:30:00.000Z"),
+      policyState: {
+        ...baseInput.policyState,
+        timezone: "Not/A_Real_Zone",
+        activeWeekdays: [1],
+        activeFrom: "23:00",
+        activeUntil: "23:59"
+      }
+    });
+
+    expect(decision.reason).toBe("credit_empty");
+    expect(decision.allowed).toBe(false);
+  });
 });
