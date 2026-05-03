@@ -28,10 +28,10 @@ This is the first runnable Commit-to-Unlock mobile prototype. It does not connec
    ./gradlew :apps:android:assembleDebug
    ```
 
-3. Install:
+3. Install and launch:
 
    ```bash
-   ~/Library/Android/sdk/platform-tools/adb install -r apps/android/build/outputs/apk/debug/android-debug.apk
+   pnpm android:dogfood
    ```
 
 4. Open the app and grant:
@@ -53,7 +53,7 @@ This is the first runnable Commit-to-Unlock mobile prototype. It does not connec
 2. Install the debug APK:
 
    ```bash
-   ~/Library/Android/sdk/platform-tools/adb install -r apps/android/build/outputs/apk/debug/android-debug.apk
+   pnpm android:dogfood
    ```
 
 3. Open Commit Unlock and grant:
