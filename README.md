@@ -98,6 +98,7 @@ Android dogfood helpers:
 ```bash
 pnpm android:dogfood
 pnpm android:dogfood:export
+pnpm android:dogfood:analyze
 ```
 
 Use `ANDROID_SERIAL=<device-id>` when more than one Android device is connected.
@@ -123,6 +124,12 @@ Use `ANDROID_SERIAL=<device-id>` when more than one Android device is connected.
 
    ```bash
    pnpm android:dogfood:export
+   ```
+
+12. Analyze the newest export:
+
+   ```bash
+   pnpm android:dogfood:analyze
    ```
 
 Exports are written under `artifacts/android-dogfood/`, which is intentionally ignored by git.
@@ -157,8 +164,8 @@ pnpm typecheck
 
 Current recommended sequence:
 
-1. Improve dogfood export analysis with a local TSV summary script.
-2. Run the Android prototype on a physical device for repeated dogfood sessions.
+1. Run the Android prototype on a physical device for repeated dogfood sessions.
+2. Analyze exports with `pnpm android:dogfood:analyze`.
 3. Decide Gate 1 and Gate 2 from dogfood data before returning to GitHub scoring.
 4. Prepare iOS Xcode project and Family Controls entitlement work.
 
