@@ -355,14 +355,15 @@ Completed after this review:
 - `test/android-event-store`
 - `test/policy-golden-fixtures`
 - `feature/android-privacy-permissions`
+- `feature/android-dogfood-review`
 
 Continue in this order:
 
-1. `feature/android-dogfood-review`
-   앱 안에서 Data Quality/Gate summary를 확인하고 14일 dogfood 판단을 쉽게 만든다.
-
-2. `docs/github-sprint4-security-entry`
+1. `docs/github-sprint4-security-entry`
    GitHub App permissions, webhook HMAC, delivery dedupe, retention, ledger idempotency.
+
+2. `refactor/android-main-sections`
+   긴 Android prototype 화면을 section helper로 나눠 보안/정책 copy가 묻히지 않게 한다.
 
 ## 16. Sources Checked
 

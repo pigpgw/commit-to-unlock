@@ -192,6 +192,7 @@ Smoke 실패 기준:
    ```
 
 7. analyzer 결과에서 Gate Snapshot, Data Quality, Recommendations를 확인한다.
+   앱 내부의 `Dogfood review` 섹션도 함께 확인해 export 전후의 Gate A/B/C/D 상태가 예상과 맞는지 본다.
 
 일일 메모에 남길 것:
 
@@ -418,10 +419,11 @@ Completed after this runbook:
 - `test/android-event-store`
 - `test/policy-golden-fixtures`
 - `feature/android-privacy-permissions`
+- `feature/android-dogfood-review`
 
 Continue in this order:
 
-1. `feature/android-dogfood-review`
-2. `docs/github-sprint4-entry`
+1. `docs/github-sprint4-entry`
+2. `refactor/android-main-sections`
 
 Do not resume GitHub scoring until Gate A/B/D have enough evidence and the Sprint 4 entry spec is complete.

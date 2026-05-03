@@ -32,6 +32,7 @@ This is the first runnable Commit-to-Unlock mobile prototype. It does not connec
 - Automatically spends `1` local credit minute for every `60` seconds of foreground use on blocked targets while the device is interactive.
 - Shows target, remaining credit, strict mode, and next action copy on the blocking overlay.
 - Shows the latest detected foreground package and a recent local dogfood event log for device testing.
+- Shows an in-app dogfood review with Data Quality coverage, Gate A/B/C/D status, and recommendations.
 - Shows recent foreground packages from UsageStats so a target can be added without installed-app scanning.
 - Hides the overlay test-credit shortcut when strict mode is enabled.
 - Stores a structured dogfood event log for the last 1,000 local events and keeps a local TSV export file for `adb` collection.
@@ -135,6 +136,7 @@ Use the in-app dogfood event log to inspect permission, foreground, target-match
 ## Dogfood Export
 
 The prototype includes a `Dogfood summary (last 14 days)` section for build-first validation.
+It also includes a `Dogfood review` section that mirrors the analyzer's Data Quality and gate snapshot logic inside the app.
 
 Use it to track:
 
@@ -150,6 +152,8 @@ Use it to track:
 - mock free days
 - daily quests added
 - daily quest mock completions
+- Data Quality coverage for target, policy reason, and credit fields
+- Gate A/B/C/D status and recommendations
 
 Tap `Share dogfood export` to export a TSV with `timestamp`, `type`, `target`, `policy_reason`, `credit_remaining`, and `detail` columns. This is local-only and does not upload data to any server.
 
@@ -171,6 +175,8 @@ The analyzer reports:
 - top target packages
 - daily summary rows
 - recommendations for whether to keep dogfooding, improve permissions, adjust policy strictness, or test quest proof more
+
+The in-app review additionally shows Gate D for local trust/data-quality readiness. Treat GitHub retention, revoke/delete, HMAC, and dedupe as Sprint 4 entry work, not as completed Android work.
 
 ## Troubleshooting
 

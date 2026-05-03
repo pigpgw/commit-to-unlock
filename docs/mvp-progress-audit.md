@@ -15,8 +15,9 @@
 - `test/android-event-store`
 - `test/policy-golden-fixtures`
 - `feature/android-privacy-permissions`
+- `feature/android-dogfood-review`
 
-현재 다음 작업은 `feature/android-dogfood-review`다.
+현재 다음 작업은 실제 Android 기기 smoke evidence 확보 후 `docs/github-sprint4-entry`다.
 
 ## 1. Executive Verdict
 
@@ -40,7 +41,7 @@
 | Android app | runnable prototype | 현재 유일한 실제 product surface |
 | Android policy engine | implemented + unit/golden-fixture tested | shared TypeScript policy와 같은 fixture로 검증됨 |
 | Dogfood logging/export | implemented | target/reason/credit structured TSV로 개선됨 |
-| Dogfood analyzer | implemented | Data Quality + Gate A/B/C snapshot 출력 |
+| Dogfood analyzer/review | implemented | CLI Data Quality + Gate A/B/C, 앱 내부 Gate A/B/C/D snapshot 출력 |
 | Shared package | implemented scaffold | mobile credit/policy contract와 policy golden fixture 기준점 |
 | Scoring package | pure rules scaffold | Sprint 4 후보. API/mobile과 아직 연결하지 않음 |
 | API | `/health` only | GitHub placeholder 제거 상태가 맞음 |
@@ -145,16 +146,13 @@ GitHub-backed 개인 개발자 MVP 기준으로 보면 아직 30% 전후다. 이
 
 ### Must Fix Before Sprint 4
 
-1. Android dogfood review UI
-   Data Quality와 Gate A/B/C/D 상태를 앱 안에서 최소한으로 확인할 수 있게 한다.
-
-2. Android device smoke checklist 실행
+1. Android device smoke checklist 실행
    permission missing, foreground changed, overlay shown, credit spend, free day, emergency unlock을 실제 기기에서 체크한다.
 
-3. 14일 dogfood export 수집
+2. 14일 dogfood export 수집
    analyzer 결과를 붙여 Gate A/B/C를 pass/fail/needs_data로 기록한다.
 
-4. GitHub Sprint 4 entry spec
+3. GitHub Sprint 4 entry spec
    webhook dedupe, PR enrichment, feature vector persistence, credit ledger write를 한 번에 설계해야 한다.
 
 ### Should Add If Dogfood Passes
@@ -173,7 +171,7 @@ GitHub-backed 개인 개발자 MVP 기준으로 보면 아직 30% 전후다. 이
 | Gate A: enforcement viability | needs_data | 코드/CI는 통과했지만 실제 기기 반복 로그 부족 | Android 실기기 smoke + export |
 | Gate B: dogfood need | needs_data | 14일 blocked attempt/override 데이터 없음 | 14일 TSV |
 | Gate C: developer proof supply | needs_data | local mock proof는 가능하나 실제 GitHub/WakaTime 빈도 미측정 | 14일 dev activity log |
-| Gate D: trust/privacy | needs_data | [security-and-logic-review.md](security-and-logic-review.md)에서 신규 gate로 승격. privacy 설계는 있으나 GitHub 연결 전 UI/HMAC/dedupe/retention 구현 없음 | privacy screen, webhook HMAC/dedupe spec, retention/revoke/delete draft |
+| Gate D: trust/privacy | needs_data | Android privacy UI와 in-app data-quality review는 있음. GitHub 연결 전 HMAC/dedupe/retention/revoke/delete 설계가 아직 없음 | real-device smoke, webhook HMAC/dedupe spec, retention/revoke/delete draft |
 | Gate E: monetization | blocked | paid feature 검증 전 | ledger가 blocker 없이 가치 있는지 확인 |
 
 ## 10. Recommended Next PRs
@@ -186,14 +184,15 @@ GitHub-backed 개인 개발자 MVP 기준으로 보면 아직 30% 전후다. 이
 - `test/android-event-store`
 - `test/policy-golden-fixtures`
 - `feature/android-privacy-permissions`
+- `feature/android-dogfood-review`
 
 다음:
 
-1. `feature/android-dogfood-review`
-   [design-research-and-ux-direction.md](design-research-and-ux-direction.md)의 sectioning 기준으로 Data Quality/Gate summary를 앱 안에 최소 표시하거나 export 직후 확인 UX 추가.
-
-2. `docs/github-sprint4-entry`
+1. `docs/github-sprint4-entry`
    GitHub App permissions, webhook dedupe, enrichment, ledger write, privacy policy를 Sprint 4 착수 전 설계.
+
+2. `refactor/android-main-sections`
+   현재 긴 MainActivity 화면을 작은 section helpers로 나누되 동작은 바꾸지 않는다.
 
 위 선행 작업과 Gate D 보안 기준 전에는 GitHub scoring 구현을 다시 시작하지 않는다.
 
