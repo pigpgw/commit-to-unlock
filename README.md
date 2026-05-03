@@ -178,6 +178,6 @@ Current recommended sequence:
 
 1. Follow the [Android dogfood runbook](docs/android-dogfood-runbook.md) on a physical device.
 2. Prepare the GitHub Sprint 4 entry spec after the first real-device Gate A/D smoke evidence.
-3. Refactor the long Android screen into smaller section helpers without changing behavior.
+3. Keep Android changes limited to dogfood fixes until the Sprint 4 entry spec is locked.
 
 Do not build payments, school/parent mode, leaderboard, money stakes, or full-diff AI scoring yet.

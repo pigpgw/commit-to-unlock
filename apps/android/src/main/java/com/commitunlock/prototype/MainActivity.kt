@@ -262,9 +262,25 @@ class MainActivity : Activity() {
             setPadding(0, 20, 0, 0)
         }
 
+        addHeaderSection(root, title, subtitle)
+        addPermissionSection(root)
+        addTargetInputSection(root)
+        addPolicySection(root)
+        addQuestSection(root)
+        addEmergencySection(root)
+        addTargetAndCreditSection(root)
+        addMonitorAndDogfoodSection(root)
+
+        return ScrollView(this).apply { addView(root) }
+    }
+
+    private fun addHeaderSection(root: LinearLayout, title: TextView, subtitle: TextView) {
         root.addView(title)
         root.addView(subtitle)
         root.addView(statusText)
+    }
+
+    private fun addPermissionSection(root: LinearLayout) {
         root.addView(sectionLabel("Privacy and permissions"))
         root.addView(privacyDisclosureText)
         root.addView(button("Open Usage Access Settings") {
@@ -276,8 +292,14 @@ class MainActivity : Activity() {
                 Uri.parse("package:$packageName")
             ))
         })
+    }
+
+    private fun addTargetInputSection(root: LinearLayout) {
         root.addView(packageInput)
         root.addView(strictModeInput)
+    }
+
+    private fun addPolicySection(root: LinearLayout) {
         root.addView(sectionLabel("Policy schedule"))
         weekdayInputs.clear()
         weekdayLabels.forEach { (day, label) ->
@@ -297,6 +319,9 @@ class MainActivity : Activity() {
             renderState()
         })
         root.addView(policySummaryText)
+    }
+
+    private fun addQuestSection(root: LinearLayout) {
         root.addView(sectionLabel("Daily quest"))
         root.addView(questTitleInput)
         root.addView(questRequiredInput)
@@ -304,6 +329,9 @@ class MainActivity : Activity() {
         root.addView(button("Complete next quest with mock proof") { completeNextQuestWithMockProof() })
         root.addView(button("Clear today's quests") { clearDailyQuests() })
         root.addView(questSummaryText)
+    }
+
+    private fun addEmergencySection(root: LinearLayout) {
         root.addView(sectionLabel("Emergency unlock"))
         root.addView(emergencyReasonInput)
         root.addView(button("Emergency unlock 5 minutes") { startEmergencyUnlock(5) })
@@ -314,6 +342,9 @@ class MainActivity : Activity() {
             dogfoodEventStore.record("emergency_unlocks_cleared")
             renderState()
         })
+    }
+
+    private fun addTargetAndCreditSection(root: LinearLayout) {
         root.addView(recentPackagesText)
         root.addView(button("Save blocked packages") { saveTargets() })
         root.addView(button("Add latest external package") { addLatestExternalPackage() })
@@ -344,6 +375,9 @@ class MainActivity : Activity() {
             )
             renderState()
         })
+    }
+
+    private fun addMonitorAndDogfoodSection(root: LinearLayout) {
         root.addView(button("Start monitor service") {
             monitorStateStore.setRunning(true)
             dogfoodEventStore.record("monitor_start_requested")
@@ -365,8 +399,6 @@ class MainActivity : Activity() {
             renderState()
         })
         root.addView(eventLogText)
-
-        return ScrollView(this).apply { addView(root) }
     }
 
     private fun button(label: String, action: () -> Unit): Button {

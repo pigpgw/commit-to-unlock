@@ -420,10 +420,11 @@ Completed after this runbook:
 - `test/policy-golden-fixtures`
 - `feature/android-privacy-permissions`
 - `feature/android-dogfood-review`
+- `refactor/android-main-sections`
 
 Continue in this order:
 
 1. `docs/github-sprint4-entry`
-2. `refactor/android-main-sections`
+2. Real-device 14-day dogfood collection
 
 Do not resume GitHub scoring until Gate A/B/D have enough evidence and the Sprint 4 entry spec is complete.
