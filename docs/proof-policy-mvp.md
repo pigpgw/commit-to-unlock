@@ -60,6 +60,25 @@ Commit-to-Unlock은 todo 앱이 아니다.
 - emergency unlock은 credit이 없어도 열어주지만 audit 대상이다.
 - credit spend는 마지막 허용 조건이다.
 
+현재 순수 함수 구현은 `packages/shared/src/policy.ts`의 `evaluatePolicyDecision`이다. Android/iOS/API는 같은 함수 또는 같은 reason code를 따라야 한다.
+
+Decision reason:
+
+| Reason | Allowed | Credit spend | 의미 |
+| --- | --- | --- | --- |
+| `own_app` | yes | no | 앱 자기 자신은 절대 차단하지 않는다. |
+| `target_not_blocked` | yes | no | 선택 차단 대상이 아니다. |
+| `inactive_weekday` | yes | no | 오늘 요일에는 정책이 적용되지 않는다. |
+| `outside_active_time` | yes | no | 현재 시간이 적용 시간 밖이다. |
+| `manual_holiday` | yes | no | 사용자가 오늘을 휴일 처리했다. |
+| `public_holiday` | yes | no | 공휴일이고 공휴일 적용이 꺼져 있다. |
+| `free_day` | yes | no | 오늘 required quest를 proof-backed 완료했다. |
+| `emergency_unlock` | yes | no | 비상 해제가 활성화되어 있다. |
+| `credit_available` | yes | yes | credit이 있으므로 허용하고 사용량에 따라 차감한다. |
+| `credit_empty` | no | no | 차단 대상이며 적용 중이고 credit/예외가 없다. |
+
+요일과 시간은 `PolicyState.timezone` 기준으로 평가한다. `freeUntil`, emergency unlock 시간은 ISO timestamp로 저장하고 절대 시간 비교를 한다.
+
 ## 4. Credit Earning
 
 MVP의 실제 production earning은 GitHub proof가 기준이다. Android prototype에서는 GitHub가 붙기 전까지 mock proof로 같은 구조를 실험한다.
@@ -243,6 +262,8 @@ Acceptance:
 - blocked target이 아니면 allow
 - inactive weekday면 allow
 - manual holiday today면 allow
+- timezone 기준으로 요일/시간을 평가
+- emergency unlock과 free day는 credit을 차감하지 않음
 - credit 0이고 예외가 없으면 block
 
 ### Sprint P2: Android Policy UI

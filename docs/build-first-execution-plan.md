@@ -121,6 +121,8 @@
 
 목표: todo 체크가 아니라 proof-backed daily quest와 예외 정책을 구현한다.
 
+현재 1차 순수 정책 함수는 `packages/shared/src/policy.ts`에 둔다. Android 연결 전에 shared package에서 reason code와 우선순위를 테스트한다.
+
 기능:
 
 - daily quest 등록
