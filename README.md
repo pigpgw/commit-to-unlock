@@ -18,6 +18,7 @@ It can:
 - block selected package names with an overlay when credit is `0`
 - spend `1` mock credit minute after `60` seconds of foreground use on blocked targets
 - show a dogfood summary for the last 14 days
+- show an in-app dogfood review with Data Quality and Gate A/B/C/D status
 - show a recent dogfood event log in the app
 - export structured dogfood events as TSV through Android share sheet or `adb`
 
@@ -176,7 +177,7 @@ pnpm typecheck
 Current recommended sequence:
 
 1. Follow the [Android dogfood runbook](docs/android-dogfood-runbook.md) on a physical device.
-2. Add Android dogfood review and Data Quality summary UI.
-3. Prepare the GitHub Sprint 4 entry spec only after Gate A/B/D have enough evidence.
+2. Prepare the GitHub Sprint 4 entry spec after the first real-device Gate A/D smoke evidence.
+3. Refactor the long Android screen into smaller section helpers without changing behavior.
 
 Do not build payments, school/parent mode, leaderboard, money stakes, or full-diff AI scoring yet.

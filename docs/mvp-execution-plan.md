@@ -76,8 +76,8 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 | 영역 | 상태 | 판단 |
 | --- | --- | --- |
 | Android app | runnable local prototype | 현재 유일한 product surface |
-| Android dogfood | runbook/log/export/analyzer 있음 | 14일 실기기 데이터 필요 |
-| Android UI | 기능은 많지만 한 화면이 길다 | privacy disclosure 후 section 리팩토링 |
+| Android dogfood | runbook/log/export/analyzer/in-app review 있음 | 14일 실기기 데이터 필요 |
+| Android UI | 기능은 많지만 한 화면이 길다 | dogfood review 후 section 리팩토링 |
 | Shared policy | TS canonical + Android mirror + golden fixtures | 정책 drift 방지 기준 확보 |
 | Scoring package | pure rules scaffold | 유지. runtime 연결 금지 |
 | API | health-only, localhost/CORS-closed default | 유지. Sprint 4 전 auth/webhook 금지 |
@@ -227,19 +227,21 @@ Deliverables:
 - export/clear explanation
 - "local prototype, not tamper-proof" copy
 
-### PR 6: Android UI section cleanup
+### PR 6: Android dogfood review/Data Quality UI
 
-Status: next.
+Status: complete.
 
 Deliverables:
 
-- MainActivity section helpers
-- Status / Permissions / Targets / Policy / Quest / Emergency / Dogfood sections
-- no behavior change
+- DogfoodReviewEngine pure Kotlin helper
+- in-app Data Quality coverage
+- in-app Gate A/B/C/D snapshot
+- in-app recommendations
+- Android unit tests
 
 ### PR 7: GitHub Sprint 4 entry spec
 
-Status: pending.
+Status: next after first real-device Gate A/D smoke evidence.
 
 Deliverables:
 
@@ -250,6 +252,16 @@ Deliverables:
 - credit ledger schema
 - retention/revoke/delete
 - Sprint 4 go/no-go checklist
+
+### PR 8: Android UI section cleanup
+
+Status: pending.
+
+Deliverables:
+
+- MainActivity section helpers
+- Status / Permissions / Targets / Policy / Quest / Emergency / Dogfood sections
+- no behavior change
 
 ## 9. Work Rules
 
@@ -265,7 +277,7 @@ Deliverables:
 이 PR 이후 즉시 할 일:
 
 ```text
-feature/android-dogfood-review
+real-device Android dogfood smoke, then docs/github-sprint4-entry
 ```
 
-이유: runbook, event store tests, policy golden fixtures, 권한/개인정보 disclosure는 완료됐다. 다음 병목은 dogfood 결과를 앱 안에서 바로 해석하는 Data Quality/Gate summary UX다.
+이유: runbook, event store tests, policy golden fixtures, 권한/개인정보 disclosure, in-app Data Quality/Gate review는 완료됐다. 이제 실제 기기에서 Gate A/D smoke evidence를 만든 뒤 GitHub Sprint 4의 HMAC/dedupe/retention/ledger 설계를 잠가야 한다.
