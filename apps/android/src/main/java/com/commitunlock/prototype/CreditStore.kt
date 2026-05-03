@@ -5,13 +5,13 @@ import java.time.Instant
 
 class CreditStore(context: Context) {
     private val prefs = context.getSharedPreferences("credit_state", Context.MODE_PRIVATE)
+    private val ownPackage = context.packageName
 
     fun read(): CreditState {
-        val targets = prefs.getString(KEY_TARGETS, "")
+        val rawTargets = prefs.getString(KEY_TARGETS, "")
             .orEmpty()
             .split(",")
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
+        val targets = TargetGuardrails.normalizeTargets(rawTargets, ownPackage).accepted
 
         return CreditState(
             remainingMinutes = prefs.getInt(KEY_REMAINING_MINUTES, 0),
@@ -24,9 +24,10 @@ class CreditStore(context: Context) {
     }
 
     fun save(state: CreditState) {
+        val targets = TargetGuardrails.normalizeTargets(state.blockedTargets, ownPackage).accepted
         prefs.edit()
             .putInt(KEY_REMAINING_MINUTES, state.remainingMinutes.coerceAtLeast(0))
-            .putString(KEY_TARGETS, state.blockedTargets.joinToString(","))
+            .putString(KEY_TARGETS, targets.joinToString(","))
             .putString(KEY_FREE_UNTIL, state.freeUntil)
             .putBoolean(KEY_STRICT_MODE, state.strictMode)
             .putString(KEY_LAST_UPDATED_AT, state.lastUpdatedAt)
