@@ -3,7 +3,7 @@
 결정: 인터뷰/설문 없이 만든다.  
 전략: 고객 검증을 말로 하지 않고, 먼저 `로컬 모바일 차단 -> mock credit -> selected app shield/block` 루프를 실제 기기/에뮬레이터에서 검증한다. GitHub scoring은 모바일 차단 가능성이 확인된 뒤 재개한다.
 
-제품/기술/UX의 기준 설계는 [app-design.md](app-design.md)를 따른다. 제품 전략/사업 패키징은 [product-strategy-spec.md](product-strategy-spec.md)를 따른다. 구현 판단은 [decision-log.md](decision-log.md)를 우선 확인한다. 시장/니즈/피벗 판단은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. Android 다음 구현 단위는 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)를 따른다. 이 문서는 실행 순서와 milestone 기준을 관리한다.
+제품/기술/UX의 기준 설계는 [app-design.md](app-design.md)를 따른다. 제품 전략/사업 패키징은 [product-strategy-spec.md](product-strategy-spec.md)를 따른다. 구현 판단은 [decision-log.md](decision-log.md)를 우선 확인한다. 시장/니즈/피벗 판단은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. 저장소 정리 기준은 [repository-audit-and-cleanup.md](repository-audit-and-cleanup.md)를 따른다. Android 상세 검증 기록은 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)를 따른다. 이 문서는 실행 순서와 milestone 기준을 관리한다.
 
 ## 1. 바뀐 원칙
 
@@ -70,6 +70,8 @@
 목표: 모바일 차단 없이 GitHub 활동을 크레딧으로 바꾸는 서버/웹 루프를 만든다.
 
 주의: Milestone 3은 자동 착수하지 않는다. 먼저 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)의 Gate B/C를 확인한다. 14일 dogfood에서 반복 사용이 약하거나 자연스러운 scorable dev event가 부족하면 GitHub PR-only 대신 WakaTime/IDE/desktop-browser proof channel을 먼저 검토한다.
+
+현재 API에는 GitHub webhook placeholder가 없다. 이전 placeholder는 실제 PR files/reviews/checks enrichment 없이 `unknown` diff를 점수화했기 때문에 삭제했다. Sprint 4 재개 시 아래 기능을 한 번에 되살린다.
 
 기능:
 
@@ -245,7 +247,7 @@ docs/
 - blocking overlay when mock credit is 0
 - monitor foreground service
 - current foreground package 표시
-- bounded debug log
+- dogfood event log
 - credit 0 reset button
 - strictMode일 때 overlay shortcut 제한
 - dogfood event logging/export
@@ -363,9 +365,8 @@ docs/
 
 현재 저장소는 1차 Android prototype과 Sprint 1.1 hardening이 들어간 상태다. 다음 개발은 아래 순서로 간다.
 
-1. Android dogfood event logging
-2. Android local spend engine
-3. Android block overlay copy/state refinement
-4. 14일 dogfood 기준으로 Gate 1/2 판단
-5. iOS Xcode project/entitlement 준비
-6. GitHub scoring 재개 또는 WakaTime/IDE proof spike 선택
+1. Android dogfood TSV summary script 추가
+2. 실제 Android 기기에서 14일 dogfood 실행
+3. Gate A/B/C 판단 기록 작성
+4. iOS Xcode project/entitlement 준비
+5. GitHub scoring 재개 또는 WakaTime/IDE/desktop proof spike 선택

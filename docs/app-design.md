@@ -1,8 +1,8 @@
 # Commit-to-Unlock App Design
 
-문서 상태: v0.2  
-역할: 제품/기술 통합 설계 기준 문서  
-현재 최우선 구현: Android 실기기 차단 검증
+문서 상태: v0.3
+역할: 제품/기술 통합 설계 기준 문서
+현재 최우선 구현: Android dogfood 데이터 수집과 Gate A/B/C 판단
 
 상세 결정 기록은 [decision-log.md](decision-log.md)를 따른다. 제품 전략/UX/사업 패키징은 [product-strategy-spec.md](product-strategy-spec.md)를 따른다. 시장/니즈/피벗 기준은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. Android 다음 구현 단위는 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)가 우선한다.
 
@@ -71,9 +71,11 @@ flowchart LR
   A["MainActivity"] --> B["CreditStore"]
   A --> C["PermissionChecks"]
   A --> D["MonitorService"]
+  A --> H["DogfoodEventStore"]
   D --> E["ForegroundAppReader"]
   D --> B
   D --> F["BlockOverlay"]
+  D --> H
   E --> G["UsageStatsManager"]
 ```
 
@@ -90,7 +92,7 @@ flowchart LR
 Android 다음 보강 구현은 아래 네 가지다.
 
 - UI에 현재 감지된 foreground package를 표시한다.
-- bounded debug log를 추가한다. 예: permission missing, foreground changed, target matched, overlay shown, overlay hidden.
+- dogfood event log를 단일 로컬 이벤트 저장소로 쓴다. 예: permission missing, foreground changed, target matched, overlay shown, overlay hidden, credit spent.
 - strictMode가 true이면 overlay 안의 “테스트 credit 추가” 버튼을 숨긴다.
 - 실기기 검증을 위해 `credit 0으로 초기화` 버튼을 추가한다.
 
@@ -150,7 +152,7 @@ stateDiagram-v2
   OverrideActive --> NoCredit: override expires
 ```
 
-실제 사용 시간에 따른 자동 credit spend는 Sprint 1-3에서는 하지 않는다. Android 실기기 차단이 안정화된 뒤, selected target foreground 누적 시간이 60초를 넘을 때마다 1분을 차감하는 local spend engine을 추가한다.
+Android prototype은 selected target이 foreground이고 기기가 interactive 상태일 때 60초마다 1분을 자동 차감한다. 이 spend engine은 local dogfood 검증용이며, 서버 sync 이후에는 ledger/policy engine이 source of truth가 된다. iOS spend는 DeviceActivity 기반 검증 전까지 구현하지 않는다.
 
 ## 5. Backend And Scoring Design
 
@@ -197,6 +199,8 @@ Sprint 4 API 최소 shape:
 
 `GET /credits/today`는 `MobileCreditState` 필드를 반드시 포함한다. 서버 메타데이터가 필요하면 `policyVersion`, `serverTime`, `source` 같은 optional field로 추가한다.
 
+현재 `apps/api`는 `/health`만 제공한다. 이전 GitHub webhook placeholder는 실제 enrichment 없이 점수를 내므로 제거했다. Sprint 4에서 다시 추가할 때는 webhook dedupe, PR files/reviews/checks enrichment, score decision persistence, ledger write가 함께 들어가야 한다.
+
 ## 6. Roadmap
 
 ### Gate 0: Android enforcement viability
@@ -218,7 +222,7 @@ Sprint 4 API 최소 shape:
 구현:
 
 - foreground package 표시
-- debug log 표시
+- dogfood event log 표시
 - credit 0 초기화 버튼
 - strictMode overlay 동작
 - README에 실기기 테스트 절차 추가
@@ -265,6 +269,13 @@ Sprint 4 API 최소 shape:
 - 같은 delivery 재전송으로 중복 적립 없음
 - generated-heavy/lockfile-only/bot PR은 0 또는 낮은 credit
 
+착수 전 조건:
+
+- 14일 dogfood에서 monitor enabled day가 8일 이상이다.
+- 주당 blocked attempt가 4회 이상이다.
+- 자연스러운 scorable dev event가 14일에 5개 이상이다.
+- PR-only가 부족하면 commit batch 또는 WakaTime/IDE proof channel을 Sprint 4 범위에 포함한다.
+
 ## 7. Verification Checklist
 
 Repo:
@@ -298,7 +309,7 @@ iOS device:
 - Apple FamilyActivityPicker: https://developer.apple.com/documentation/familycontrols/familyactivitypicker
 - Apple FamilyActivitySelection: https://developer.apple.com/documentation/familycontrols/familyactivityselection
 - Android UsageStatsManager: https://developer.android.com/reference/android/app/usage/UsageStatsManager
-- Google Play sensitive permissions and Accessibility API policy: https://support.google.com/googleplay/android-developer/answer/16558241
+- Google Play AccessibilityService API policy: https://support.google.com/googleplay/android-developer/answer/10964491
 - GitHub webhooks: https://docs.github.com/en/webhooks/about-webhooks
 - GitHub App rate limits: https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/rate-limits-for-github-apps
 - GitHub pull request REST API: https://docs.github.com/en/rest/pulls/pulls

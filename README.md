@@ -15,6 +15,7 @@ It can:
 - block selected package names with an overlay when credit is `0`
 - spend `1` mock credit minute after `60` seconds of foreground use on blocked targets
 - show a dogfood summary for the last 14 days
+- show a recent dogfood event log in the app
 - export dogfood events as TSV through Android share sheet or `adb`
 
 It does not yet:
@@ -50,17 +51,18 @@ Read the strategy docs before changing product direction:
 - [App design](docs/app-design.md)
 - [Build-first execution plan](docs/build-first-execution-plan.md)
 - [Decision log](docs/decision-log.md)
+- [Repository audit and cleanup](docs/repository-audit-and-cleanup.md)
 
 ## Repository Layout
 
 ```text
 apps/
   android/  Android local blocker prototype
-  api/      Fastify API scaffold for later GitHub scoring work
+  api/      Fastify health-only scaffold; GitHub scoring is parked until Sprint 4
   ios/      SwiftUI and Screen Time API source/design skeleton
 docs/       Product, market, technical, and execution planning
 packages/
-  scoring/  Rules-first scoring package scaffold
+  scoring/  Rules-first scoring package scaffold, not wired to the API yet
   shared/   Shared TypeScript contracts
 scripts/    Local dogfood helper scripts
 ```
