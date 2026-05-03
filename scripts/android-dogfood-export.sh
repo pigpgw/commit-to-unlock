@@ -3,50 +3,28 @@ set -euo pipefail
 
 usage() {
   cat <<'USAGE'
-Usage: scripts/android-dogfood-install.sh [--skip-build] [--no-launch]
+Usage: scripts/android-dogfood-export.sh [output-file]
 
-Builds, installs, and launches the Android local blocker prototype on one
-connected Android device.
-
-Options:
-  --skip-build   Install the existing debug APK without running Gradle first.
-  --no-launch    Install the APK but do not launch the app.
-  -h, --help     Show this help text.
+Pulls the latest Commit Unlock dogfood TSV export from a connected debug device.
+If output-file is omitted, the file is written under artifacts/android-dogfood/.
 
 Set ANDROID_SERIAL when more than one device is connected.
 USAGE
 }
 
-skip_build=0
-launch_app=1
-
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --)
-      ;;
-    --skip-build)
-      skip_build=1
-      ;;
-    --no-launch)
-      launch_app=0
-      ;;
-    -h|--help)
-      usage
-      exit 0
-      ;;
-    *)
-      echo "Unknown option: $1" >&2
-      usage >&2
-      exit 2
-      ;;
-  esac
+if [[ "${1:-}" == "--" ]]; then
   shift
-done
+fi
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  usage
+  exit 0
+fi
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd "$script_dir/.." && pwd)"
-apk_path="$repo_root/apps/android/build/outputs/apk/debug/android-debug.apk"
-app_component="com.commitunlock.prototype/.MainActivity"
+package_name="com.commitunlock.prototype"
+remote_file="files/dogfood-export.tsv"
 
 find_adb() {
   if command -v adb >/dev/null 2>&1; then
@@ -97,31 +75,40 @@ if [[ -z "${ANDROID_SERIAL:-}" ]]; then
   fi
 fi
 
-cd "$repo_root"
-
-if [[ "$skip_build" -eq 0 ]]; then
-  ./gradlew :apps:android:assembleDebug
+if [[ $# -gt 1 ]]; then
+  echo "Too many arguments." >&2
+  usage >&2
+  exit 2
 fi
 
-if [[ ! -f "$apk_path" ]]; then
-  echo "Debug APK not found at $apk_path. Run without --skip-build first." >&2
+if [[ $# -eq 1 ]]; then
+  output_path="$1"
+else
+  timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
+  output_path="$repo_root/artifacts/android-dogfood/dogfood-export-$timestamp.tsv"
+fi
+
+mkdir -p "$(dirname "$output_path")"
+temp_path="$output_path.tmp"
+
+if ! "${adb_cmd[@]}" exec-out run-as "$package_name" cat "$remote_file" > "$temp_path"; then
+  rm -f "$temp_path"
+  cat >&2 <<'ERROR'
+Could not read dogfood export from the device.
+
+Make sure:
+1. A debug build is installed with `pnpm android:dogfood`.
+2. The app has recorded at least one dogfood event.
+3. The package is debuggable so `run-as com.commitunlock.prototype` works.
+ERROR
   exit 1
 fi
 
-"${adb_cmd[@]}" install -r "$apk_path"
-
-if [[ "$launch_app" -eq 1 ]]; then
-  "${adb_cmd[@]}" shell am start -n "$app_component"
+if [[ ! -s "$temp_path" ]]; then
+  rm -f "$temp_path"
+  echo "Dogfood export is empty. Open the app and record at least one event first." >&2
+  exit 1
 fi
 
-cat <<'NEXT_STEPS'
-
-Installed Commit Unlock prototype.
-
-Device dogfood checklist:
-1. Grant Usage Access, Display over other apps, and Notifications.
-2. Add a target package, such as com.android.chrome.
-3. Reset credit to 0, start the monitor, and open the target app.
-4. Add 5 test minutes and keep the target app foreground for 60 seconds.
-5. Check Dogfood summary and Share dogfood export after testing.
-NEXT_STEPS
+mv "$temp_path" "$output_path"
+echo "Wrote dogfood export to $output_path"

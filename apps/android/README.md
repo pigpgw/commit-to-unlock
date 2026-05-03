@@ -16,7 +16,7 @@ This is the first runnable Commit-to-Unlock mobile prototype. It does not connec
 - Shows the latest detected foreground package and a bounded local debug log for device testing.
 - Shows recent foreground packages from UsageStats so a target can be added without installed-app scanning.
 - Hides the overlay test-credit shortcut when strict mode is enabled.
-- Stores a structured dogfood event log for the last 1,000 local events and can share it as TSV.
+- Stores a structured dogfood event log for the last 1,000 local events and keeps a local TSV export file for `adb` collection.
 - Does not use AccessibilityService.
 
 ## Local Run
@@ -93,3 +93,11 @@ Use it to track:
 - manual credit changes
 
 Tap `Share dogfood export` to export a TSV with `timestamp`, `type`, and `detail` columns. This is local-only and does not upload data to any server.
+
+For repeat dogfood runs on a debug build, pull the latest export from the connected device:
+
+```bash
+pnpm android:dogfood:export
+```
+
+By default this writes to `artifacts/android-dogfood/`. Set `ANDROID_SERIAL` first when multiple devices are connected.

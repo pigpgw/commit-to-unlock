@@ -5,6 +5,8 @@ import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 
+const val DOGFOOD_EXPORT_FILE_NAME = "dogfood-export.tsv"
+
 data class DogfoodEvent(
     val timestamp: Instant,
     val type: String,
@@ -23,7 +25,12 @@ data class DogfoodSummary(
 )
 
 class DogfoodEventStore(context: Context) {
+    private val appContext = context.applicationContext
     private val prefs = context.getSharedPreferences("dogfood_events", Context.MODE_PRIVATE)
+
+    init {
+        writeExportFile()
+    }
 
     fun record(type: String, detail: String = "") {
         val cleanType = sanitize(type)
@@ -40,9 +47,13 @@ class DogfoodEventStore(context: Context) {
             .plus(current)
             .take(MAX_EVENTS)
 
-        prefs.edit()
+        val saved = prefs.edit()
             .putString(KEY_EVENTS, next.joinToString("\n"))
-            .apply()
+            .commit()
+
+        if (saved) {
+            writeExportFile(next)
+        }
     }
 
     fun read(): List<DogfoodEvent> {
@@ -84,7 +95,10 @@ class DogfoodEventStore(context: Context) {
     }
 
     fun clear() {
-        prefs.edit().remove(KEY_EVENTS).apply()
+        val cleared = prefs.edit().remove(KEY_EVENTS).commit()
+        if (cleared) {
+            writeExportFile(emptyList())
+        }
     }
 
     private fun readRaw(): List<String> {
@@ -104,6 +118,20 @@ class DogfoodEventStore(context: Context) {
         val detail = parts.getOrElse(2) { "" }
 
         return DogfoodEvent(timestamp, type, detail)
+    }
+
+    private fun writeExportFile(rawEvents: List<String> = readRaw()) {
+        val rows = rawEvents
+            .mapNotNull { parse(it) }
+            .sortedBy { it.timestamp }
+            .joinToString("\n") { "${it.timestamp}\t${it.type}\t${it.detail}" }
+        val export = listOf("timestamp\ttype\tdetail", rows)
+            .filter { it.isNotEmpty() }
+            .joinToString("\n")
+
+        appContext.openFileOutput(DOGFOOD_EXPORT_FILE_NAME, Context.MODE_PRIVATE).use { output ->
+            output.write(export.toByteArray(Charsets.UTF_8))
+        }
     }
 
     private fun sanitize(value: String): String {
