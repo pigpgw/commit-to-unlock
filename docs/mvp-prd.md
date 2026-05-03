@@ -4,7 +4,7 @@
 범위: GitHub-backed 개인 개발자 MVP  
 비범위: 학교/부모/MDM, 금전 스테이크, GitLab/Bitbucket, enterprise admin
 
-주의: 현재 구현 순서는 GitHub-first가 아니다. build-first 전략에 따라 Android/iOS 모바일 차단 가능성을 먼저 검증하고, 그 다음 GitHub scoring을 이 PRD 범위로 연결한다. 실행 순서는 [build-first-execution-plan.md](build-first-execution-plan.md), 기준 설계는 [app-design.md](app-design.md)를 따른다.
+주의: 현재 구현 순서는 GitHub-first가 아니다. build-first 전략에 따라 Android/iOS 모바일 차단 가능성을 먼저 검증하고, 그 다음 GitHub scoring을 이 PRD 범위로 연결한다. 실행 순서는 [build-first-execution-plan.md](build-first-execution-plan.md), 기준 설계는 [app-design.md](app-design.md), 제품 전략/UX/사업 패키징은 [product-strategy-spec.md](product-strategy-spec.md)를 따른다.
 
 ## 1. 제품 목표
 
@@ -44,6 +44,7 @@
 - GitHub PR/commit/review/CI metadata로 개발 활동을 검증한다.
 - 점수는 내부용이고, 사용자는 minutes와 explanation을 본다.
 - 모바일 enforcement는 선택 앱/웹사이트 shield로 제한한다.
+- proof ledger가 blocker 없이도 다시 볼 가치가 있을 때만 결제를 구현한다.
 
 ## 5. MVP 기능
 
@@ -240,6 +241,14 @@ MVP alpha:
 - appeal rate: scored events의 20% 이하
 - override frequency: 사용자당 주 3회 이하
 - voluntary enabled days: 사용자당 주 4일 이상
+
+Prototype dogfood:
+
+- monitor enabled days: 14일 중 8일 이상
+- blocked attempts: 주 4회 이상
+- override frequency: 주 3회 이하
+- overlay show latency: 2초 이하
+- natural scorable dev events: 14일 중 5개 이상
 
 ## 13. 주요 리스크
 

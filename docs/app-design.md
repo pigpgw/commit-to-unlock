@@ -4,7 +4,7 @@
 역할: 제품/기술 통합 설계 기준 문서  
 현재 최우선 구현: Android 실기기 차단 검증
 
-상세 결정 기록은 [decision-log.md](decision-log.md)를 따른다. 시장/니즈/피벗 기준은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. Android 다음 구현 단위는 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)가 우선한다.
+상세 결정 기록은 [decision-log.md](decision-log.md)를 따른다. 제품 전략/UX/사업 패키징은 [product-strategy-spec.md](product-strategy-spec.md)를 따른다. 시장/니즈/피벗 기준은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. Android 다음 구현 단위는 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)가 우선한다.
 
 ## 1. 결정 요약
 
@@ -51,6 +51,8 @@ MVP의 사용자는 개인 개발자다. 학교/부모/MDM, 금전 스테이크,
 | Targets | Android package 또는 iOS activity selection 관리 | 1-2 |
 | Credit Test | mock credit 추가/소진/0 초기화 | 1 |
 | Blocked/Shield | 차단 사유, 현재 credit 0, 앱으로 돌아가기 | 1-2 |
+
+MVP 이후 상세 IA와 screen copy 규칙은 [product-strategy-spec.md](product-strategy-spec.md)의 `UX Information Architecture`와 `Screen Copy Rules`를 따른다. 특히 사용자는 raw score가 아니라 minutes, proof tier, reasons, risk flags를 본다.
 
 Android prototype의 target selection은 수동 package 입력으로 시작한다. 프로덕션 Android에서는 `QUERY_ALL_PACKAGES` 없이 가야 하므로, 설치 앱 전체 스캐너를 만들지 않는다. 대신 Usage Access 승인 후 최근 foreground/usage package 목록을 보여주고 사용자가 그중 선택하게 한다. 수동 입력은 dev/debug 기능으로 남긴다.
 
