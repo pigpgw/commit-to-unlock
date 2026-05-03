@@ -16,11 +16,12 @@ class BlockOverlay(private val context: Context) {
 
     fun show(
         packageName: String,
-        canAddCredit: Boolean,
+        strictMode: Boolean,
         onOpenApp: () -> Unit,
         onAddCredit: () -> Unit
     ) {
         if (overlayView != null) return
+        val canAddCredit = !strictMode
 
         val container = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
@@ -30,32 +31,52 @@ class BlockOverlay(private val context: Context) {
         }
 
         val title = TextView(context).apply {
-            text = "Blocked"
+            text = "No leisure credit left"
             textSize = 30f
             setTextColor(0xFFFFFFFF.toInt())
             gravity = Gravity.CENTER
         }
 
         val message = TextView(context).apply {
-            text = "$packageName is locked because mock credit is 0 minutes."
+            text = "This app is paused because your selected-app credit is 0 minutes."
             textSize = 17f
             setTextColor(0xFFE5E7EB.toInt())
             gravity = Gravity.CENTER
-            setPadding(0, 20, 0, 28)
+            setPadding(0, 20, 0, 20)
+        }
+
+        val targetState = TextView(context).apply {
+            text = "Target: $packageName\nRemaining credit: 0 minutes\nStrict mode: ${if (strictMode) "on" else "off"}"
+            textSize = 15f
+            setTextColor(0xFFCBD5E1.toInt())
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 20)
+        }
+
+        val nextAction = TextView(context).apply {
+            text = if (strictMode) {
+                "Open Commit Unlock to review your policy or add credit from the app."
+            } else {
+                "Prototype mode: add test credit here, or open Commit Unlock to review your targets and dogfood log."
+            }
+            textSize = 15f
+            setTextColor(0xFFE2E8F0.toInt())
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 26)
         }
 
         val openApp = Button(context).apply {
-            text = "Open Commit Unlock"
+            text = "Review in Commit Unlock"
             setOnClickListener { onOpenApp() }
         }
 
         val addCredit = Button(context).apply {
-            text = "Add 5 test minutes"
+            text = "Add 5 test minutes (prototype)"
             setOnClickListener { onAddCredit() }
         }
 
         val strictModeNotice = TextView(context).apply {
-            text = "Strict mode is on. Test credit shortcut is disabled."
+            text = "Strict mode is on. The overlay test-credit shortcut is disabled."
             textSize = 15f
             setTextColor(0xFFCBD5E1.toInt())
             gravity = Gravity.CENTER
@@ -64,6 +85,8 @@ class BlockOverlay(private val context: Context) {
 
         container.addView(title)
         container.addView(message)
+        container.addView(targetState)
+        container.addView(nextAction)
         container.addView(openApp)
         if (canAddCredit) {
             container.addView(addCredit)

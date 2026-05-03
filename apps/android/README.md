@@ -12,6 +12,7 @@ This is the first runnable Commit-to-Unlock mobile prototype. It does not connec
 - Uses `UsageStatsManager` to detect the foreground app.
 - Uses Android overlay permission to show a blocking screen when a blocked package is foreground and mock credit is `0`.
 - Automatically spends `1` local credit minute for every `60` seconds of foreground use on blocked targets while the device is interactive.
+- Shows target, remaining credit, strict mode, and next action copy on the blocking overlay.
 - Shows the latest detected foreground package and a bounded local debug log for device testing.
 - Shows recent foreground packages from UsageStats so a target can be added without installed-app scanning.
 - Hides the overlay test-credit shortcut when strict mode is enabled.
@@ -69,7 +70,7 @@ This is the first runnable Commit-to-Unlock mobile prototype. It does not connec
 6. Tap `Add latest external package`, or manually put `com.android.chrome` in blocked packages and tap `Save blocked packages`.
 7. Tap `Reset credit to 0`.
 8. Tap `Start monitor service`.
-9. Open Chrome. The blocking overlay should appear within a few seconds.
+9. Open Chrome. The blocking overlay should appear within a few seconds and show target, remaining credit, strict mode, and next action text.
 10. Return to Commit Unlock and tap `Add 5 test minutes`.
 11. Open Chrome again. The overlay should not stay visible while mock credit is above `0`.
 12. Keep Chrome foreground for at least 60 seconds and confirm one minute is spent automatically.
