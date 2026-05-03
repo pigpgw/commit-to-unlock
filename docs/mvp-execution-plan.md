@@ -357,6 +357,16 @@ Deliverables:
 - dogfood event / quest summary text formatting extracted and unit-tested
 - recent package suggestions filtered through target guardrails
 
+### PR 14: CI runtime cleanup
+
+Status: complete.
+
+Deliverables:
+
+- Android CI setup action updated to Node 24 runtime
+- unnecessary forced JavaScript action runtime override removed
+- README branch examples aligned with the repo task-branch convention
+
 ## 10. Work Rules
 
 - 한 PR에 unrelated scope를 섞지 않는다.

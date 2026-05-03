@@ -15,9 +15,6 @@ on:
 permissions:
   contents: read
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-
 jobs:
   typescript:
     name: TypeScript
@@ -63,7 +60,7 @@ jobs:
           java-version: 17
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       - name: Install Android SDK packages
         run: sdkmanager "platforms;android-33" "build-tools;33.0.2"

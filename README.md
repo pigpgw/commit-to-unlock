@@ -151,10 +151,12 @@ Work from `dev`, not `main`.
 Use task-scoped branches:
 
 ```text
-codex/feature/<task>
-codex/fix/<task>
-codex/docs/<task>
-codex/chore/<task>
+feature/<task-name>
+fix/<task-name>
+docs/<task-name>
+chore/<task-name>
+refactor/<task-name>
+test/<task-name>
 ```
 
 Keep commits split by task. Do not bundle unrelated implementation, docs, and tooling changes into one commit when they can be reviewed independently.
