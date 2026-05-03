@@ -45,13 +45,14 @@ Verified developer work earns credits for selected distracting apps.
 | --- | --- | --- |
 | 1 | [mvp-execution-plan.md](mvp-execution-plan.md) | 지금 무엇을 만들지 결정 |
 | 2 | [product-security-hardening-plan.md](product-security-hardening-plan.md) | 기획/보안/개인정보/플랫폼 정책 gate |
-| 3 | [android-dogfood-runbook.md](android-dogfood-runbook.md) | MVP-A 실기기 검증 절차 |
-| 4 | [decision-log.md](decision-log.md) | 이미 확정한 결정 |
-| 5 | [security-and-logic-review.md](security-and-logic-review.md) | 로직/보안 세부 점검 |
-| 6 | [github-sprint4-entry.md](github-sprint4-entry.md) | GitHub runtime 진입 기준 |
-| 7 | [control-account-design.md](control-account-design.md) | 선택 target, 삭제 가능성, 계정/탈퇴 UX |
-| 8 | [app-design.md](app-design.md) | 제품/기술 통합 설계 |
-| 9 | [proof-policy-mvp.md](proof-policy-mvp.md) | proof, quest, exception 정책 |
+| 3 | [competitive-service-review.md](competitive-service-review.md) | 경쟁 서비스 조사와 paid moat |
+| 4 | [android-dogfood-runbook.md](android-dogfood-runbook.md) | MVP-A 실기기 검증 절차 |
+| 5 | [decision-log.md](decision-log.md) | 이미 확정한 결정 |
+| 6 | [security-and-logic-review.md](security-and-logic-review.md) | 로직/보안 세부 점검 |
+| 7 | [github-sprint4-entry.md](github-sprint4-entry.md) | GitHub runtime 진입 기준 |
+| 8 | [control-account-design.md](control-account-design.md) | 선택 target, 삭제 가능성, 계정/탈퇴 UX |
+| 9 | [app-design.md](app-design.md) | 제품/기술 통합 설계 |
+| 10 | [proof-policy-mvp.md](proof-policy-mvp.md) | proof, quest, exception 정책 |
 
 문서가 충돌하면 이 순서대로 따른다. 단, 플랫폼 공식 정책과 법적 요구가 이 문서보다 우선한다.
 
@@ -98,6 +99,7 @@ Verified developer work earns credits for selected distracting apps.
 | 차단 앱으로만 인식됨 | 사용자가 Opal/Freedom/ScreenZen과 가격 비교 | proof ledger, GitHub/WakaTime history를 전면에 둔다 |
 | 모바일 enforcement가 약함 | overlay 지연, 권한 회수, 제조사 제한 | desktop/browser blocker fallback을 준비 |
 | proof 공급이 부족함 | 14일 동안 merged PR이 적음 | commit batch, WakaTime/IDE proof를 capped fallback으로 추가 |
+| Android-only paid product가 됨 | ScreenZen/free blocker와 비교됨 | paid moat는 cross-device, browser/desktop, proof history로 제한 |
 
 수익성 판단:
 
@@ -422,10 +424,16 @@ Gate D는 Sprint 4의 hard blocker다. HMAC, dedupe, retention, revoke/delete �
 3. `test/android-real-device-smoke`
    실제 기기 runbook 결과를 문서화하고 Gate A/D evidence를 남긴다.
 
-4. `feature/github-webhook-security`
+4. `docs/desktop-browser-companion-spike`
+   [competitive-service-review.md](competitive-service-review.md)의 Freedom, Cold Turkey, FocusMe 교훈을 바탕으로 proof ledger와 desktop/browser enforcement를 연결하는 설계를 작성한다.
+
+5. `feature/github-webhook-security`
    HMAC verification, delivery dedupe, inbound event store, tests. Ledger write는 아직 하지 않는다.
 
-5. `feature/account-lifecycle-contract`
+6. `docs/wakatime-ide-proof-spike`
+   GitHub PR-only 공급이 약할 때 capped provisional credit fallback을 설계한다.
+
+7. `feature/account-lifecycle-contract`
    signup/login/logout/delete/export/revoke API contract와 UI skeleton. GitHub sync 전 deletion path를 먼저 고정한다.
 
 이 순서가 중요한 이유는 간단하다. 사용자가 신뢰할 수 없는 차단 앱은 오래 켜두지 않고, 개인정보를 설명하지 못하는 GitHub 연동은 설치되지 않는다.

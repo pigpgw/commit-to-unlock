@@ -36,7 +36,7 @@ It does not yet:
 
 The product should not compete as a generic screen-time blocker. The recommended position is:
 
-> Verified developer proof-of-work becomes guilt-free screen time.
+> Verified dev work becomes guilt-free leisure credit.
 
 Core principles:
 
@@ -53,6 +53,7 @@ Read these docs in order before changing product direction or implementation pri
 
 - [MVP execution plan](docs/mvp-execution-plan.md)
 - [Product and security hardening plan](docs/product-security-hardening-plan.md)
+- [Competitive service review](docs/competitive-service-review.md)
 - [Android dogfood runbook](docs/android-dogfood-runbook.md)
 - [Decision log](docs/decision-log.md)
 - [Security and logic review](docs/security-and-logic-review.md)
@@ -180,8 +181,10 @@ pnpm typecheck
 Current recommended sequence:
 
 1. Keep new work inside the guardrails in the [product and security hardening plan](docs/product-security-hardening-plan.md).
-2. Add Android target guardrails for own package, empty/duplicate packages, and dangerous/system targets.
-3. Follow the [Android dogfood runbook](docs/android-dogfood-runbook.md) on a physical device.
-4. Use the [GitHub Sprint 4 entry spec](docs/github-sprint4-entry.md) as the implementation gate for webhook/security work.
+2. Use the [competitive service review](docs/competitive-service-review.md) to keep the product out of generic blocker pricing traps.
+3. Add Android target guardrails for own package, empty/duplicate packages, and dangerous/system targets.
+4. Follow the [Android dogfood runbook](docs/android-dogfood-runbook.md) on a physical device.
+5. Draft the desktop/browser companion spike before treating mobile-only as a paid product.
+6. Use the [GitHub Sprint 4 entry spec](docs/github-sprint4-entry.md) as the implementation gate for webhook/security work.
 
 Do not build payments, school/parent mode, leaderboard, money stakes, or full-diff AI scoring yet.

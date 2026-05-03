@@ -85,7 +85,8 @@ flowchart LR
 2. `packages/shared`의 `MobileCreditState`를 Android/iOS 문서와 자동 비교하는 작은 contract test를 추가한다.
 3. iOS skeleton은 Xcode project 생성 전까지 문서 수준으로만 유지한다.
 4. [product-security-hardening-plan.md](product-security-hardening-plan.md)의 immediate queue에 따라 Android target guardrail을 먼저 구현한다.
-5. [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A 기준으로 `apps/api`에 webhook HMAC/dedupe foundation을 추가한다. scoring route는 enrichment와 ledger가 함께 준비될 때만 복구한다.
+5. [competitive-service-review.md](competitive-service-review.md)에 따라 desktop/browser companion spike를 작성한다.
+6. [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A 기준으로 `apps/api`에 webhook HMAC/dedupe foundation을 추가한다. scoring route는 enrichment와 ledger가 함께 준비될 때만 복구한다.
 
 완료된 정리:
 
@@ -98,6 +99,7 @@ flowchart LR
 - GitHub Sprint 4 entry spec 추가.
 - Control/account design spec 추가.
 - Product/security hardening plan 추가.
+- Competitive service review 추가.
 
 ## 6. Do Not Build Yet
 
