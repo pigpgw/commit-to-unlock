@@ -47,6 +47,14 @@ class CreditStore(context: Context) {
         ))
     }
 
+    fun resetCredit() {
+        val current = read()
+        save(current.copy(
+            remainingMinutes = 0,
+            lastUpdatedAt = Instant.now().toString()
+        ))
+    }
+
     companion object {
         private const val KEY_REMAINING_MINUTES = "remaining_minutes"
         private const val KEY_TARGETS = "blocked_targets"
