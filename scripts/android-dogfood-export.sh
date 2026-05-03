@@ -112,3 +112,4 @@ fi
 
 mv "$temp_path" "$output_path"
 echo "Wrote dogfood export to $output_path"
+echo "Analyze it with: pnpm android:dogfood:analyze $output_path"

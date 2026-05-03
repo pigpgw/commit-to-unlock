@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "android:dogfood": "bash scripts/android-dogfood-install.sh",
+    "android:dogfood:analyze": "tsx scripts/android-dogfood-analyze.ts",
     "android:dogfood:export": "bash scripts/android-dogfood-export.sh",
     "build": "pnpm -r build",
     "dev:api": "pnpm --filter @commit-to-unlock/api dev",
