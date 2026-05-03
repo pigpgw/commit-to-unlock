@@ -1,6 +1,6 @@
 # Commit-to-Unlock App Design
 
-문서 상태: v0.3
+문서 상태: v0.4
 역할: 제품/기술 통합 설계 기준 문서
 현재 최우선 구현: Android dogfood 데이터 수집과 Gate A/B/C 판단
 
@@ -30,6 +30,7 @@ Commit-to-Unlock은 “개발 활동을 했다고 직접 체크하면 앱을 열
 - Ship code. Earn guilt-free screen time.
 - Verified work becomes leisure credits.
 - 코드를 냈으면, 쉬는 시간도 떳떳하게.
+- 개발자지만 난 괜찮아.
 
 금지 문구:
 
@@ -38,14 +39,30 @@ Commit-to-Unlock은 “개발 활동을 했다고 직접 체크하면 앱을 열
 - “AI가 알아서 폰을 통제”
 - “코드 품질을 자동 평가”
 
+브랜드 톤은 재미있고 개발자스럽게 간다. 단, 장난은 entry/onboarding/block copy에만 둔다. 권한, 데이터, 차단 정책, 보안 안내는 정확해야 한다.
+
+허용 톤:
+
+- `개발자이신가요?`
+- `예, 커밋으로 증명하겠습니다`
+- `403: 개발자 인증 실패`
+- `저리가. 여긴 SNS를 줄이려는 개발자 전용 던전입니다.`
+
+경계:
+
+- 개발자 gate는 로컬 onboarding flag다. 실제 신원 인증, 보안 경계, 결제 권한으로 쓰지 않는다.
+- 거절 화면은 재미로 앱을 종료할 수 있지만, 데이터를 삭제하거나 권한을 바꾸지 않는다.
+- 오덕/개발자 밈은 써도 사용자를 모욕하거나 중독/ADHD를 조롱하지 않는다.
+
 ## 2. Product UX
 
 MVP의 사용자는 개인 개발자다. 학교/부모/MDM, 금전 스테이크, 리더보드, 부트캠프 관리자는 뒤로 미룬다.
 
-핵심 화면은 다섯 개다.
+핵심 화면은 여섯 개다.
 
 | 화면 | 목적 | Sprint |
 | --- | --- | --- |
+| Developer Gate | “개발자 전용” 톤을 설정하고, 아니오 선택 시 장난스럽게 종료 | 1 |
 | Home | 오늘 남은 크레딧, 정책 상태, 최근 credit event 표시 | 1 |
 | Permissions | Usage Access, Overlay, Notification, Family Controls 상태 표시 | 1-2 |
 | Targets | Android package 또는 iOS activity selection 관리 | 1-2 |
@@ -69,6 +86,7 @@ Android MVP는 다음 구조로 고정한다.
 ```mermaid
 flowchart LR
   A["MainActivity"] --> B["CreditStore"]
+  A --> I["DeveloperGateStore"]
   A --> C["PermissionChecks"]
   A --> D["MonitorService"]
   A --> H["DogfoodEventStore"]

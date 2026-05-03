@@ -10,6 +10,7 @@ The current runnable prototype is Android-only and local-only.
 
 It can:
 
+- ask a playful developer-only entry question on first launch
 - store local mock credit state
 - detect the foreground app through `UsageStatsManager`
 - block selected package names with an overlay when credit is `0`
@@ -36,6 +37,7 @@ The product should not compete as a generic screen-time blocker. The recommended
 
 Core principles:
 
+- Fun developer tone, serious policy boundaries.
 - Explain before restrict.
 - Ledger over score.
 - Proof over self-report.
