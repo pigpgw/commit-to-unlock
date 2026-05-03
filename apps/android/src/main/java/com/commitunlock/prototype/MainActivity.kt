@@ -19,10 +19,12 @@ import java.time.Instant
 class MainActivity : Activity() {
     private lateinit var creditStore: CreditStore
     private lateinit var debugLogStore: DebugLogStore
+    private lateinit var dogfoodEventStore: DogfoodEventStore
     private lateinit var foregroundReader: ForegroundAppReader
     private lateinit var monitorStateStore: MonitorStateStore
     private lateinit var statusText: TextView
     private lateinit var recentPackagesText: TextView
+    private lateinit var dogfoodSummaryText: TextView
     private lateinit var debugLogText: TextView
     private lateinit var packageInput: EditText
     private lateinit var strictModeInput: CheckBox
@@ -31,6 +33,7 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         creditStore = CreditStore(this)
         debugLogStore = DebugLogStore(this)
+        dogfoodEventStore = DogfoodEventStore(this)
         foregroundReader = ForegroundAppReader(this)
         monitorStateStore = MonitorStateStore(this)
         requestNotificationPermission()
@@ -83,6 +86,12 @@ class MainActivity : Activity() {
             setPadding(0, 14, 0, 10)
         }
 
+        dogfoodSummaryText = TextView(this).apply {
+            textSize = 13f
+            setTextColor(0xFF334155.toInt())
+            setPadding(0, 20, 0, 0)
+        }
+
         debugLogText = TextView(this).apply {
             textSize = 13f
             setTextColor(0xFF334155.toInt())
@@ -109,29 +118,40 @@ class MainActivity : Activity() {
         root.addView(button("Add 5 test minutes") {
             creditStore.addMinutes(5)
             debugLogStore.record("credit_added:5")
+            dogfoodEventStore.record("credit_added", "source=main minutes=5")
             renderState()
         })
         root.addView(button("Spend 1 test minute") {
             creditStore.spendMinute()
             debugLogStore.record("credit_spent:1")
+            dogfoodEventStore.record("credit_spent", "source=main minutes=1")
             renderState()
         })
         root.addView(button("Reset credit to 0") {
             creditStore.resetCredit()
             debugLogStore.record("credit_reset")
+            dogfoodEventStore.record("credit_reset", "source=main")
             renderState()
         })
         root.addView(button("Start monitor service") {
             monitorStateStore.setRunning(true)
+            dogfoodEventStore.record("monitor_start_requested")
             startForegroundService(Intent(this, MonitorService::class.java))
             renderState()
         })
         root.addView(button("Stop monitor service") {
             monitorStateStore.setRunning(false)
+            dogfoodEventStore.record("monitor_stop_requested")
             stopService(Intent(this, MonitorService::class.java))
             renderState()
         })
         root.addView(button("Refresh status") { renderState() })
+        root.addView(dogfoodSummaryText)
+        root.addView(button("Share dogfood export") { shareDogfoodExport() })
+        root.addView(button("Clear dogfood events") {
+            dogfoodEventStore.clear()
+            renderState()
+        })
         root.addView(button("Clear debug log") {
             debugLogStore.clear()
             renderState()
@@ -163,12 +183,14 @@ class MainActivity : Activity() {
             lastUpdatedAt = Instant.now().toString()
         ))
         debugLogStore.record("blocked_targets_saved:${targets.size}")
+        dogfoodEventStore.record("targets_saved", "count=${targets.size} strict=${strictModeInput.isChecked}")
         renderState()
     }
 
     private fun addLatestExternalPackage() {
         if (!PermissionChecks.hasUsageAccess(this)) {
             debugLogStore.record("usage_access_missing")
+            dogfoodEventStore.record("permission_missing", "usage_access")
             renderState()
             return
         }
@@ -193,6 +215,7 @@ class MainActivity : Activity() {
             lastUpdatedAt = Instant.now().toString()
         ))
         debugLogStore.record("blocked_target_added:$latestExternalPackage")
+        dogfoodEventStore.record("target_added", latestExternalPackage)
         renderState()
     }
 
@@ -223,6 +246,18 @@ class MainActivity : Activity() {
             }
         }
 
+        val summary = dogfoodEventStore.summary()
+        dogfoodSummaryText.text = listOf(
+            "Dogfood summary (last 14 days)",
+            "Monitor enabled days: ${summary.monitorEnabledDays} / 8 target",
+            "Blocked attempts: ${summary.blockedAttempts} / 8 target",
+            "Permission failures: ${summary.permissionFailures}",
+            "Overlay open-app actions: ${summary.overlayOpens}",
+            "Overlay test-credit unlocks: ${summary.overlayCreditAdds}",
+            "Manual credit changes: ${summary.manualCreditChanges}",
+            "Stored dogfood events: ${summary.eventCount}"
+        ).joinToString("\n")
+
         debugLogText.text = buildString {
             append("Debug log\n")
             val events = debugLogStore.read()
@@ -243,6 +278,16 @@ class MainActivity : Activity() {
     private fun currentForegroundPackage(): String {
         if (!PermissionChecks.hasUsageAccess(this)) return "unknown (usage access missing)"
         return foregroundReader.currentForegroundPackage() ?: "unknown"
+    }
+
+    private fun shareDogfoodExport() {
+        val export = dogfoodEventStore.exportTsv()
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/tab-separated-values"
+            putExtra(Intent.EXTRA_SUBJECT, "Commit Unlock dogfood export")
+            putExtra(Intent.EXTRA_TEXT, export)
+        }
+        startActivity(Intent.createChooser(intent, "Share dogfood export"))
     }
 
     private fun requestNotificationPermission() {

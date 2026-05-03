@@ -14,6 +14,7 @@ This is the first runnable Commit-to-Unlock mobile prototype. It does not connec
 - Shows the latest detected foreground package and a bounded local debug log for device testing.
 - Shows recent foreground packages from UsageStats so a target can be added without installed-app scanning.
 - Hides the overlay test-credit shortcut when strict mode is enabled.
+- Stores a structured dogfood event log for the last 1,000 local events and can share it as TSV.
 - Does not use AccessibilityService.
 
 ## Local Run
@@ -73,3 +74,18 @@ This is the first runnable Commit-to-Unlock mobile prototype. It does not connec
 12. Enable strict mode, reset credit to `0`, and open Chrome again. The overlay should not show the `Add 5 test minutes` shortcut.
 
 Use the in-app debug log to inspect permission, foreground, target-match, overlay, and credit events.
+
+## Dogfood Export
+
+The prototype includes a `Dogfood summary (last 14 days)` section for build-first validation.
+
+Use it to track:
+
+- monitor enabled days
+- blocked attempts
+- permission failures
+- overlay open-app actions
+- overlay test-credit unlocks
+- manual credit changes
+
+Tap `Share dogfood export` to export a TSV with `timestamp`, `type`, and `detail` columns. This is local-only and does not upload data to any server.
