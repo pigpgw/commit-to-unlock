@@ -1,0 +1,468 @@
+[
+  {
+    "id": "own-app",
+    "description": "The prototype app itself is always allowed.",
+    "input": {
+      "currentPackage": "com.commitunlock.prototype",
+      "ownPackage": "com.commitunlock.prototype",
+      "now": "2026-05-04T12:00:00.000Z",
+      "creditState": {
+        "remainingMinutes": 0,
+        "freeUntil": null,
+        "strictMode": false,
+        "lastUpdatedAt": "2026-05-04T12:00:00.000Z"
+      },
+      "policyState": {
+        "blockedTargets": ["com.video.app"],
+        "activeWeekdays": [1, 2, 3, 4, 5],
+        "activeFrom": null,
+        "activeUntil": null,
+        "applyOnPublicHolidays": false,
+        "manualHolidayToday": false,
+        "manualHolidayDate": null,
+        "timezone": "UTC"
+      },
+      "activeEmergencyUnlocks": [],
+      "isPublicHoliday": false
+    },
+    "expected": {
+      "allowed": true,
+      "reason": "own_app",
+      "shouldSpendCredit": false,
+      "matchedTarget": null,
+      "activeEmergencyUnlockId": null
+    }
+  },
+  {
+    "id": "target-not-blocked",
+    "description": "Packages outside the target list are allowed before schedule checks.",
+    "input": {
+      "currentPackage": "com.editor.app",
+      "ownPackage": "com.commitunlock.prototype",
+      "now": "2026-05-04T12:00:00.000Z",
+      "creditState": {
+        "remainingMinutes": 0,
+        "freeUntil": null,
+        "strictMode": false,
+        "lastUpdatedAt": "2026-05-04T12:00:00.000Z"
+      },
+      "policyState": {
+        "blockedTargets": ["com.video.app"],
+        "activeWeekdays": [1, 2, 3, 4, 5],
+        "activeFrom": null,
+        "activeUntil": null,
+        "applyOnPublicHolidays": false,
+        "manualHolidayToday": false,
+        "manualHolidayDate": null,
+        "timezone": "UTC"
+      },
+      "activeEmergencyUnlocks": [],
+      "isPublicHoliday": false
+    },
+    "expected": {
+      "allowed": true,
+      "reason": "target_not_blocked",
+      "shouldSpendCredit": false,
+      "matchedTarget": null,
+      "activeEmergencyUnlockId": null
+    }
+  },
+  {
+    "id": "inactive-weekday",
+    "description": "Inactive weekdays allow access before credit checks.",
+    "input": {
+      "currentPackage": "com.video.app",
+      "ownPackage": "com.commitunlock.prototype",
+      "now": "2026-05-03T12:00:00.000Z",
+      "creditState": {
+        "remainingMinutes": 0,
+        "freeUntil": null,
+        "strictMode": false,
+        "lastUpdatedAt": "2026-05-03T12:00:00.000Z"
+      },
+      "policyState": {
+        "blockedTargets": ["com.video.app"],
+        "activeWeekdays": [1, 2, 3, 4, 5],
+        "activeFrom": null,
+        "activeUntil": null,
+        "applyOnPublicHolidays": false,
+        "manualHolidayToday": false,
+        "manualHolidayDate": null,
+        "timezone": "UTC"
+      },
+      "activeEmergencyUnlocks": [],
+      "isPublicHoliday": false
+    },
+    "expected": {
+      "allowed": true,
+      "reason": "inactive_weekday",
+      "shouldSpendCredit": false,
+      "matchedTarget": "com.video.app",
+      "activeEmergencyUnlockId": null
+    }
+  },
+  {
+    "id": "outside-active-time",
+    "description": "Outside an overnight active window allows access before credit checks.",
+    "input": {
+      "currentPackage": "com.video.app",
+      "ownPackage": "com.commitunlock.prototype",
+      "now": "2026-05-04T20:30:00.000Z",
+      "creditState": {
+        "remainingMinutes": 0,
+        "freeUntil": null,
+        "strictMode": false,
+        "lastUpdatedAt": "2026-05-04T20:30:00.000Z"
+      },
+      "policyState": {
+        "blockedTargets": ["com.video.app"],
+        "activeWeekdays": [1, 2, 3, 4, 5],
+        "activeFrom": "22:00",
+        "activeUntil": "02:00",
+        "applyOnPublicHolidays": false,
+        "manualHolidayToday": false,
+        "manualHolidayDate": null,
+        "timezone": "UTC"
+      },
+      "activeEmergencyUnlocks": [],
+      "isPublicHoliday": false
+    },
+    "expected": {
+      "allowed": true,
+      "reason": "outside_active_time",
+      "shouldSpendCredit": false,
+      "matchedTarget": "com.video.app",
+      "activeEmergencyUnlockId": null
+    }
+  },
+  {
+    "id": "manual-holiday",
+    "description": "Manual holiday takes priority over free day, emergency unlock, and credit.",
+    "input": {
+      "currentPackage": "com.video.app",
+      "ownPackage": "com.commitunlock.prototype",
+      "now": "2026-05-04T12:00:00.000Z",
+      "creditState": {
+        "remainingMinutes": 5,
+        "freeUntil": "2026-05-04T23:59:59.000Z",
+        "strictMode": false,
+        "lastUpdatedAt": "2026-05-04T12:00:00.000Z"
+      },
+      "policyState": {
+        "blockedTargets": ["com.video.app"],
+        "activeWeekdays": [1, 2, 3, 4, 5],
+        "activeFrom": null,
+        "activeUntil": null,
+        "applyOnPublicHolidays": false,
+        "manualHolidayToday": true,
+        "manualHolidayDate": "2026-05-04",
+        "timezone": "UTC"
+      },
+      "activeEmergencyUnlocks": [
+        {
+          "id": "unlock-1",
+          "durationMinutes": 15,
+          "reason": "Production incident",
+          "startedAt": "2026-05-04T11:50:00.000Z",
+          "expiresAt": "2026-05-04T12:05:00.000Z"
+        }
+      ],
+      "isPublicHoliday": false
+    },
+    "expected": {
+      "allowed": true,
+      "reason": "manual_holiday",
+      "shouldSpendCredit": false,
+      "matchedTarget": "com.video.app",
+      "activeEmergencyUnlockId": null
+    }
+  },
+  {
+    "id": "public-holiday",
+    "description": "Public holiday skip allows access when public holidays are not enforced.",
+    "input": {
+      "currentPackage": "com.video.app",
+      "ownPackage": "com.commitunlock.prototype",
+      "now": "2026-05-05T12:00:00.000Z",
+      "creditState": {
+        "remainingMinutes": 0,
+        "freeUntil": null,
+        "strictMode": false,
+        "lastUpdatedAt": "2026-05-05T12:00:00.000Z"
+      },
+      "policyState": {
+        "blockedTargets": ["com.video.app"],
+        "activeWeekdays": [1, 2, 3, 4, 5],
+        "activeFrom": null,
+        "activeUntil": null,
+        "applyOnPublicHolidays": false,
+        "manualHolidayToday": false,
+        "manualHolidayDate": null,
+        "timezone": "UTC"
+      },
+      "activeEmergencyUnlocks": [],
+      "isPublicHoliday": true
+    },
+    "expected": {
+      "allowed": true,
+      "reason": "public_holiday",
+      "shouldSpendCredit": false,
+      "matchedTarget": "com.video.app",
+      "activeEmergencyUnlockId": null
+    }
+  },
+  {
+    "id": "free-day",
+    "description": "Free day takes priority over emergency unlock and credit.",
+    "input": {
+      "currentPackage": "com.video.app",
+      "ownPackage": "com.commitunlock.prototype",
+      "now": "2026-05-04T12:00:00.000Z",
+      "creditState": {
+        "remainingMinutes": 5,
+        "freeUntil": "2026-05-04T23:59:59.000Z",
+        "strictMode": false,
+        "lastUpdatedAt": "2026-05-04T12:00:00.000Z"
+      },
+      "policyState": {
+        "blockedTargets": ["com.video.app"],
+        "activeWeekdays": [1, 2, 3, 4, 5],
+        "activeFrom": null,
+        "activeUntil": null,
+        "applyOnPublicHolidays": false,
+        "manualHolidayToday": false,
+        "manualHolidayDate": null,
+        "timezone": "UTC"
+      },
+      "activeEmergencyUnlocks": [
+        {
+          "id": "unlock-1",
+          "durationMinutes": 15,
+          "reason": "Check production alert",
+          "startedAt": "2026-05-04T11:50:00.000Z",
+          "expiresAt": "2026-05-04T12:05:00.000Z"
+        }
+      ],
+      "isPublicHoliday": false
+    },
+    "expected": {
+      "allowed": true,
+      "reason": "free_day",
+      "shouldSpendCredit": false,
+      "matchedTarget": "com.video.app",
+      "activeEmergencyUnlockId": null
+    }
+  },
+  {
+    "id": "emergency-unlock",
+    "description": "Emergency unlock allows access without spending credit.",
+    "input": {
+      "currentPackage": "com.video.app",
+      "ownPackage": "com.commitunlock.prototype",
+      "now": "2026-05-04T12:00:00.000Z",
+      "creditState": {
+        "remainingMinutes": 0,
+        "freeUntil": null,
+        "strictMode": false,
+        "lastUpdatedAt": "2026-05-04T12:00:00.000Z"
+      },
+      "policyState": {
+        "blockedTargets": ["com.video.app"],
+        "activeWeekdays": [1, 2, 3, 4, 5],
+        "activeFrom": null,
+        "activeUntil": null,
+        "applyOnPublicHolidays": false,
+        "manualHolidayToday": false,
+        "manualHolidayDate": null,
+        "timezone": "UTC"
+      },
+      "activeEmergencyUnlocks": [
+        {
+          "id": "unlock-1",
+          "durationMinutes": 15,
+          "reason": "Production incident",
+          "startedAt": "2026-05-04T11:50:00.000Z",
+          "expiresAt": "2026-05-04T12:05:00.000Z"
+        }
+      ],
+      "isPublicHoliday": false
+    },
+    "expected": {
+      "allowed": true,
+      "reason": "emergency_unlock",
+      "shouldSpendCredit": false,
+      "matchedTarget": "com.video.app",
+      "activeEmergencyUnlockId": "unlock-1"
+    }
+  },
+  {
+    "id": "credit-available",
+    "description": "Available credit allows access and should spend credit.",
+    "input": {
+      "currentPackage": "com.video.app",
+      "ownPackage": "com.commitunlock.prototype",
+      "now": "2026-05-04T12:00:00.000Z",
+      "creditState": {
+        "remainingMinutes": 5,
+        "freeUntil": null,
+        "strictMode": false,
+        "lastUpdatedAt": "2026-05-04T12:00:00.000Z"
+      },
+      "policyState": {
+        "blockedTargets": ["com.video.app"],
+        "activeWeekdays": [1, 2, 3, 4, 5],
+        "activeFrom": null,
+        "activeUntil": null,
+        "applyOnPublicHolidays": false,
+        "manualHolidayToday": false,
+        "manualHolidayDate": null,
+        "timezone": "UTC"
+      },
+      "activeEmergencyUnlocks": [],
+      "isPublicHoliday": false
+    },
+    "expected": {
+      "allowed": true,
+      "reason": "credit_available",
+      "shouldSpendCredit": true,
+      "matchedTarget": "com.video.app",
+      "activeEmergencyUnlockId": null
+    }
+  },
+  {
+    "id": "credit-empty",
+    "description": "A matched target with no allowance and no credit is blocked.",
+    "input": {
+      "currentPackage": "com.video.app",
+      "ownPackage": "com.commitunlock.prototype",
+      "now": "2026-05-04T12:00:00.000Z",
+      "creditState": {
+        "remainingMinutes": 0,
+        "freeUntil": null,
+        "strictMode": false,
+        "lastUpdatedAt": "2026-05-04T12:00:00.000Z"
+      },
+      "policyState": {
+        "blockedTargets": ["com.video.app"],
+        "activeWeekdays": [1, 2, 3, 4, 5],
+        "activeFrom": null,
+        "activeUntil": null,
+        "applyOnPublicHolidays": false,
+        "manualHolidayToday": false,
+        "manualHolidayDate": null,
+        "timezone": "UTC"
+      },
+      "activeEmergencyUnlocks": [],
+      "isPublicHoliday": false
+    },
+    "expected": {
+      "allowed": false,
+      "reason": "credit_empty",
+      "shouldSpendCredit": false,
+      "matchedTarget": "com.video.app",
+      "activeEmergencyUnlockId": null
+    }
+  },
+  {
+    "id": "overnight-window-active",
+    "description": "Inside an overnight active window, normal credit_empty blocking applies.",
+    "input": {
+      "currentPackage": "com.video.app",
+      "ownPackage": "com.commitunlock.prototype",
+      "now": "2026-05-04T23:30:00.000Z",
+      "creditState": {
+        "remainingMinutes": 0,
+        "freeUntil": null,
+        "strictMode": false,
+        "lastUpdatedAt": "2026-05-04T23:30:00.000Z"
+      },
+      "policyState": {
+        "blockedTargets": ["com.video.app"],
+        "activeWeekdays": [1, 2, 3, 4, 5],
+        "activeFrom": "22:00",
+        "activeUntil": "02:00",
+        "applyOnPublicHolidays": false,
+        "manualHolidayToday": false,
+        "manualHolidayDate": null,
+        "timezone": "UTC"
+      },
+      "activeEmergencyUnlocks": [],
+      "isPublicHoliday": false
+    },
+    "expected": {
+      "allowed": false,
+      "reason": "credit_empty",
+      "shouldSpendCredit": false,
+      "matchedTarget": "com.video.app",
+      "activeEmergencyUnlockId": null
+    }
+  },
+  {
+    "id": "timezone-conversion",
+    "description": "Weekday and active time are evaluated in the configured timezone.",
+    "input": {
+      "currentPackage": "com.video.app",
+      "ownPackage": "com.commitunlock.prototype",
+      "now": "2026-05-03T15:30:00.000Z",
+      "creditState": {
+        "remainingMinutes": 0,
+        "freeUntil": null,
+        "strictMode": false,
+        "lastUpdatedAt": "2026-05-03T15:30:00.000Z"
+      },
+      "policyState": {
+        "blockedTargets": ["com.video.app"],
+        "activeWeekdays": [1],
+        "activeFrom": "00:00",
+        "activeUntil": "01:00",
+        "applyOnPublicHolidays": false,
+        "manualHolidayToday": false,
+        "manualHolidayDate": null,
+        "timezone": "Asia/Seoul"
+      },
+      "activeEmergencyUnlocks": [],
+      "isPublicHoliday": false
+    },
+    "expected": {
+      "allowed": false,
+      "reason": "credit_empty",
+      "shouldSpendCredit": false,
+      "matchedTarget": "com.video.app",
+      "activeEmergencyUnlockId": null
+    }
+  },
+  {
+    "id": "invalid-timezone-falls-back-to-utc",
+    "description": "Invalid policy timezone falls back to UTC instead of system-local time.",
+    "input": {
+      "currentPackage": "com.video.app",
+      "ownPackage": "com.commitunlock.prototype",
+      "now": "2026-05-04T23:30:00.000Z",
+      "creditState": {
+        "remainingMinutes": 0,
+        "freeUntil": null,
+        "strictMode": false,
+        "lastUpdatedAt": "2026-05-04T23:30:00.000Z"
+      },
+      "policyState": {
+        "blockedTargets": ["com.video.app"],
+        "activeWeekdays": [1],
+        "activeFrom": "23:00",
+        "activeUntil": "23:59",
+        "applyOnPublicHolidays": false,
+        "manualHolidayToday": false,
+        "manualHolidayDate": null,
+        "timezone": "Not/A_Real_Zone"
+      },
+      "activeEmergencyUnlocks": [],
+      "isPublicHoliday": false
+    },
+    "expected": {
+      "allowed": false,
+      "reason": "credit_empty",
+      "shouldSpendCredit": false,
+      "matchedTarget": "com.video.app",
+      "activeEmergencyUnlockId": null
+    }
+  }
+]

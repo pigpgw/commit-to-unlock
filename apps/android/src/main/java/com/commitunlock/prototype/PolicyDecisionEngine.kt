@@ -2,6 +2,7 @@ package com.commitunlock.prototype
 
 import java.time.Instant
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeParseException
 
 object PolicyDecisionEngine {
@@ -78,7 +79,7 @@ object PolicyDecisionEngine {
     }
 
     private fun localNow(now: Instant, timezone: String) =
-        now.atZone(runCatching { ZoneId.of(timezone) }.getOrDefault(ZoneId.systemDefault()))
+        now.atZone(runCatching { ZoneId.of(timezone) }.getOrDefault(ZoneOffset.UTC))
 
     private fun isWithinActiveTime(currentMinutes: Int, policy: PolicyState): Boolean {
         if (policy.activeFrom == null && policy.activeUntil == null) return true

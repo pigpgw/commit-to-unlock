@@ -54,6 +54,7 @@
 | D-026 | Gate D: Trust And Privacy를 GitHub sync 착수 조건으로 승격 | 제품의 핵심 리스크는 강제 차단보다 package/repo/diff/privacy 데이터 최소화다. webhook HMAC, dedupe, retention, revoke/delete가 없으면 Sprint 4를 시작하지 않는다. | Accepted |
 | D-027 | `mvp-execution-plan.md`를 현재 실행 source of truth로 둔다 | 문서가 많아져 실행 순서가 분산됐다. 중복 문서를 삭제하기 전에 active/reference/archive 후보를 분리하고 PR 순서를 고정한다. | Accepted |
 | D-028 | Android MVP-A는 14일 dogfood runbook으로 Gate A/B/C/D를 판단한다 | 기능 추가보다 실기기 반복 데이터가 먼저다. runbook 없이 GitHub scoring이나 UI 확장을 진행하면 제품 리스크를 잘못 읽을 가능성이 높다. | Accepted |
+| D-029 | TypeScript와 Android 정책 엔진은 공통 golden fixture로 drift를 막는다 | 모바일 enforcement와 서버/공유 정책이 어긋나면 같은 사용자 상태에서 다른 차단 결과가 나온다. Sprint 4 전부터 공통 JSON fixture를 양쪽 테스트에 적용한다. | Accepted |
 
 ## Revisit Triggers
 
