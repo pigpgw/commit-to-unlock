@@ -18,6 +18,7 @@
 - `feature/android-dogfood-review`
 - `refactor/android-main-sections`
 - `docs/github-sprint4-entry`
+- `docs/control-account-design`
 
 현재 다음 작업은 실제 Android 기기 smoke evidence 확보다. 이후 구현은 [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A 순서로 진행한다.
 
@@ -197,6 +198,9 @@ GitHub-backed 개인 개발자 MVP 기준으로 보면 아직 30% 전후다. 이
 
 2. `feature/github-webhook-security`
    [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A 기준으로 HMAC 검증, delivery dedupe, inbound event 저장 테스트부터 구현한다.
+
+3. `feature/account-lifecycle`
+   서버 계정 구현을 시작할 때 [control-account-design.md](control-account-design.md)의 로그인/로그아웃/회원탈퇴/데이터 삭제 기준을 먼저 만족한다.
 
 위 선행 작업과 Gate D 보안 기준 전에는 GitHub scoring 구현을 다시 시작하지 않는다.
 

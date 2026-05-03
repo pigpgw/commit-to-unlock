@@ -112,6 +112,7 @@ Job-to-be-done:
 | Proof-backed quests | 오늘 할 일은 등록할 수 있지만, unlock은 개발 증거가 있어야 한다. |
 | Developer tool density | 마케팅/웰빙 앱보다 GitHub/WakaTime처럼 상태, 장부, 이유를 빠르게 스캔하게 한다. |
 | Trust before sync | GitHub sync 전 [security-and-logic-review.md](security-and-logic-review.md)의 Gate D를 통과한다. |
+| User control | 앱 삭제 가능, 선택 target만 차단, 계정 삭제 가능 원칙은 [control-account-design.md](control-account-design.md)를 따른다. |
 
 ## 5. Core Product Loops
 

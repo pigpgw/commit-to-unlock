@@ -37,8 +37,9 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 | 3 | [decision-log.md](decision-log.md) | 다시 판단하지 않을 제품/기술 결정 |
 | 4 | [security-and-logic-review.md](security-and-logic-review.md) | 보안/정책/로직 gate |
 | 5 | [github-sprint4-entry.md](github-sprint4-entry.md) | GitHub runtime 진입 기준 |
-| 6 | [app-design.md](app-design.md) | 전체 제품/기술 설계 |
-| 7 | [proof-policy-mvp.md](proof-policy-mvp.md) | proof, quest, exception policy 상세 |
+| 6 | [control-account-design.md](control-account-design.md) | 차단 범위, 계정, 탈퇴 UX |
+| 7 | [app-design.md](app-design.md) | 전체 제품/기술 설계 |
+| 8 | [proof-policy-mvp.md](proof-policy-mvp.md) | proof, quest, exception policy 상세 |
 
 나머지 문서는 reference다. 충돌하면 이 문서와 decision log를 우선한다.
 
@@ -96,6 +97,7 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 | `decision-log.md` | 결정만 유지 |
 | `security-and-logic-review.md` | Gate D와 보안 기준 유지 |
 | `github-sprint4-entry.md` | GitHub Sprint 4 진입 기준 |
+| `control-account-design.md` | 기기별 차단 가능 범위, target 선택, 계정/탈퇴 UX 기준 |
 | `app-design.md` | 기술/제품 설계 유지 |
 | `proof-policy-mvp.md` | 정책 상세 유지 |
 
@@ -272,6 +274,7 @@ Deliverables:
 - Android behavior 변경 전에는 unit test를 먼저 보강한다.
 - Sprint 4 전까지 mobile mock credit을 API와 연결하지 않는다.
 - GitHub sync는 Gate D를 통과하기 전까지 구현하지 않는다.
+- 로그인/회원가입/로그아웃/회원탈퇴 구현은 [control-account-design.md](control-account-design.md)의 삭제/권한/target guard를 먼저 만족해야 한다.
 - 결제/부모/학교/MDM/money stake는 계속 금지한다.
 
 ## 10. Immediate Next Action

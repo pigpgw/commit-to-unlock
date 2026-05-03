@@ -134,6 +134,8 @@ Emergency Unlock 방향도 맞다. 사용자에게 우회 수단이 없으면 �
 - 앱 삭제 방지 금지.
 - `QUERY_ALL_PACKAGES` 사용 금지.
 - 전체 휴대폰 잠금 약속 금지.
+- 사용자가 선택하지 않은 target 차단 금지.
+- 계정/탈퇴/권한/Settings 화면 차단 금지.
 - Usage Access와 Overlay 권한은 사용자가 직접 켜고 끌 수 있게 둔다.
 
 현재 안전장치:
@@ -321,6 +323,7 @@ MVP 전 대응:
 
 - Android privacy/permission screen 존재.
 - GitHub data retention draft 존재. 상세 기준은 [github-sprint4-entry.md](github-sprint4-entry.md)를 따른다.
+- 계정 생성/삭제/로그아웃 UX 기준은 [control-account-design.md](control-account-design.md)를 따른다.
 - private repo raw diff 기본 저장 금지.
 - user revoke/delete path 설계.
 - webhook HMAC/dedupe 구현 전에는 GitHub sync 금지.

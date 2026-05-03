@@ -95,6 +95,7 @@ flowchart LR
 - Android dogfood review/Data Quality/Gate UI 추가.
 - Android MainActivity section helper 분리.
 - GitHub Sprint 4 entry spec 추가.
+- Control/account design spec 추가.
 
 ## 6. Do Not Build Yet
 

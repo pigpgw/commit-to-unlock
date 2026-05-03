@@ -15,6 +15,7 @@
 | 디자인 조사/화면 톤 | [design-research-and-ux-direction.md](design-research-and-ux-direction.md) |
 | 보안/로직 점검 | [security-and-logic-review.md](security-and-logic-review.md) |
 | GitHub Sprint 4 진입 기준 | [github-sprint4-entry.md](github-sprint4-entry.md) |
+| 차단 범위/계정/탈퇴 UX | [control-account-design.md](control-account-design.md) |
 | 실행 순서 | [build-first-execution-plan.md](build-first-execution-plan.md) |
 | 시장/니즈/피벗 게이트 | [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md) |
 | 현재 MVP 진행도/보완 우선순위 | [mvp-progress-audit.md](mvp-progress-audit.md) |
@@ -57,6 +58,7 @@
 | D-028 | Android MVP-A는 14일 dogfood runbook으로 Gate A/B/C/D를 판단한다 | 기능 추가보다 실기기 반복 데이터가 먼저다. runbook 없이 GitHub scoring이나 UI 확장을 진행하면 제품 리스크를 잘못 읽을 가능성이 높다. | Accepted |
 | D-029 | TypeScript와 Android 정책 엔진은 공통 golden fixture로 drift를 막는다 | 모바일 enforcement와 서버/공유 정책이 어긋나면 같은 사용자 상태에서 다른 차단 결과가 나온다. Sprint 4 전부터 공통 JSON fixture를 양쪽 테스트에 적용한다. | Accepted |
 | D-030 | GitHub Sprint 4는 HMAC/dedupe/retention/ledger idempotency부터 시작한다 | PR enrichment 없는 scoring이나 dedupe 없는 ledger write는 제품 신뢰와 privacy를 동시에 깨뜨린다. GitHub runtime은 [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A-F 순서를 따른다. | Accepted |
+| D-031 | 앱은 삭제 가능하고, 선택한 target만 차단한다 | B2C self-control 제품에서 uninstall prevention, 전체 기기 잠금, 모든 서비스 차단은 정책/신뢰 리스크가 크다. 로그인/로그아웃/회원탈퇴/데이터 삭제는 [control-account-design.md](control-account-design.md)를 따른다. | Accepted |
 
 ## Revisit Triggers
 
