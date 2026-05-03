@@ -10,6 +10,9 @@ const val DOGFOOD_EXPORT_FILE_NAME = "dogfood-export.tsv"
 data class DogfoodEvent(
     val timestamp: Instant,
     val type: String,
+    val target: String?,
+    val policyReason: String?,
+    val creditRemaining: Int?,
     val detail: String
 )
 
@@ -38,12 +41,32 @@ class DogfoodEventStore(context: Context) {
     }
 
     fun record(type: String, detail: String = "") {
+        recordStructured(type = type, detail = detail)
+    }
+
+    fun recordStructured(
+        type: String,
+        target: String? = null,
+        policyReason: String? = null,
+        creditRemaining: Int? = null,
+        detail: String = ""
+    ) {
         val cleanType = sanitize(type)
+        val cleanTarget = sanitize(target.orEmpty())
+        val cleanPolicyReason = sanitize(policyReason.orEmpty())
+        val cleanCreditRemaining = creditRemaining?.coerceAtLeast(0)?.toString().orEmpty()
         val cleanDetail = sanitize(detail)
         if (cleanType.isEmpty()) return
 
         val current = readRaw()
-        val nextLine = "${Instant.now()}\t$cleanType\t$cleanDetail"
+        val nextLine = listOf(
+            Instant.now().toString(),
+            cleanType,
+            cleanTarget,
+            cleanPolicyReason,
+            cleanCreditRemaining,
+            cleanDetail
+        ).joinToString("\t")
         if (current.firstOrNull()?.substringAfter("\t", "") == nextLine.substringAfter("\t", "")) {
             return
         }
@@ -95,10 +118,10 @@ class DogfoodEventStore(context: Context) {
     }
 
     fun exportTsv(): String {
-        val header = "timestamp\ttype\tdetail"
+        val header = EXPORT_HEADER
         val rows = read()
             .sortedBy { it.timestamp }
-            .joinToString("\n") { "${it.timestamp}\t${it.type}\t${it.detail}" }
+            .joinToString("\n") { serialize(it) }
         return listOf(header, rows)
             .filter { it.isNotEmpty() }
             .joinToString("\n")
@@ -120,22 +143,39 @@ class DogfoodEventStore(context: Context) {
     }
 
     private fun parse(line: String): DogfoodEvent? {
-        val parts = line.split('\t', limit = 3)
+        val parts = line.split('\t', limit = 6)
         if (parts.size < 2) return null
 
         val timestamp = runCatching { Instant.parse(parts[0]) }.getOrNull() ?: return null
         val type = parts[1]
-        val detail = parts.getOrElse(2) { "" }
+        if (parts.size >= 6) {
+            val creditRemaining = parts[4].takeIf { it.isNotBlank() }?.toIntOrNull()
+            return DogfoodEvent(
+                timestamp = timestamp,
+                type = type,
+                target = parts[2].takeIf { it.isNotBlank() },
+                policyReason = parts[3].takeIf { it.isNotBlank() },
+                creditRemaining = creditRemaining,
+                detail = parts[5]
+            )
+        }
 
-        return DogfoodEvent(timestamp, type, detail)
+        return DogfoodEvent(
+            timestamp = timestamp,
+            type = type,
+            target = null,
+            policyReason = null,
+            creditRemaining = null,
+            detail = parts.getOrElse(2) { "" }
+        )
     }
 
     private fun writeExportFile(rawEvents: List<String> = readRaw()) {
         val rows = rawEvents
             .mapNotNull { parse(it) }
             .sortedBy { it.timestamp }
-            .joinToString("\n") { "${it.timestamp}\t${it.type}\t${it.detail}" }
-        val export = listOf("timestamp\ttype\tdetail", rows)
+            .joinToString("\n") { serialize(it) }
+        val export = listOf(EXPORT_HEADER, rows)
             .filter { it.isNotEmpty() }
             .joinToString("\n")
 
@@ -151,9 +191,21 @@ class DogfoodEventStore(context: Context) {
             .trim()
     }
 
+    private fun serialize(event: DogfoodEvent): String {
+        return listOf(
+            event.timestamp.toString(),
+            sanitize(event.type),
+            sanitize(event.target.orEmpty()),
+            sanitize(event.policyReason.orEmpty()),
+            event.creditRemaining?.coerceAtLeast(0)?.toString().orEmpty(),
+            sanitize(event.detail)
+        ).joinToString("\t")
+    }
+
     companion object {
         private const val KEY_EVENTS = "events"
         private const val MAX_EVENTS = 1_000
         private const val SUMMARY_DAYS = 14L
+        private const val EXPORT_HEADER = "timestamp\ttype\ttarget\tpolicy_reason\tcredit_remaining\tdetail"
     }
 }

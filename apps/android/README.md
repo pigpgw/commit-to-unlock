@@ -149,7 +149,7 @@ Use it to track:
 - daily quests added
 - daily quest mock completions
 
-Tap `Share dogfood export` to export a TSV with `timestamp`, `type`, and `detail` columns. This is local-only and does not upload data to any server.
+Tap `Share dogfood export` to export a TSV with `timestamp`, `type`, `target`, `policy_reason`, `credit_remaining`, and `detail` columns. This is local-only and does not upload data to any server.
 
 For repeat dogfood runs on a debug build, pull the latest export from the connected device:
 
@@ -163,6 +163,7 @@ By default export writes to `artifacts/android-dogfood/`, and analyze reads the 
 The analyzer reports:
 
 - core counts for blocked attempts, policy blocks, free days, emergency unlocks, quest proof completions, and credit spends
+- Data Quality coverage for structured target, policy reason, and credit fields
 - Gate A/B/C snapshot for enforcement viability, dogfood need, and proof supply
 - top policy reasons such as `credit_empty`, `free_day`, or `emergency_unlock`
 - top target packages

@@ -303,17 +303,29 @@ class MainActivity : Activity() {
         root.addView(button("Add latest external package") { addLatestExternalPackage() })
         root.addView(button("Add 5 test minutes") {
             creditStore.addMinutes(5)
-            dogfoodEventStore.record("credit_added", "source=main minutes=5")
+            dogfoodEventStore.recordStructured(
+                type = "credit_added",
+                creditRemaining = creditStore.read().remainingMinutes,
+                detail = "source=main minutes=5"
+            )
             renderState()
         })
         root.addView(button("Spend 1 test minute") {
             creditStore.spendMinute()
-            dogfoodEventStore.record("credit_spent", "source=main minutes=1")
+            dogfoodEventStore.recordStructured(
+                type = "credit_spent",
+                creditRemaining = creditStore.read().remainingMinutes,
+                detail = "source=main minutes=1"
+            )
             renderState()
         })
         root.addView(button("Reset credit to 0") {
             creditStore.resetCredit()
-            dogfoodEventStore.record("credit_reset", "source=main")
+            dogfoodEventStore.recordStructured(
+                type = "credit_reset",
+                creditRemaining = creditStore.read().remainingMinutes,
+                detail = "source=main"
+            )
             renderState()
         })
         root.addView(button("Start monitor service") {
@@ -546,7 +558,10 @@ class MainActivity : Activity() {
             strictMode = strictModeInput.isChecked,
             lastUpdatedAt = Instant.now().toString()
         ))
-        dogfoodEventStore.record("target_added", latestExternalPackage)
+        dogfoodEventStore.recordStructured(
+            type = "target_added",
+            target = latestExternalPackage
+        )
         renderState()
     }
 
@@ -644,7 +659,14 @@ class MainActivity : Activity() {
     }
 
     private fun formatDogfoodEvent(event: DogfoodEvent): String {
-        return listOf(event.timestamp.toString(), event.type, event.detail)
+        return listOf(
+            event.timestamp.toString(),
+            event.type,
+            event.target?.let { "target=$it" }.orEmpty(),
+            event.policyReason?.let { "reason=$it" }.orEmpty(),
+            event.creditRemaining?.let { "credit=$it" }.orEmpty(),
+            event.detail
+        )
             .filter { it.isNotEmpty() }
             .joinToString(" ")
     }
