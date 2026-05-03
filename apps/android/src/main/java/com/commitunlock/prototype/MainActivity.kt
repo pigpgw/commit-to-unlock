@@ -18,13 +18,20 @@ import java.time.Instant
 
 class MainActivity : Activity() {
     private lateinit var creditStore: CreditStore
+    private lateinit var debugLogStore: DebugLogStore
+    private lateinit var foregroundReader: ForegroundAppReader
+    private lateinit var monitorStateStore: MonitorStateStore
     private lateinit var statusText: TextView
+    private lateinit var debugLogText: TextView
     private lateinit var packageInput: EditText
     private lateinit var strictModeInput: CheckBox
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         creditStore = CreditStore(this)
+        debugLogStore = DebugLogStore(this)
+        foregroundReader = ForegroundAppReader(this)
+        monitorStateStore = MonitorStateStore(this)
         requestNotificationPermission()
         setContentView(buildContent())
         renderState()
@@ -69,6 +76,12 @@ class MainActivity : Activity() {
             text = "Strict mode mock flag"
         }
 
+        debugLogText = TextView(this).apply {
+            textSize = 13f
+            setTextColor(0xFF334155.toInt())
+            setPadding(0, 20, 0, 0)
+        }
+
         root.addView(title)
         root.addView(subtitle)
         root.addView(statusText)
@@ -86,20 +99,35 @@ class MainActivity : Activity() {
         root.addView(button("Save blocked packages") { saveTargets() })
         root.addView(button("Add 5 test minutes") {
             creditStore.addMinutes(5)
+            debugLogStore.record("credit_added:5")
             renderState()
         })
         root.addView(button("Spend 1 test minute") {
             creditStore.spendMinute()
+            debugLogStore.record("credit_spent:1")
+            renderState()
+        })
+        root.addView(button("Reset credit to 0") {
+            creditStore.resetCredit()
+            debugLogStore.record("credit_reset")
             renderState()
         })
         root.addView(button("Start monitor service") {
+            monitorStateStore.setRunning(true)
             startForegroundService(Intent(this, MonitorService::class.java))
             renderState()
         })
         root.addView(button("Stop monitor service") {
+            monitorStateStore.setRunning(false)
             stopService(Intent(this, MonitorService::class.java))
             renderState()
         })
+        root.addView(button("Refresh status") { renderState() })
+        root.addView(button("Clear debug log") {
+            debugLogStore.clear()
+            renderState()
+        })
+        root.addView(debugLogText)
 
         return ScrollView(this).apply { addView(root) }
     }
@@ -125,6 +153,7 @@ class MainActivity : Activity() {
             strictMode = strictModeInput.isChecked,
             lastUpdatedAt = Instant.now().toString()
         ))
+        debugLogStore.record("blocked_targets_saved:${targets.size}")
         renderState()
     }
 
@@ -136,16 +165,43 @@ class MainActivity : Activity() {
         statusText.text = listOf(
             "Usage Access: ${if (PermissionChecks.hasUsageAccess(this)) "granted" else "missing"}",
             "Overlay Permission: ${if (PermissionChecks.canDrawOverlays(this)) "granted" else "missing"}",
+            "Notification Permission: ${if (PermissionChecks.hasNotificationPermission(this)) "granted" else "missing"}",
+            "Monitor service: ${if (monitorStateStore.isRunning()) "running" else "stopped"}",
+            "Current foreground: ${currentForegroundPackage()}",
             "Remaining mock credit: ${state.remainingMinutes} minutes",
             "Blocked targets: ${state.blockedTargets.ifEmpty { listOf("none") }.joinToString(", ")}",
             "Strict mode: ${state.strictMode}",
             "Last updated: ${state.lastUpdatedAt}"
         ).joinToString("\n")
+
+        debugLogText.text = buildString {
+            append("Debug log\n")
+            val events = debugLogStore.read()
+            if (events.isEmpty()) {
+                append("none")
+            } else {
+                append(events.joinToString("\n"))
+            }
+        }
+    }
+
+    private fun currentForegroundPackage(): String {
+        if (!PermissionChecks.hasUsageAccess(this)) return "unknown (usage access missing)"
+        return foregroundReader.currentForegroundPackage() ?: "unknown"
     }
 
     private fun requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 10)
         }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        renderState()
     }
 }

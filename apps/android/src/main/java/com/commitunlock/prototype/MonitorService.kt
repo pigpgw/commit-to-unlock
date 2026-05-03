@@ -12,9 +12,13 @@ import android.os.Looper
 
 class MonitorService : Service() {
     private lateinit var creditStore: CreditStore
+    private lateinit var debugLogStore: DebugLogStore
     private lateinit var foregroundReader: ForegroundAppReader
+    private lateinit var monitorStateStore: MonitorStateStore
     private lateinit var overlay: BlockOverlay
     private val handler = Handler(Looper.getMainLooper())
+    private var lastForegroundPackage: String? = null
+    private var showingBlockedPackage: String? = null
 
     private val pollRunnable = object : Runnable {
         override fun run() {
@@ -26,46 +30,91 @@ class MonitorService : Service() {
     override fun onCreate() {
         super.onCreate()
         creditStore = CreditStore(this)
+        debugLogStore = DebugLogStore(this)
         foregroundReader = ForegroundAppReader(this)
+        monitorStateStore = MonitorStateStore(this)
         overlay = BlockOverlay(this)
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, notification("Monitoring selected apps"))
+        monitorStateStore.setRunning(true)
+        debugLogStore.record("monitor_started")
         handler.post(pollRunnable)
     }
 
     override fun onDestroy() {
         handler.removeCallbacks(pollRunnable)
-        overlay.hide()
+        hideOverlay("monitor_stopped")
+        monitorStateStore.setRunning(false)
+        debugLogStore.record("monitor_stopped")
         super.onDestroy()
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     private fun poll() {
-        if (!PermissionChecks.hasUsageAccess(this) || !PermissionChecks.canDrawOverlays(this)) {
-            overlay.hide()
+        if (!PermissionChecks.hasUsageAccess(this)) {
+            debugLogStore.record("usage_access_missing")
+            hideOverlay("usage_access_missing")
+            return
+        }
+
+        if (!PermissionChecks.canDrawOverlays(this)) {
+            debugLogStore.record("overlay_permission_missing")
+            hideOverlay("overlay_permission_missing")
             return
         }
 
         val state = creditStore.read()
         val foregroundPackage = foregroundReader.currentForegroundPackage()
+
+        if (foregroundPackage != null && foregroundPackage != lastForegroundPackage) {
+            lastForegroundPackage = foregroundPackage
+            debugLogStore.record("foreground_changed:$foregroundPackage")
+        }
+
         val shouldBlock = foregroundPackage != null &&
             foregroundPackage != packageName &&
             state.blockedTargets.contains(foregroundPackage) &&
             state.remainingMinutes <= 0
 
         if (shouldBlock) {
-            overlay.show(
-                packageName = foregroundPackage,
-                onOpenApp = { openMainActivity() },
-                onAddCredit = {
-                    creditStore.addMinutes(5)
-                    overlay.hide()
+            debugLogStore.record("target_matched:$foregroundPackage")
+            showOverlay(foregroundPackage, state.strictMode)
+        } else {
+            hideOverlay(
+                when {
+                    foregroundPackage == null -> "foreground_unknown"
+                    state.remainingMinutes > 0 -> "credit_available"
+                    else -> "target_mismatch"
                 }
             )
-        } else {
-            overlay.hide()
         }
+    }
+
+    private fun showOverlay(foregroundPackage: String, strictMode: Boolean) {
+        if (showingBlockedPackage == foregroundPackage) return
+
+        overlay.hide()
+        overlay.show(
+            packageName = foregroundPackage,
+            canAddCredit = !strictMode,
+            onOpenApp = { openMainActivity() },
+            onAddCredit = {
+                creditStore.addMinutes(5)
+                debugLogStore.record("credit_added:5")
+                hideOverlay("credit_added")
+            }
+        )
+        showingBlockedPackage = foregroundPackage
+        debugLogStore.record("overlay_shown:$foregroundPackage")
+    }
+
+    private fun hideOverlay(reason: String) {
+        if (showingBlockedPackage != null) {
+            debugLogStore.record("overlay_hidden:$reason")
+        }
+        overlay.hide()
+        showingBlockedPackage = null
     }
 
     private fun openMainActivity() {

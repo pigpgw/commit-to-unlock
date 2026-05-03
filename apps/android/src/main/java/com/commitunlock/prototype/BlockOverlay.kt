@@ -14,7 +14,12 @@ class BlockOverlay(private val context: Context) {
     private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
     private var overlayView: View? = null
 
-    fun show(packageName: String, onOpenApp: () -> Unit, onAddCredit: () -> Unit) {
+    fun show(
+        packageName: String,
+        canAddCredit: Boolean,
+        onOpenApp: () -> Unit,
+        onAddCredit: () -> Unit
+    ) {
         if (overlayView != null) return
 
         val container = LinearLayout(context).apply {
@@ -49,10 +54,22 @@ class BlockOverlay(private val context: Context) {
             setOnClickListener { onAddCredit() }
         }
 
+        val strictModeNotice = TextView(context).apply {
+            text = "Strict mode is on. Test credit shortcut is disabled."
+            textSize = 15f
+            setTextColor(0xFFCBD5E1.toInt())
+            gravity = Gravity.CENTER
+            setPadding(0, 12, 0, 0)
+        }
+
         container.addView(title)
         container.addView(message)
         container.addView(openApp)
-        container.addView(addCredit)
+        if (canAddCredit) {
+            container.addView(addCredit)
+        } else {
+            container.addView(strictModeNotice)
+        }
 
         val layoutType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
