@@ -9,6 +9,7 @@
 | --- | --- |
 | 전체 제품/기술 설계 | [app-design.md](app-design.md) |
 | 실행 순서 | [build-first-execution-plan.md](build-first-execution-plan.md) |
+| 시장/니즈/피벗 게이트 | [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md) |
 | Android Sprint 1.1 | [android-sprint-1.1-design.md](android-sprint-1.1-design.md) |
 | 모바일 credit contract | [mobile-credit-contract.md](mobile-credit-contract.md) |
 | GitHub MVP PRD | [mvp-prd.md](mvp-prd.md) |
@@ -36,6 +37,8 @@ Background only:
 | D-010 | GitHub scoring은 PR 중심, rules-first, ledger-first | commit 수 보상은 악용되기 쉽고, 설명 가능한 rule이 AI 단독 판정보다 신뢰를 만든다. | Deferred |
 | D-011 | LLM은 full diff 심사자가 아니라 explanation 보조층 | privacy, 비용, 신뢰 리스크를 낮추고 rules-first 정책을 유지한다. | Deferred |
 | D-012 | 금전 스테이크, 부모/학교, 삭제 방지는 MVP 제외 | 결제/미성년자/MDM/스토어 정책 리스크가 핵심 검증을 흐린다. | Accepted |
+| D-013 | 제품 포지션을 generic blocker가 아니라 developer proof ledger로 고정 | 차단 앱 시장은 붐비고 무료/저가 대안이 많다. 수익 명분은 차단 자체가 아니라 검증 가능한 개발 활동 ledger와 설명 가능한 credit 정책에서 나온다. | Accepted |
+| D-014 | Sprint 4 전 market/dogfood gate를 추가 | GitHub scoring을 본격 구현하기 전에 모바일 차단 효용, 본인 반복 사용, 자연스러운 scorable dev event 빈도를 확인해야 한다. | Accepted |
 
 ## Revisit Triggers
 
@@ -46,3 +49,6 @@ Background only:
 - iOS Family Controls entitlement가 장기간 승인되지 않는다.
 - GitHub private repo 연결 거부가 실제 사용에서 핵심 blocker가 된다.
 - PR-only scoring이 개인 개발자 activation을 크게 떨어뜨린다.
+- 14일 dogfood에서 monitor enabled day가 8일 미만이거나 override가 주 3회를 넘는다.
+- 14일 동안 자연스럽게 생긴 scorable dev event가 5개 미만이다.
+- 사용자가 제품을 “개발 보상 ledger”가 아니라 “비싼 차단 앱”으로 인식하는 신호가 강하다.

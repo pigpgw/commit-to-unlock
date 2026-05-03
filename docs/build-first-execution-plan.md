@@ -3,7 +3,7 @@
 결정: 인터뷰/설문 없이 만든다.  
 전략: 고객 검증을 말로 하지 않고, 먼저 `로컬 모바일 차단 -> mock credit -> selected app shield/block` 루프를 실제 기기/에뮬레이터에서 검증한다. GitHub scoring은 모바일 차단 가능성이 확인된 뒤 재개한다.
 
-제품/기술/UX의 기준 설계는 [app-design.md](app-design.md)를 따른다. 구현 판단은 [decision-log.md](decision-log.md)를 우선 확인한다. Android 다음 구현 단위는 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)를 따른다. 이 문서는 실행 순서와 milestone 기준을 관리한다.
+제품/기술/UX의 기준 설계는 [app-design.md](app-design.md)를 따른다. 구현 판단은 [decision-log.md](decision-log.md)를 우선 확인한다. 시장/니즈/피벗 판단은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. Android 다음 구현 단위는 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)를 따른다. 이 문서는 실행 순서와 milestone 기준을 관리한다.
 
 ## 1. 바뀐 원칙
 
@@ -68,6 +68,8 @@
 ### Milestone 3: GitHub Scoring Simulator
 
 목표: 모바일 차단 없이 GitHub 활동을 크레딧으로 바꾸는 서버/웹 루프를 만든다.
+
+주의: Milestone 3은 자동 착수하지 않는다. 먼저 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)의 Gate B/C를 확인한다. 14일 dogfood에서 반복 사용이 약하거나 자연스러운 scorable dev event가 부족하면 GitHub PR-only 대신 WakaTime/IDE/desktop-browser proof channel을 먼저 검토한다.
 
 기능:
 
@@ -324,6 +326,8 @@ docs/
 - iOS FamilyControls entitlement와 Xcode 프로젝트 전환 경로가 막히지 않는다.
 - mock credit contract가 Android/iOS 양쪽에서 같은 의미로 유지된다.
 - 이후 GitHub scoring을 붙일 API shape가 명확하다.
+- 14일 dogfood에서 monitor enabled day가 8일 이상이고 override가 주 3회 이하이다.
+- 14일 동안 자연스러운 scorable dev event가 5개 이상이다. PR-only가 부족하면 commit batch/WakaTime/IDE channel을 추가한다.
 
 방향 전환:
 
@@ -331,6 +335,8 @@ docs/
 - Android overlay가 정책상 위험하면 interruption-only UX로 낮춘다.
 - PR 중심이 너무 느리면 commit batch provisional credit 비중을 높인다.
 - GitHub App 권한 부담이 크면 public repo mode와 WakaTime mode를 검토한다.
+- 사용자가 제품을 “비싼 차단 앱”으로 인식하면 local one-time + cloud scoring Pro로 가격 구조를 바꾼다.
+- earn-to-unlock 언어가 처벌처럼 느껴지면 proof ledger/report 중심으로 낮춘다.
 
 중단:
 
