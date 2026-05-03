@@ -31,6 +31,7 @@
 | Scoring package | pure rules scaffold | Sprint 4 후보. API/mobile과 아직 연결하지 않음 |
 | API | `/health` only | GitHub placeholder 제거 상태가 맞음 |
 | iOS | source/design skeleton | Xcode/entitlement 전에는 runnable 검증 불가 |
+| Design direction | documented from competitor/platform research | generic wellness blocker가 아니라 developer utility dashboard + playful edge로 고정 |
 | CI | TypeScript + Android | main 기준 통과 |
 
 ## 3. MVP Progress
@@ -172,7 +173,7 @@ GitHub-backed 개인 개발자 MVP 기준으로 보면 아직 30% 전후다. 이
    DogfoodEventStore export/parse/sanitize/max events unit tests.
 
 3. `feature/android-dogfood-review`
-   앱 내부에 Data Quality/Gate summary를 최소 표시하거나 export 직후 확인 UX 추가.
+   [design-research-and-ux-direction.md](design-research-and-ux-direction.md)의 sectioning 기준으로 Data Quality/Gate summary를 앱 안에 최소 표시하거나 export 직후 확인 UX 추가.
 
 4. `docs/github-sprint4-entry`
    GitHub App permissions, webhook dedupe, enrichment, ledger write, privacy policy를 Sprint 4 착수 전 설계.

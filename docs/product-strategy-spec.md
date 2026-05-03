@@ -1,6 +1,6 @@
 # Commit-to-Unlock Product Strategy Spec
 
-문서 상태: v0.2
+문서 상태: v0.3
 역할: 기획, UX, 사업 모델, 개발 우선순위를 하나의 실행 기준으로 묶는다.  
 전제: 인터뷰/설문/fake-door 없이 build-first로 간다. 단, 제품이 약하면 빠르게 축소하거나 피벗한다.
 
@@ -27,6 +27,8 @@ Commit-to-Unlock은 차단 앱이 아니다. 개발자가 실제로 만든 작�
 > Verified developer proof-of-work becomes guilt-free screen time.
 
 사용자에게는 “코딩 안 하면 막는다”가 아니라 “검증된 개발 활동을 했으니 떳떳하게 쉬게 해준다”로 말한다.
+
+디자인 포지션은 [design-research-and-ux-direction.md](design-research-and-ux-direction.md)의 `developer utility dashboard + playful edge`를 따른다. Opal, one sec, Freedom, Jomo는 차단 UX 참고 대상이고, GitHub Primer/WakaTime은 제품 표면의 시각 언어 참고 대상이다.
 
 ### Do Not Compete As
 
@@ -108,6 +110,7 @@ Job-to-be-done:
 | No shame copy | 중독/실패/벌점보다 회복/리듬/떳떳한 휴식을 말한다. |
 | Policy-compliant control | 전체 폰 잠금, 삭제 방지, 우회적인 Accessibility 사용은 피한다. |
 | Proof-backed quests | 오늘 할 일은 등록할 수 있지만, unlock은 개발 증거가 있어야 한다. |
+| Developer tool density | 마케팅/웰빙 앱보다 GitHub/WakaTime처럼 상태, 장부, 이유를 빠르게 스캔하게 한다. |
 
 ## 5. Core Product Loops
 

@@ -10,6 +10,7 @@
 | 전체 제품/기술 설계 | [app-design.md](app-design.md) |
 | proof/quest/policy MVP | [proof-policy-mvp.md](proof-policy-mvp.md) |
 | 제품 전략/UX/사업 패키징 | [product-strategy-spec.md](product-strategy-spec.md) |
+| 디자인 조사/화면 톤 | [design-research-and-ux-direction.md](design-research-and-ux-direction.md) |
 | 실행 순서 | [build-first-execution-plan.md](build-first-execution-plan.md) |
 | 시장/니즈/피벗 게이트 | [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md) |
 | 현재 MVP 진행도/보완 우선순위 | [mvp-progress-audit.md](mvp-progress-audit.md) |
@@ -45,6 +46,7 @@
 | D-021 | 요일/휴일/free day/emergency unlock은 credit보다 상위 정책으로 둔다 | 예외 정책이 없으면 사용자는 앱을 삭제하거나 권한을 꺼버린다. 단, 모든 예외는 event log와 ledger에 남긴다. | Accepted |
 | D-022 | GitHub scoring 재개 전 MVP progress audit을 통과 기준으로 사용 | 현재 병목은 scoring 코드가 아니라 실기기 dogfood 데이터 부재다. Gate A/B/C 판단 없이 Sprint 4로 가면 잘못된 product risk를 늦게 발견한다. | Accepted |
 | D-023 | 다음 4개 PR은 dogfood runbook, event store tests, dogfood review UX, GitHub Sprint 4 entry spec 순서로 진행 | 모바일 차단 가치와 데이터 품질을 확인한 뒤 proof ledger로 넘어가야 한다. | Accepted |
+| D-024 | 디자인 방향은 developer utility dashboard + playful edge로 고정 | Opal/one sec/Freedom/Jomo는 차단 UX가 강하지만 generic blocker 시장이 붐빈다. 수익 명분은 GitHub/WakaTime류 개발자 proof ledger를 전면에 두는 데 있다. | Accepted |
 
 ## Revisit Triggers
 

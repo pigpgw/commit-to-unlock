@@ -1,10 +1,10 @@
 # Commit-to-Unlock App Design
 
-문서 상태: v0.5
+문서 상태: v0.6
 역할: 제품/기술 통합 설계 기준 문서
 현재 최우선 구현: Android dogfood 데이터 수집과 Gate A/B/C 판단
 
-상세 결정 기록은 [decision-log.md](decision-log.md)를 따른다. 제품 전략/UX/사업 패키징은 [product-strategy-spec.md](product-strategy-spec.md)를 따른다. proof/quest/요일/휴일/override 정책은 [proof-policy-mvp.md](proof-policy-mvp.md)를 따른다. 시장/니즈/피벗 기준은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. Android 다음 구현 단위는 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)가 우선한다.
+상세 결정 기록은 [decision-log.md](decision-log.md)를 따른다. 제품 전략/UX/사업 패키징은 [product-strategy-spec.md](product-strategy-spec.md)를 따른다. 디자인 조사와 화면 톤은 [design-research-and-ux-direction.md](design-research-and-ux-direction.md)를 따른다. proof/quest/요일/휴일/override 정책은 [proof-policy-mvp.md](proof-policy-mvp.md)를 따른다. 시장/니즈/피벗 기준은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. Android 다음 구현 단위는 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)가 우선한다.
 
 ## 1. 결정 요약
 
@@ -55,6 +55,20 @@ Commit-to-Unlock은 “개발 활동을 했다고 직접 체크하면 앱을 열
 - 개발자 gate는 로컬 onboarding flag다. 실제 신원 인증, 보안 경계, 결제 권한으로 쓰지 않는다.
 - 거절 화면은 재미로 앱을 종료할 수 있지만, 데이터를 삭제하거나 권한을 바꾸지 않는다.
 - 오덕/개발자 밈은 써도 사용자를 모욕하거나 중독/ADHD를 조롱하지 않는다.
+
+디자인 방향은 `developer utility dashboard + playful edge`로 고정한다. Opal, one sec, Freedom, Jomo 같은 앱은 차단/strict/schedule UX가 강하므로 참고하되, 이 제품은 generic wellness blocker처럼 보이면 안 된다. Home, Proof Feed, Ledger는 GitHub Primer/WakaTime에 가까운 dense developer tool로 설계하고, 재미있는 문구는 Developer Gate와 Block Overlay에만 제한한다.
+
+기본 visual system:
+
+| 요소 | 기준 |
+| --- | --- |
+| 배경 | light-first, `#F6F8FA` 계열 |
+| surface | white panel, thin border |
+| radius | 8dp 이하 |
+| 상태 색 | success/warning/danger를 의미별로만 사용 |
+| accent | GitHub blue 계열 |
+| monospace | package, repo, reason code, PR ref |
+| 피해야 할 테마 | neon hacker, one-note purple gradient, beige wellness |
 
 ## 2. Product UX
 

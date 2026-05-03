@@ -83,6 +83,8 @@ overlay는 `remainingMinutes > 0`, target mismatch, 권한 missing, service stop
 
 MainActivity에는 별도 debug log가 아니라 단일 dogfood event log를 표시한다. 같은 이벤트 저장소가 in-app log, 14일 summary, TSV export의 source of truth다.
 
+화면 정리는 [design-research-and-ux-direction.md](design-research-and-ux-direction.md)의 Android Prototype IA를 따른다. 기능을 삭제하지 않고 Status, Permissions, Targets And Policy, Quest And Proof, Emergency, Dogfood Review 섹션으로 나눈다.
+
 필수 event:
 
 - `permission_missing`
