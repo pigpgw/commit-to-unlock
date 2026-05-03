@@ -188,7 +188,7 @@ MVP에는 적용 요일을 반드시 넣는다.
 - Monday-Friday: ON
 - Saturday-Sunday: OFF
 - time window: all day
-- public holidays: OFF, 아직 자동 판정하지 않음
+- public holidays: local Android MVP에서는 자동 판정과 UI 설정 없음
 - manual holiday today: OFF
 
 설정:
@@ -198,13 +198,13 @@ MVP에는 적용 요일을 반드시 넣는다.
 | `activeWeekdays` | 정책을 적용할 요일. 1=Monday, 7=Sunday |
 | `activeFrom` | 적용 시작 시간. optional |
 | `activeUntil` | 적용 종료 시간. optional |
-| `applyOnPublicHolidays` | 공휴일에도 적용할지 |
+| `applyOnPublicHolidays` | future API/server policy에서 공휴일에도 적용할지. Android local MVP UI에는 노출하지 않음 |
 | `manualHolidayToday` | 오늘 하루 휴일 처리 |
 | `timezone` | 날짜/요일/freeUntil 계산 기준 |
 
 공휴일 MVP 결정:
 
-- 자동 공휴일 API는 MVP에서 제외한다.
+- 자동 공휴일 API와 Android UI 설정은 MVP에서 제외한다.
 - 사용자가 `오늘 휴일 처리`를 누를 수 있게 한다.
 - v1에서 locale/country 기반 holiday table 또는 calendar provider를 붙인다.
 

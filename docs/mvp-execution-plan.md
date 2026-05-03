@@ -81,7 +81,7 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 | --- | --- | --- |
 | Android app | runnable local prototype + target guardrails | 현재 유일한 product surface |
 | Android dogfood | runbook/log/export/analyzer/in-app review 있음 | 14일 실기기 데이터 필요 |
-| Android UI | 긴 화면을 section helper로 분리함 | 실기기 dogfood fix만 추가 |
+| Android UI | 긴 화면을 section helper와 pure text/time helper로 분리함 | 실기기 dogfood fix만 추가 |
 | Shared policy | TS canonical + Android mirror + golden fixtures | 정책 drift 방지 기준 확보 |
 | Scoring package | pure rules scaffold | 유지. runtime 연결 금지 |
 | API | health-only, localhost/CORS-closed default | 유지. Sprint 4 전 auth/webhook 금지 |
@@ -103,6 +103,8 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 - daily quest + mock proof free day.
 - dogfood event log, TSV export, analyzer, in-app Gate review.
 - target guardrail.
+- public holiday placeholder UI 제거.
+- time parser와 dogfood/quest text formatter 단위 테스트 추가.
 - GitHub Sprint 4 security entry spec.
 - product/security/competitive/account hardening docs.
 
@@ -165,7 +167,7 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 
 | 대상 | 문제 | 처리 |
 | --- | --- | --- |
-| `MainActivity.kt` | 여전히 큰 Android Activity | 실기기 smoke 전에는 추가 분리보다 동작 안정성 우선. 다음 리팩터는 device evidence 이후 |
+| `MainActivity.kt` | 여전히 큰 Android Activity | time/text helper는 분리 완료. 남은 분리는 실기기 smoke 이후 |
 | `DogfoodEventStore.kt` | parser/export 핵심 | unit test 추가 완료. event type constants는 후순위 |
 | TS/Kotlin policy mirror | drift 위험 | golden fixtures 추가 완료. 정책 변경 시 fixture 우선 갱신 |
 | Android event type strings | 문자열 분산 | tests 후 constants/sealed class 검토 |
@@ -343,6 +345,17 @@ Deliverables:
 - active source-of-truth reduced to current MVP docs
 - MVP closeout status and missing work consolidated
 - code cleanup scan documented
+
+### PR 13: Android maintenance cleanup
+
+Status: complete.
+
+Deliverables:
+
+- public holiday placeholder UI removed from Android local MVP
+- time input parsing extracted and unit-tested
+- dogfood event / quest summary text formatting extracted and unit-tested
+- recent package suggestions filtered through target guardrails
 
 ## 10. Work Rules
 

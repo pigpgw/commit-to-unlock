@@ -136,7 +136,7 @@ TSV에 들어갈 수 있는 데이터:
    - weekdays: Monday-Friday
    - active time: blank for all day
    - manual holiday: off
-   - public holiday skip: off until real holiday source exists
+   - public holiday source: not connected in local MVP
 
 ## 6. Smoke Checklist
 

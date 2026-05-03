@@ -41,7 +41,6 @@ class MainActivity : Activity() {
     private lateinit var strictModeInput: CheckBox
     private lateinit var activeFromInput: EditText
     private lateinit var activeUntilInput: EditText
-    private lateinit var applyPublicHolidaysInput: CheckBox
     private lateinit var manualHolidayInput: CheckBox
     private lateinit var questTitleInput: EditText
     private lateinit var questRequiredInput: CheckBox
@@ -203,10 +202,6 @@ class MainActivity : Activity() {
             setSingleLine(true)
         }
 
-        applyPublicHolidaysInput = CheckBox(this).apply {
-            text = "Apply on public holidays (manual placeholder)"
-        }
-
         manualHolidayInput = CheckBox(this).apply {
             text = "Treat today as holiday"
         }
@@ -309,7 +304,6 @@ class MainActivity : Activity() {
         }
         root.addView(activeFromInput)
         root.addView(activeUntilInput)
-        root.addView(applyPublicHolidaysInput)
         root.addView(manualHolidayInput)
         root.addView(button("Save policy schedule") { savePolicy() })
         root.addView(button("Set mock free day until midnight") { setMockFreeDay() })
@@ -441,9 +435,9 @@ class MainActivity : Activity() {
     }
 
     private fun savePolicy() {
-        val activeFrom = normalizedTime(activeFromInput.text.toString())
-        val activeUntil = normalizedTime(activeUntilInput.text.toString())
-        if (activeFrom == INVALID_TIME || activeUntil == INVALID_TIME) {
+        val activeFrom = TimeInputParser.normalize(activeFromInput.text.toString())
+        val activeUntil = TimeInputParser.normalize(activeUntilInput.text.toString())
+        if (activeFrom is TimeInputValue.Invalid || activeUntil is TimeInputValue.Invalid) {
             Toast.makeText(this, "Use HH:mm time, for example 09:30", Toast.LENGTH_SHORT).show()
             dogfoodEventStore.record("policy_save_rejected", "invalid_time")
             renderState()
@@ -460,16 +454,16 @@ class MainActivity : Activity() {
 
         policyStore.save(current.copy(
             activeWeekdays = selectedWeekdays,
-            activeFrom = activeFrom,
-            activeUntil = activeUntil,
-            applyOnPublicHolidays = applyPublicHolidaysInput.isChecked,
+            activeFrom = activeFrom.valueOrNull(),
+            activeUntil = activeUntil.valueOrNull(),
+            applyOnPublicHolidays = false,
             manualHolidayDate = if (manualHolidayInput.isChecked) today else null,
             timezone = timezone
         ))
 
         dogfoodEventStore.record(
             "policy_saved",
-            "weekdays=${selectedWeekdays.joinToString(",")} from=${activeFrom.orEmpty()} until=${activeUntil.orEmpty()} manualHoliday=${manualHolidayInput.isChecked}"
+            "weekdays=${selectedWeekdays.joinToString(",")} from=${activeFrom.valueOrNull().orEmpty()} until=${activeUntil.valueOrNull().orEmpty()} manualHoliday=${manualHolidayInput.isChecked}"
         )
         renderState()
     }
@@ -674,7 +668,6 @@ class MainActivity : Activity() {
         }
         activeFromInput.setText(policy.activeFrom.orEmpty())
         activeUntilInput.setText(policy.activeUntil.orEmpty())
-        applyPublicHolidaysInput.isChecked = policy.applyOnPublicHolidays
         manualHolidayInput.isChecked = policy.isManualHolidayActive()
         val recentPackages = recentExternalPackages()
 
@@ -707,12 +700,12 @@ class MainActivity : Activity() {
             "Active weekdays: ${policy.activeWeekdays.takeIf { it.isNotEmpty() }?.joinToString(",") ?: "none"}",
             "Active time: ${(policy.activeFrom ?: "00:00")} - ${(policy.activeUntil ?: "24:00")}",
             "Manual holiday today: ${policy.isManualHolidayActive()}",
-            "Public holiday setting: ${if (policy.applyOnPublicHolidays) "apply" else "skip"}",
+            "Public holiday source: not connected in local MVP",
             "Timezone: ${policy.timezone}",
             "Active emergency unlock: ${activeUnlocks.firstOrNull()?.expiresAt ?: "none"}"
         ).joinToString("\n")
 
-        questSummaryText.text = buildQuestSummary(quests, state)
+        questSummaryText.text = PrototypeText.questSummary(quests, state)
 
         recentPackagesText.text = buildString {
             append("Recent external packages\n")
@@ -748,42 +741,7 @@ class MainActivity : Activity() {
             if (events.isEmpty()) {
                 append("none")
             } else {
-                append(events.joinToString("\n") { event -> formatDogfoodEvent(event) })
-            }
-        }
-    }
-
-    private fun formatDogfoodEvent(event: DogfoodEvent): String {
-        return listOf(
-            event.timestamp.toString(),
-            event.type,
-            event.target?.let { "target=$it" }.orEmpty(),
-            event.policyReason?.let { "reason=$it" }.orEmpty(),
-            event.creditRemaining?.let { "credit=$it" }.orEmpty(),
-            event.detail
-        )
-            .filter { it.isNotEmpty() }
-            .joinToString(" ")
-    }
-
-    private fun buildQuestSummary(quests: List<DailyQuest>, state: CreditState): String {
-        val requiredCount = quests.count { it.required }
-        val completedRequiredCount = quests.count {
-            it.required && it.status == DailyQuestStatus.COMPLETED
-        }
-        return buildString {
-            append("Daily quest summary\n")
-            append("Required completed: $completedRequiredCount / $requiredCount\n")
-            append("Free day eligible: ${DailyQuestPolicy.shouldGrantFreeDay(quests)}\n")
-            append("Current free until: ${state.freeUntil ?: "none"}\n")
-            if (quests.isEmpty()) {
-                append("No quests planned today")
-            } else {
-                append(quests.joinToString("\n") { quest ->
-                    val requiredLabel = if (quest.required) "required" else "optional"
-                    val proofLabel = quest.proofType ?: "no-proof"
-                    "- [${quest.status.code}] ${quest.title} ($requiredLabel, $proofLabel)"
-                })
+                append(events.joinToString("\n") { event -> PrototypeText.dogfoodEvent(event) })
             }
         }
     }
@@ -791,7 +749,7 @@ class MainActivity : Activity() {
     private fun recentExternalPackages(): List<String> {
         if (!PermissionChecks.hasUsageAccess(this)) return emptyList()
         return foregroundReader.recentForegroundPackages()
-            .filter { it != packageName }
+            .filter { TargetGuardrails.normalizeTargets(listOf(it), packageName).accepted.isNotEmpty() }
     }
 
     private fun foregroundPackageOrNull(): String? {
@@ -800,23 +758,9 @@ class MainActivity : Activity() {
     }
 
     private fun foregroundUnavailableReason(): String {
-        return if (PermissionChecks.hasUsageAccess(this)) {
-            "unknown"
-        } else {
-            "unknown (usage access missing)"
-        }
-    }
-
-    private fun normalizedTime(value: String): String? {
-        val trimmed = value.trim()
-        if (trimmed.isEmpty()) return null
-        if (!TIME_REGEX.matches(trimmed)) return INVALID_TIME
-
-        val hour = trimmed.substringBefore(":").toInt()
-        val minute = trimmed.substringAfter(":").toInt()
-        if (hour !in 0..23 || minute !in 0..59) return INVALID_TIME
-
-        return "%02d:%02d".format(hour, minute)
+        return PrototypeText.foregroundUnavailableReason(
+            hasUsageAccess = PermissionChecks.hasUsageAccess(this)
+        )
     }
 
     private fun shareDogfoodExport() {
@@ -845,10 +789,8 @@ class MainActivity : Activity() {
     }
 
     companion object {
-        private const val INVALID_TIME = "__invalid_time__"
         private const val DAILY_EMERGENCY_LIMIT = 3
         private const val WEEKLY_EMERGENCY_LIMIT = 10
-        private val TIME_REGEX = Regex("""^\d{1,2}:\d{2}$""")
         private val weekdayLabels = listOf(
             1 to "Monday",
             2 to "Tuesday",

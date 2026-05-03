@@ -142,6 +142,8 @@ Android local MVP에서 이미 완료된 hardening:
 - strictMode가 true이면 overlay 안의 테스트 shortcut 제한.
 - `credit 0으로 초기화` 버튼.
 - target guardrail로 자기 앱, Settings, launcher, permission controller, core service 저장 차단.
+- public holiday placeholder UI 제거. 실제 holiday source 전까지 Android local MVP는 공휴일 설정을 노출하지 않는다.
+- time input parsing과 dogfood/quest text formatting을 순수 Kotlin helper로 분리.
 
 Android의 남은 판단은 새 기능 구현이 아니라 실기기 검증이다. 절차는 [android-dogfood-runbook.md](android-dogfood-runbook.md)를 따른다.
 
