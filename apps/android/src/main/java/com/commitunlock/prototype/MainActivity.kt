@@ -22,6 +22,7 @@ class MainActivity : Activity() {
     private lateinit var foregroundReader: ForegroundAppReader
     private lateinit var monitorStateStore: MonitorStateStore
     private lateinit var statusText: TextView
+    private lateinit var recentPackagesText: TextView
     private lateinit var debugLogText: TextView
     private lateinit var packageInput: EditText
     private lateinit var strictModeInput: CheckBox
@@ -76,6 +77,12 @@ class MainActivity : Activity() {
             text = "Strict mode mock flag"
         }
 
+        recentPackagesText = TextView(this).apply {
+            textSize = 13f
+            setTextColor(0xFF334155.toInt())
+            setPadding(0, 14, 0, 10)
+        }
+
         debugLogText = TextView(this).apply {
             textSize = 13f
             setTextColor(0xFF334155.toInt())
@@ -96,7 +103,9 @@ class MainActivity : Activity() {
         })
         root.addView(packageInput)
         root.addView(strictModeInput)
+        root.addView(recentPackagesText)
         root.addView(button("Save blocked packages") { saveTargets() })
+        root.addView(button("Add latest external package") { addLatestExternalPackage() })
         root.addView(button("Add 5 test minutes") {
             creditStore.addMinutes(5)
             debugLogStore.record("credit_added:5")
@@ -157,10 +166,41 @@ class MainActivity : Activity() {
         renderState()
     }
 
+    private fun addLatestExternalPackage() {
+        if (!PermissionChecks.hasUsageAccess(this)) {
+            debugLogStore.record("usage_access_missing")
+            renderState()
+            return
+        }
+
+        val latestExternalPackage = foregroundReader.recentForegroundPackages()
+            .firstOrNull { it != packageName }
+
+        if (latestExternalPackage == null) {
+            debugLogStore.record("recent_external_package_missing")
+            renderState()
+            return
+        }
+
+        val current = creditStore.read()
+        val nextTargets = current.blockedTargets
+            .plus(latestExternalPackage)
+            .distinct()
+
+        creditStore.save(current.copy(
+            blockedTargets = nextTargets,
+            strictMode = strictModeInput.isChecked,
+            lastUpdatedAt = Instant.now().toString()
+        ))
+        debugLogStore.record("blocked_target_added:$latestExternalPackage")
+        renderState()
+    }
+
     private fun renderState() {
         val state = creditStore.read()
         packageInput.setText(state.blockedTargets.joinToString(", "))
         strictModeInput.isChecked = state.strictMode
+        val recentPackages = recentExternalPackages()
 
         statusText.text = listOf(
             "Usage Access: ${if (PermissionChecks.hasUsageAccess(this)) "granted" else "missing"}",
@@ -174,6 +214,15 @@ class MainActivity : Activity() {
             "Last updated: ${state.lastUpdatedAt}"
         ).joinToString("\n")
 
+        recentPackagesText.text = buildString {
+            append("Recent external packages\n")
+            if (recentPackages.isEmpty()) {
+                append("none")
+            } else {
+                append(recentPackages.joinToString("\n"))
+            }
+        }
+
         debugLogText.text = buildString {
             append("Debug log\n")
             val events = debugLogStore.read()
@@ -183,6 +232,12 @@ class MainActivity : Activity() {
                 append(events.joinToString("\n"))
             }
         }
+    }
+
+    private fun recentExternalPackages(): List<String> {
+        if (!PermissionChecks.hasUsageAccess(this)) return emptyList()
+        return foregroundReader.recentForegroundPackages()
+            .filter { it != packageName }
     }
 
     private fun currentForegroundPackage(): String {
