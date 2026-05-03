@@ -9,6 +9,8 @@ import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.os.PowerManager
+import android.os.SystemClock
 import java.time.LocalDate
 
 class MonitorService : Service() {
@@ -22,6 +24,9 @@ class MonitorService : Service() {
     private var lastForegroundPackage: String? = null
     private var showingBlockedPackage: String? = null
     private var lastHeartbeatDay: String? = null
+    private var activeSpendPackage: String? = null
+    private var lastSpendTickMs: Long? = null
+    private var spendAccumulatorMs: Long = 0L
 
     private val pollRunnable = object : Runnable {
         override fun run() {
@@ -63,6 +68,7 @@ class MonitorService : Service() {
         if (!PermissionChecks.hasUsageAccess(this)) {
             debugLogStore.record("usage_access_missing")
             dogfoodEventStore.record("permission_missing", "usage_access")
+            stopSpendSession("usage_access_missing")
             hideOverlay("usage_access_missing")
             return
         }
@@ -70,12 +76,14 @@ class MonitorService : Service() {
         if (!PermissionChecks.canDrawOverlays(this)) {
             debugLogStore.record("overlay_permission_missing")
             dogfoodEventStore.record("permission_missing", "overlay")
+            stopSpendSession("overlay_permission_missing")
             hideOverlay("overlay_permission_missing")
             return
         }
 
-        val state = creditStore.read()
+        var state = creditStore.read()
         val foregroundPackage = foregroundReader.currentForegroundPackage()
+        val deviceInteractive = isDeviceInteractive()
 
         if (foregroundPackage != null && foregroundPackage != lastForegroundPackage) {
             lastForegroundPackage = foregroundPackage
@@ -83,14 +91,30 @@ class MonitorService : Service() {
             dogfoodEventStore.record("foreground_changed", foregroundPackage)
         }
 
-        val shouldBlock = foregroundPackage != null &&
+        val isTrackedTarget = foregroundPackage != null &&
             foregroundPackage != packageName &&
-            state.blockedTargets.contains(foregroundPackage) &&
-            state.remainingMinutes <= 0
+            state.blockedTargets.contains(foregroundPackage)
+
+        if (foregroundPackage != null && isTrackedTarget && state.remainingMinutes > 0 && deviceInteractive) {
+            state = accrueSpend(foregroundPackage, state)
+        } else {
+            stopSpendSession(
+                when {
+                    !deviceInteractive -> "device_not_interactive"
+                    foregroundPackage == null -> "foreground_unknown"
+                    !isTrackedTarget -> "target_mismatch"
+                    else -> "no_credit"
+                },
+                clearAccumulator = state.remainingMinutes <= 0
+            )
+        }
+
+        val shouldBlock = isTrackedTarget && state.remainingMinutes <= 0
 
         if (shouldBlock) {
-            debugLogStore.record("target_matched:$foregroundPackage")
-            showOverlay(foregroundPackage, state.strictMode)
+            val blockedPackage = foregroundPackage
+            debugLogStore.record("target_matched:$blockedPackage")
+            showOverlay(blockedPackage, state.strictMode)
         } else {
             hideOverlay(
                 when {
@@ -108,6 +132,60 @@ class MonitorService : Service() {
 
         lastHeartbeatDay = today
         dogfoodEventStore.record("monitor_heartbeat", "date=$today")
+    }
+
+    private fun accrueSpend(foregroundPackage: String, state: CreditState): CreditState {
+        val nowMs = SystemClock.elapsedRealtime()
+        if (activeSpendPackage != foregroundPackage) {
+            stopSpendSession("target_changed")
+            activeSpendPackage = foregroundPackage
+            lastSpendTickMs = nowMs
+            debugLogStore.record("target_use_started:$foregroundPackage")
+            dogfoodEventStore.record("target_use_started", foregroundPackage)
+            return state
+        }
+
+        val lastTickMs = lastSpendTickMs ?: nowMs
+        val elapsedMs = (nowMs - lastTickMs).coerceAtLeast(0L)
+        lastSpendTickMs = nowMs
+        spendAccumulatorMs += elapsedMs
+
+        var updatedState = state
+        while (spendAccumulatorMs >= CREDIT_SPEND_INTERVAL_MS && updatedState.remainingMinutes > 0) {
+            spendAccumulatorMs -= CREDIT_SPEND_INTERVAL_MS
+            creditStore.spendMinute()
+            updatedState = creditStore.read()
+            debugLogStore.record("credit_auto_spent:$foregroundPackage")
+            dogfoodEventStore.record(
+                "credit_auto_spent",
+                "package=$foregroundPackage minutes=1 remaining=${updatedState.remainingMinutes}"
+            )
+        }
+
+        if (updatedState.remainingMinutes <= 0) {
+            stopSpendSession("credit_depleted", clearAccumulator = true)
+        }
+
+        return updatedState
+    }
+
+    private fun stopSpendSession(reason: String, clearAccumulator: Boolean = false) {
+        val packageName = activeSpendPackage ?: return
+        debugLogStore.record("target_use_stopped:$reason")
+        dogfoodEventStore.record(
+            "target_use_stopped",
+            "package=$packageName reason=$reason pending_ms=$spendAccumulatorMs"
+        )
+        activeSpendPackage = null
+        lastSpendTickMs = null
+        if (clearAccumulator) {
+            spendAccumulatorMs = 0L
+        }
+    }
+
+    private fun isDeviceInteractive(): Boolean {
+        val powerManager = getSystemService(PowerManager::class.java)
+        return powerManager.isInteractive
     }
 
     private fun showOverlay(foregroundPackage: String, strictMode: Boolean) {
@@ -182,5 +260,6 @@ class MonitorService : Service() {
         private const val CHANNEL_ID = "commit_unlock_monitor"
         private const val NOTIFICATION_ID = 1001
         private const val POLL_MS = 1_000L
+        private const val CREDIT_SPEND_INTERVAL_MS = 60_000L
     }
 }

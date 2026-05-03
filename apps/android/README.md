@@ -11,6 +11,7 @@ This is the first runnable Commit-to-Unlock mobile prototype. It does not connec
   - `lastUpdatedAt`
 - Uses `UsageStatsManager` to detect the foreground app.
 - Uses Android overlay permission to show a blocking screen when a blocked package is foreground and mock credit is `0`.
+- Automatically spends `1` local credit minute for every `60` seconds of foreground use on blocked targets while the device is interactive.
 - Shows the latest detected foreground package and a bounded local debug log for device testing.
 - Shows recent foreground packages from UsageStats so a target can be added without installed-app scanning.
 - Hides the overlay test-credit shortcut when strict mode is enabled.
@@ -71,7 +72,8 @@ This is the first runnable Commit-to-Unlock mobile prototype. It does not connec
 9. Open Chrome. The blocking overlay should appear within a few seconds.
 10. Return to Commit Unlock and tap `Add 5 test minutes`.
 11. Open Chrome again. The overlay should not stay visible while mock credit is above `0`.
-12. Enable strict mode, reset credit to `0`, and open Chrome again. The overlay should not show the `Add 5 test minutes` shortcut.
+12. Keep Chrome foreground for at least 60 seconds and confirm one minute is spent automatically.
+13. Enable strict mode, reset credit to `0`, and open Chrome again. The overlay should not show the `Add 5 test minutes` shortcut.
 
 Use the in-app debug log to inspect permission, foreground, target-match, overlay, and credit events.
 
@@ -86,6 +88,7 @@ Use it to track:
 - permission failures
 - overlay open-app actions
 - overlay test-credit unlocks
+- automatic credit spends
 - manual credit changes
 
 Tap `Share dogfood export` to export a TSV with `timestamp`, `type`, and `detail` columns. This is local-only and does not upload data to any server.
