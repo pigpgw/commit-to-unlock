@@ -1,10 +1,10 @@
 # Commit-to-Unlock App Design
 
-문서 상태: v0.6
+문서 상태: v0.7
 역할: 제품/기술 통합 설계 기준 문서
 현재 최우선 구현: Android dogfood 데이터 수집과 Gate A/B/C 판단
 
-현재 실행 순서는 [mvp-execution-plan.md](mvp-execution-plan.md)를 우선한다. 신규 기능의 기획/보안/개인정보/platform gate는 [product-security-hardening-plan.md](product-security-hardening-plan.md)를 따른다. 경쟁 서비스 기준의 차별화와 paid moat는 [competitive-service-review.md](competitive-service-review.md)를 따른다. 상세 결정 기록은 [decision-log.md](decision-log.md)를 따른다. 제품 전략/UX/사업 패키징은 [product-strategy-spec.md](product-strategy-spec.md)를 따른다. 디자인 조사와 화면 톤은 [design-research-and-ux-direction.md](design-research-and-ux-direction.md)를 따른다. 보안/로직 점검은 [security-and-logic-review.md](security-and-logic-review.md)를 따른다. GitHub runtime 진입 기준은 [github-sprint4-entry.md](github-sprint4-entry.md)를 따른다. 차단 범위와 계정/탈퇴 UX는 [control-account-design.md](control-account-design.md)를 따른다. proof/quest/요일/휴일/override 정책은 [proof-policy-mvp.md](proof-policy-mvp.md)를 따른다. 시장/니즈/피벗 기준은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. Android 다음 구현 단위는 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)가 우선한다.
+현재 실행 순서는 [mvp-execution-plan.md](mvp-execution-plan.md)를 우선한다. 신규 기능의 기획/보안/개인정보/platform gate는 [product-security-hardening-plan.md](product-security-hardening-plan.md)를 따른다. 경쟁 서비스 기준의 차별화와 paid moat는 [competitive-service-review.md](competitive-service-review.md)를 따른다. 상세 결정 기록은 [decision-log.md](decision-log.md)를 따른다. 보안/로직 점검은 [security-and-logic-review.md](security-and-logic-review.md)를 따른다. GitHub runtime 진입 기준은 [github-sprint4-entry.md](github-sprint4-entry.md)를 따른다. 차단 범위와 계정/탈퇴 UX는 [control-account-design.md](control-account-design.md)를 따른다. proof/quest/요일/휴일/override 정책은 [proof-policy-mvp.md](proof-policy-mvp.md)를 따른다.
 
 ## 1. 결정 요약
 
@@ -91,7 +91,13 @@ MVP의 사용자는 개인 개발자다. 학교/부모/MDM, 금전 스테이크,
 | Daily Quest | proof-backed 오늘의 개발 퀘스트 | P3 |
 | Blocked/Shield | 차단 사유, 현재 credit 0, 앱으로 돌아가기 | 1-2 |
 
-MVP 이후 상세 IA와 screen copy 규칙은 [product-strategy-spec.md](product-strategy-spec.md)의 `UX Information Architecture`와 `Screen Copy Rules`를 따른다. 특히 사용자는 raw score가 아니라 minutes, proof tier, reasons, risk flags를 본다.
+상세 IA와 screen copy는 아래 규칙을 따른다. 특히 사용자는 raw score가 아니라 minutes, proof tier, reasons, risk flags를 본다.
+
+- 앱 설명은 “차단”보다 “검증된 개발 proof가 쉬는 시간을 만든다”를 먼저 말한다.
+- Developer Gate와 Block Overlay는 playful copy를 허용한다.
+- 권한, 데이터, 로그, 탈퇴, 삭제, GitHub 연결 화면은 장난 없이 정확하게 쓴다.
+- package, repo, reason code, PR ref는 monospace로 보여준다.
+- target selection은 수동 입력보다 최근 foreground 후보를 우선한다.
 
 Android prototype의 target selection은 수동 package 입력으로 시작한다. 프로덕션 Android에서는 `QUERY_ALL_PACKAGES` 없이 가야 하므로, 설치 앱 전체 스캐너를 만들지 않는다. 대신 Usage Access 승인 후 최근 foreground/usage package 목록을 보여주고 사용자가 그중 선택하게 한다. 수동 입력은 dev/debug 기능으로 남긴다.
 
@@ -129,14 +135,15 @@ flowchart LR
 - 앱 자신의 package는 절대 차단하지 않는다.
 - AccessibilityService는 쓰지 않는다.
 
-Android 다음 보강 구현은 아래 네 가지다.
+Android local MVP에서 이미 완료된 hardening:
 
-- UI에 현재 감지된 foreground package를 표시한다.
-- dogfood event log를 단일 로컬 이벤트 저장소로 쓴다. 예: permission missing, foreground changed, target matched, overlay shown, overlay hidden, credit spent.
-- strictMode가 true이면 overlay 안의 “테스트 credit 추가” 버튼을 숨긴다.
-- 실기기 검증을 위해 `credit 0으로 초기화` 버튼을 추가한다.
+- 현재 감지된 foreground package 표시.
+- dogfood event log를 단일 로컬 이벤트 저장소로 사용.
+- strictMode가 true이면 overlay 안의 테스트 shortcut 제한.
+- `credit 0으로 초기화` 버튼.
+- target guardrail로 자기 앱, Settings, launcher, permission controller, core service 저장 차단.
 
-Sprint 1.1의 상세 acceptance criteria는 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)를 기준으로 한다.
+Android의 남은 판단은 새 기능 구현이 아니라 실기기 검증이다. 절차는 [android-dogfood-runbook.md](android-dogfood-runbook.md)를 따른다.
 
 ### iOS
 
@@ -168,6 +175,7 @@ iOS에서 앱 이름을 직접 알거나 raw browsing history를 보는 UX를 �
 export interface MobileCreditState {
   remainingMinutes: number;
   blockedTargets: string[];
+  freeUntil?: string;
   strictMode: boolean;
   lastUpdatedAt: string;
 }

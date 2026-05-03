@@ -1,6 +1,6 @@
 # Commit-to-Unlock Decision Log
 
-문서 상태: v0.3
+문서 상태: v0.4
 목적: 구현자가 다시 판단하지 않아도 되는 제품/기술 결정 기록
 
 ## Current Source Of Truth
@@ -13,18 +13,9 @@
 | Android dogfood 실행 절차 | [android-dogfood-runbook.md](android-dogfood-runbook.md) |
 | 전체 제품/기술 설계 | [app-design.md](app-design.md) |
 | proof/quest/policy MVP | [proof-policy-mvp.md](proof-policy-mvp.md) |
-| 제품 전략/UX/사업 패키징 | [product-strategy-spec.md](product-strategy-spec.md) |
-| 디자인 조사/화면 톤 | [design-research-and-ux-direction.md](design-research-and-ux-direction.md) |
 | 보안/로직 점검 | [security-and-logic-review.md](security-and-logic-review.md) |
 | GitHub Sprint 4 진입 기준 | [github-sprint4-entry.md](github-sprint4-entry.md) |
 | 차단 범위/계정/탈퇴 UX | [control-account-design.md](control-account-design.md) |
-| 실행 순서 | [build-first-execution-plan.md](build-first-execution-plan.md) |
-| 시장/니즈/피벗 게이트 | [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md) |
-| 현재 MVP 진행도/보완 우선순위 | [mvp-progress-audit.md](mvp-progress-audit.md) |
-| Android Sprint 1.1 | [android-sprint-1.1-design.md](android-sprint-1.1-design.md) |
-| 모바일 credit contract | [mobile-credit-contract.md](mobile-credit-contract.md) |
-| GitHub MVP PRD | [mvp-prd.md](mvp-prd.md) |
-| 저장소 정리/삭제 기준 | [repository-audit-and-cleanup.md](repository-audit-and-cleanup.md) |
 
 ## Decisions
 
@@ -63,6 +54,8 @@
 | D-031 | 앱은 삭제 가능하고, 선택한 target만 차단한다 | B2C self-control 제품에서 uninstall prevention, 전체 기기 잠금, 모든 서비스 차단은 정책/신뢰 리스크가 크다. 로그인/로그아웃/회원탈퇴/데이터 삭제는 [control-account-design.md](control-account-design.md)를 따른다. | Accepted |
 | D-032 | 모든 신규 기능은 product/security hardening gate를 먼저 통과한다 | 기획, 보안, 개인정보, 플랫폼 정책이 따로 움직이면 수익성 없는 blocker나 과잉 수집 GitHub 앱이 된다. 신규 기능은 [product-security-hardening-plan.md](product-security-hardening-plan.md)의 invariants, gate, stop list를 먼저 만족해야 한다. | Accepted |
 | D-033 | paid 제품은 generic blocker가 아니라 proof ledger + cross-device policy로 판다 | Opal/Freedom/Jomo/Roots/ScreenZen/Cold Turkey/FocusMe가 blocker 시장을 이미 차지하고, ScreenZen 같은 무료 대안이 가격 기준을 낮춘다. Commit-to-Unlock의 유료 명분은 [competitive-service-review.md](competitive-service-review.md)의 proof ledger, browser/desktop companion, multi-source proof, sync/history에 둔다. | Accepted |
+| D-034 | 오래된 PRD/스프린트/스냅샷 문서는 삭제하고 active docs만 유지한다 | 같은 결정을 여러 문서가 다르게 설명하면 구현 순서가 흔들린다. 삭제된 문서의 유효한 내용은 [mvp-execution-plan.md](mvp-execution-plan.md), [app-design.md](app-design.md), [competitive-service-review.md](competitive-service-review.md), [product-security-hardening-plan.md](product-security-hardening-plan.md)에 흡수한다. | Accepted |
+| D-035 | 현재 MVP는 code-complete가 아니라 dogfood-data-gated 상태다 | Android local prototype은 빌드/테스트 가능한 수준까지 왔지만, 실제 기기에서 14일 데이터가 없으면 제품성/수익성 판단은 아직 불가능하다. | Accepted |
 
 ## Revisit Triggers
 

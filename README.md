@@ -63,14 +63,7 @@ Read these docs in order before changing product direction or implementation pri
 - [App design](docs/app-design.md)
 - [Proof policy MVP](docs/proof-policy-mvp.md)
 
-Reference docs:
-
-- [Product strategy](docs/product-strategy-spec.md)
-- [Design research and UX direction](docs/design-research-and-ux-direction.md)
-- [Market needs and pivot plan](docs/market-needs-and-pivot-plan.md)
-- [MVP progress audit](docs/mvp-progress-audit.md)
-- [Build-first execution plan](docs/build-first-execution-plan.md)
-- [Repository audit and cleanup](docs/repository-audit-and-cleanup.md)
+Old snapshot/planning docs were removed after their still-valid decisions were folded into the active docs above. Use git history for the deleted references when historical context is needed.
 
 ## Repository Layout
 
@@ -79,7 +72,7 @@ apps/
   android/  Android local blocker prototype
   api/      Fastify health-only scaffold; GitHub scoring is parked until Sprint 4
   ios/      SwiftUI and Screen Time API source/design skeleton
-docs/       Product, market, technical, and execution planning
+docs/       Current product, market, technical, and execution planning
 fixtures/   Cross-platform policy golden fixtures
 packages/
   scoring/  Rules-first scoring package scaffold, not wired to the API yet
