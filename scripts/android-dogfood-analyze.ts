@@ -21,6 +21,23 @@ interface DailySummary {
   autoCreditSpends: number;
 }
 
+type GateStatus = "pass" | "fail" | "needs_data";
+
+interface GateCheck {
+  label: string;
+  passed: boolean;
+  actual: number | boolean;
+  target: string;
+}
+
+interface GateDecision {
+  id: "A" | "B" | "C";
+  title: string;
+  status: GateStatus;
+  checks: GateCheck[];
+  summary: string;
+}
+
 interface DogfoodAnalysis {
   file: string;
   eventCount: number;
@@ -32,6 +49,7 @@ interface DogfoodAnalysis {
   policyReasons: Record<string, number>;
   targets: Record<string, number>;
   daily: DailySummary[];
+  gates: GateDecision[];
   recommendations: string[];
 }
 
@@ -52,7 +70,10 @@ const eventTypes = {
   freeDays: ["free_day_set"],
   emergencyUnlocks: ["emergency_unlock_started"],
   dailyQuestAdds: ["daily_quest_added"],
-  dailyQuestMockCompletions: ["daily_quest_mock_completed"]
+  dailyQuestMockCompletions: ["daily_quest_mock_completed"],
+  foregroundChanges: ["foreground_changed"],
+  monitorEnabledSignals: ["monitor_started", "monitor_heartbeat"],
+  overlayShows: ["overlay_shown"]
 } as const;
 
 function usage(): string {
@@ -165,8 +186,10 @@ function analyze(filePath: string, events: DogfoodEvent[]): DogfoodAnalysis {
     policyReasons,
     targets,
     daily,
+    gates: [],
     recommendations: []
   };
+  analysis.gates = gateDecisions(analysis, events);
   analysis.recommendations = recommendations(analysis);
   return analysis;
 }
@@ -288,11 +311,151 @@ function recommendations(analysis: DogfoodAnalysis): string[] {
   if ((metrics.overlayCreditAdds ?? 0) > (metrics.autoCreditSpends ?? 0) + (metrics.dailyQuestMockCompletions ?? 0)) {
     notes.push("Overlay test-credit unlocks dominate proof/usage; consider enabling strict mode during dogfood.");
   }
+  for (const gate of analysis.gates) {
+    if (gate.status === "fail") {
+      notes.push(`Gate ${gate.id} is failing: ${gate.summary}`);
+    } else if (gate.status === "needs_data") {
+      notes.push(`Gate ${gate.id} needs more data: ${gate.summary}`);
+    }
+  }
 
   if (notes.length === 0) {
     notes.push("No obvious dogfood risk flags. Continue collecting sessions and inspect top policy reasons.");
   }
   return notes;
+}
+
+function gateDecisions(analysis: DogfoodAnalysis, events: DogfoodEvent[]): GateDecision[] {
+  const metrics = analysis.metrics;
+  const dogfoodSpanDays = spanDays(analysis.firstEventAt, analysis.lastEventAt);
+  const monitorEnabledDays = distinctEventDays(events, eventTypes.monitorEnabledSignals);
+  const blockedAttempts = metrics.blockedAttempts ?? 0;
+  const emergencyUnlocks = metrics.emergencyUnlocks ?? 0;
+  const mockProofCompletions = metrics.dailyQuestMockCompletions ?? 0;
+  const foregroundChanges = metrics.foregroundChanges ?? 0;
+  const overlayShows = metrics.overlayShows ?? 0;
+  const permissionFailures = metrics.permissionFailures ?? 0;
+
+  const gateAChecks: GateCheck[] = [
+    {
+      label: "Foreground app was observed",
+      passed: foregroundChanges > 0,
+      actual: foregroundChanges,
+      target: "> 0 foreground_changed events"
+    },
+    {
+      label: "Blocking overlay was observed",
+      passed: overlayShows > 0 || blockedAttempts > 0,
+      actual: overlayShows || blockedAttempts,
+      target: "> 0 overlay_shown or blocked_attempt events"
+    },
+    {
+      label: "Permission/service failures are logged when they happen",
+      passed: permissionFailures > 0 || analysis.eventCount > 0,
+      actual: permissionFailures,
+      target: "event log exists; permission_missing should appear if permissions fail"
+    }
+  ];
+
+  const gateBChecks: GateCheck[] = [
+    {
+      label: "Monitor enabled days",
+      passed: monitorEnabledDays >= 8,
+      actual: monitorEnabledDays,
+      target: ">= 8 days in a 14-day dogfood window"
+    },
+    {
+      label: "Blocked attempts",
+      passed: blockedAttempts >= 8,
+      actual: blockedAttempts,
+      target: ">= 8 attempts in 14 days (4/week)"
+    },
+    {
+      label: "Emergency unlocks",
+      passed: emergencyUnlocks <= 6,
+      actual: emergencyUnlocks,
+      target: "<= 6 in 14 days (3/week)"
+    }
+  ];
+
+  const gateCChecks: GateCheck[] = [
+    {
+      label: "Mock proof completions",
+      passed: mockProofCompletions >= 5,
+      actual: mockProofCompletions,
+      target: ">= 5 local proof completions before real GitHub proof"
+    }
+  ];
+
+  const gateA = makeGate({
+    id: "A",
+    title: "Enforcement Viability",
+    checks: gateAChecks,
+    hasEnoughData: analysis.eventCount > 0,
+    passingSummary: "local enforcement signals are present",
+    failingSummary: "foreground or overlay evidence is missing"
+  });
+
+  const gateB = makeGate({
+    id: "B",
+    title: "Dogfood Need",
+    checks: gateBChecks,
+    hasEnoughData: dogfoodSpanDays >= 14 || monitorEnabledDays >= 8,
+    passingSummary: "14-day dogfood need signal is strong enough to keep mobile-first",
+    failingSummary: "14-day dogfood need signal is weak; consider desktop/browser-first"
+  });
+
+  const gateC = makeGate({
+    id: "C",
+    title: "Developer Proof Supply",
+    checks: gateCChecks,
+    hasEnoughData: dogfoodSpanDays >= 14 || mockProofCompletions >= 5,
+    passingSummary: "local proof behavior is frequent enough to test real GitHub/IDE proof",
+    failingSummary: "proof events are too sparse; widen beyond PR-only before Sprint 4"
+  });
+
+  if (gateC.status === "pass") {
+    gateC.summary = `${gateC.summary}; still requires real GitHub/WakaTime/IDE proof validation`;
+  }
+
+  return [gateA, gateB, gateC];
+}
+
+function makeGate(input: {
+  id: GateDecision["id"];
+  title: string;
+  checks: GateCheck[];
+  hasEnoughData: boolean;
+  passingSummary: string;
+  failingSummary: string;
+}): GateDecision {
+  const allPassed = input.checks.every((check) => check.passed);
+  const status: GateStatus = allPassed ? "pass" : input.hasEnoughData ? "fail" : "needs_data";
+  return {
+    id: input.id,
+    title: input.title,
+    status,
+    checks: input.checks,
+    summary: status === "pass" ? input.passingSummary :
+      status === "fail" ? input.failingSummary :
+        "not enough dogfood data yet"
+  };
+}
+
+function distinctEventDays(events: DogfoodEvent[], types: readonly string[]): number {
+  return new Set(
+    events
+      .filter((event) => types.includes(event.type))
+      .map((event) => dayKey(event.timestamp))
+  ).size;
+}
+
+function spanDays(firstEventAt: string | null, lastEventAt: string | null): number {
+  if (!firstEventAt || !lastEventAt) return 0;
+  const first = Date.parse(firstEventAt);
+  const last = Date.parse(lastEventAt);
+  if (Number.isNaN(first) || Number.isNaN(last)) return 0;
+  return Math.floor((last - first) / (24 * 60 * 60 * 1000)) + 1;
 }
 
 function renderMarkdown(analysis: DogfoodAnalysis): string {
@@ -311,6 +474,27 @@ function renderMarkdown(analysis: DogfoodAnalysis): string {
       Object.entries(analysis.metrics).map(([key, value]) => [key, String(value)])
     ),
     "",
+    "## Gate Snapshot",
+    "",
+    table(
+      ["Gate", "Status", "Summary"],
+      analysis.gates.map((gate) => [`Gate ${gate.id}: ${gate.title}`, gate.status, gate.summary])
+    ),
+    "",
+    ...analysis.gates.flatMap((gate) => [
+      `### Gate ${gate.id} Checks`,
+      "",
+      table(
+        ["Check", "Actual", "Target", "Pass"],
+        gate.checks.map((check) => [
+          check.label,
+          String(check.actual),
+          check.target,
+          check.passed ? "yes" : "no"
+        ])
+      ),
+      ""
+    ]),
     "## Policy Reasons",
     "",
     recordTable(analysis.policyReasons),
