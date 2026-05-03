@@ -193,6 +193,8 @@ Deliverables:
 
 ### PR 3: DogfoodEventStore tests
 
+Status: complete.
+
 Deliverables:
 
 - export header/column test
