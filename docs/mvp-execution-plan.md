@@ -1,6 +1,6 @@
 # MVP Execution Plan
 
-문서 상태: v0.3
+문서 상태: v0.4
 작성일: 2026-05-03
 최종 정리: 2026-05-04
 역할: 현재 MVP의 단일 실행 계획, 남은 작업 목록, 문서/코드 정리 기준
@@ -43,7 +43,7 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 | 9 | [app-design.md](app-design.md) | 전체 제품/기술 설계 |
 | 10 | [proof-policy-mvp.md](proof-policy-mvp.md) | proof, quest, exception policy 상세 |
 
-나머지 문서는 reference다. 충돌하면 이 문서와 decision log를 우선한다.
+삭제된 과거 계획/스냅샷 문서는 git history에서만 확인한다. 충돌하면 이 문서와 decision log를 우선한다.
 
 ## 3. MVP Definition
 
@@ -86,49 +86,69 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 | Scoring package | pure rules scaffold | 유지. runtime 연결 금지 |
 | API | health-only, localhost/CORS-closed default | 유지. Sprint 4 전 auth/webhook 금지 |
 | iOS | Swift source skeleton only | Xcode/entitlement 전까지 보류 |
-| Docs | source-of-truth 정리됨 | reference 문서는 실행 기준이 아님 |
+| Docs | active docs only | 오래된 PRD/snapshot/reference 문서 삭제 |
 
-## 5. Document Cleanup Plan
+## 5. MVP Closeout Status
+
+현재 MVP-A는 `local Android prototype code-complete, dogfood-data-gated` 상태다.
+
+완료:
+
+- Android debug APK build/lint/test 기준선.
+- Usage Access 기반 foreground 감지.
+- selected target + credit 0 overlay.
+- credit > 0 allow.
+- 60초 foreground spend.
+- weekday/time/manual holiday/free day/emergency unlock 정책.
+- daily quest + mock proof free day.
+- dogfood event log, TSV export, analyzer, in-app Gate review.
+- target guardrail.
+- GitHub Sprint 4 security entry spec.
+- product/security/competitive/account hardening docs.
+
+부족한 것:
+
+- 실제 Android 기기 smoke evidence.
+- 14일 dogfood TSV 1세트.
+- 제조사별 overlay/background 제한 확인.
+- 실제 GitHub/WakaTime/IDE proof 빈도 확인.
+- desktop/browser companion 설계.
+- Sprint 4 webhook HMAC/dedupe runtime 구현.
+
+## 6. Document Cleanup Plan
 
 ### Active
 
-| 문서 | 액션 |
+| 문서 | 역할 |
 | --- | --- |
-| `mvp-execution-plan.md` | 신규 단일 실행 계획 |
+| `mvp-execution-plan.md` | 단일 실행 계획, MVP 현황, 남은 gate |
 | `product-security-hardening-plan.md` | 신규 기능의 기획/보안/개인정보/platform hardening gate |
 | `competitive-service-review.md` | 경쟁 서비스 조사, paid moat, desktop/browser companion, WakaTime fallback 판단 |
 | `android-dogfood-runbook.md` | MVP-A 실기기 dogfood 절차와 gate decision template |
-| `decision-log.md` | 결정만 유지 |
-| `security-and-logic-review.md` | Gate D와 보안 기준 유지 |
+| `decision-log.md` | 다시 판단하지 않을 결정 |
+| `security-and-logic-review.md` | Gate D와 보안 기준 |
 | `github-sprint4-entry.md` | GitHub Sprint 4 진입 기준 |
-| `control-account-design.md` | 기기별 차단 가능 범위, target 선택, 계정/탈퇴 UX 기준 |
-| `app-design.md` | 기술/제품 설계 유지 |
-| `proof-policy-mvp.md` | 정책 상세 유지 |
+| `control-account-design.md` | 기기별 차단 가능 범위, target 선택, 계정/탈퇴 UX |
+| `app-design.md` | 제품/기술/UX 통합 설계 |
+| `proof-policy-mvp.md` | proof, quest, exception policy |
 
-### Reference
+### Deleted As Duplicates Or Stale Snapshots
 
-| 문서 | 이유 |
+삭제된 문서는 git history에 남긴다. 지금 repo에서는 실행 기준을 한 곳으로 모으기 위해 제거한다.
+
+| 삭제 문서 | 이유 |
 | --- | --- |
-| `product-strategy-spec.md` | 제품/사업 포지션 참고 |
-| `design-research-and-ux-direction.md` | UI/톤 참고 |
-| `mobile-credit-contract.md` | Android/iOS/API contract 참고 |
-| `android-sprint-1.1-design.md` | Android 구현 상세 참고 |
-| `market-needs-and-pivot-plan.md` | 시장/피벗 참고 |
-| `repository-audit-and-cleanup.md` | 정리 기준 참고 |
-| `mvp-progress-audit.md` | 2026-05-03 snapshot 참고 |
-| `mvp-prd.md` | GitHub-backed MVP reference. Sprint 4 전까지 실행 기준 아님 |
+| `mvp-prd.md` | GitHub-first PRD라 현재 Android MVP-A와 우선순위가 다름 |
+| `build-first-execution-plan.md` | 현재 실행 순서는 이 문서로 대체됨 |
+| `mvp-progress-audit.md` | 일회성 snapshot이며 현재 현황은 이 문서의 MVP Closeout Status로 이동 |
+| `repository-audit-and-cleanup.md` | 정리 기준은 이 문서와 README로 이동 |
+| `android-sprint-1.1-design.md` | 완료된 스프린트 상세 문서. 남은 검증은 runbook으로 이동 |
+| `mobile-credit-contract.md` | contract source는 `packages/shared/src/mobile-credit.ts`와 [app-design.md](app-design.md)에 유지 |
+| `product-strategy-spec.md` | 유효한 포지션/패키징 판단은 [app-design.md](app-design.md)와 [competitive-service-review.md](competitive-service-review.md)에 흡수 |
+| `design-research-and-ux-direction.md` | UI/톤 기준은 [app-design.md](app-design.md)에 흡수 |
+| `market-needs-and-pivot-plan.md` | gate/pivot 판단은 이 문서와 [competitive-service-review.md](competitive-service-review.md)에 흡수 |
 
-### Do Not Delete Yet
-
-현재는 문서를 삭제하지 않는다. 삭제보다 먼저 README와 source-of-truth를 정리하고, 중복이 실제 구현 혼선을 만든 문서만 archive 후보로 둔다.
-
-Archive 후보:
-
-- `mvp-prd.md`: GitHub-first PRD라 현재 MVP-A와 우선순위가 다름.
-- `build-first-execution-plan.md`: 상세 milestone 기록으로 남기되, 이 문서가 실행 기준을 대체함.
-- `mvp-progress-audit.md`: 현재 snapshot이라 계속 갱신하지 않음.
-
-## 6. Code Cleanup Plan
+## 7. Code Cleanup Plan
 
 ### Keep
 
@@ -145,7 +165,7 @@ Archive 후보:
 
 | 대상 | 문제 | 처리 |
 | --- | --- | --- |
-| `MainActivity.kt` | 700라인 이상, UI/logic 혼재 | 테스트 보강 후 section renderer/helper로 분리 |
+| `MainActivity.kt` | 여전히 큰 Android Activity | 실기기 smoke 전에는 추가 분리보다 동작 안정성 우선. 다음 리팩터는 device evidence 이후 |
 | `DogfoodEventStore.kt` | parser/export 핵심 | unit test 추가 완료. event type constants는 후순위 |
 | TS/Kotlin policy mirror | drift 위험 | golden fixtures 추가 완료. 정책 변경 시 fixture 우선 갱신 |
 | Android event type strings | 문자열 분산 | tests 후 constants/sealed class 검토 |
@@ -167,7 +187,14 @@ Archive 후보:
 
 현재 main 기준으로 위 삭제 대상은 대부분 이미 제거되어 있다.
 
-## 7. Gates
+이번 cleanup에서 확인한 내용:
+
+- tracked build artifact, generated JS/d.ts, tracked Android build output은 없다.
+- ignored local artifacts는 `.gradle/`, `apps/android/build/`, package `dist/`, `node_modules/`로 남아 있을 수 있으나 repo에는 포함하지 않는다.
+- `packages/scoring`, `apps/api`, `apps/ios`는 현재 runtime에는 연결하지 않지만 Sprint 4/iOS 준비 자산이라 삭제하지 않는다.
+- Android `MainActivity.kt`는 여전히 크지만 section helper로 분리되어 있고, 지금은 실기기 검증 전 추가 리팩터보다 안정성이 우선이다.
+
+## 8. Gates
 
 | Gate | 상태 | 통과 기준 | 다음 작업 |
 | --- | --- | --- | --- |
@@ -177,7 +204,7 @@ Archive 후보:
 | D: Trust/privacy | needs_data | product/security hardening invariants, permission/privacy UI, retention/revoke/delete spec, webhook HMAC/dedupe spec | hardening gate + GitHub entry spec |
 | E: Monetization | blocked | proof ledger 가치 확인 후 | 나중 |
 
-## 8. Next PR Sequence
+## 9. Next PR Sequence
 
 ### PR 1: MVP execution plan
 
@@ -306,7 +333,18 @@ Deliverables:
 - rejected-target dogfood events
 - Android unit tests
 
-## 9. Work Rules
+### PR 12: MVP cleanup and closeout audit
+
+Status: complete.
+
+Deliverables:
+
+- stale reference docs removed
+- active source-of-truth reduced to current MVP docs
+- MVP closeout status and missing work consolidated
+- code cleanup scan documented
+
+## 10. Work Rules
 
 - 한 PR에 unrelated scope를 섞지 않는다.
 - 코드 삭제는 테스트/문서 기준 없이 하지 않는다.
@@ -317,7 +355,7 @@ Deliverables:
 - Android-only local blocker를 유료 제품으로 포장하지 않는다. paid work는 [competitive-service-review.md](competitive-service-review.md)의 proof ledger/cross-device moat 기준을 따른다.
 - 결제/부모/학교/MDM/money stake는 계속 금지한다.
 
-## 10. Immediate Next Action
+## 11. Immediate Next Action
 
 이 PR 이후 즉시 할 일:
 
