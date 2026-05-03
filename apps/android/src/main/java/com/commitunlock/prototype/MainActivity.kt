@@ -35,6 +35,7 @@ class MainActivity : Activity() {
     private lateinit var policySummaryText: TextView
     private lateinit var questSummaryText: TextView
     private lateinit var dogfoodSummaryText: TextView
+    private lateinit var dogfoodReviewText: TextView
     private lateinit var eventLogText: TextView
     private lateinit var packageInput: EditText
     private lateinit var strictModeInput: CheckBox
@@ -249,6 +250,12 @@ class MainActivity : Activity() {
             setPadding(0, 20, 0, 0)
         }
 
+        dogfoodReviewText = TextView(this).apply {
+            textSize = 13f
+            setTextColor(0xFF334155.toInt())
+            setPadding(0, 20, 0, 0)
+        }
+
         eventLogText = TextView(this).apply {
             textSize = 13f
             setTextColor(0xFF334155.toInt())
@@ -351,6 +358,7 @@ class MainActivity : Activity() {
         })
         root.addView(button("Refresh status") { renderState() })
         root.addView(dogfoodSummaryText)
+        root.addView(dogfoodReviewText)
         root.addView(button("Share dogfood export") { shareDogfoodExport() })
         root.addView(button("Clear dogfood events") {
             dogfoodEventStore.clear()
@@ -580,7 +588,9 @@ class MainActivity : Activity() {
         val activeUnlocks = emergencyUnlockStore.active()
         val quests = dailyQuestStore.read(policy.timezone)
         val foregroundPackage = foregroundPackageOrNull()
+        val dogfoodEvents = dogfoodEventStore.read()
         val dogfoodSummary = dogfoodEventStore.summary()
+        val dogfoodReview = DogfoodReviewEngine.analyze(dogfoodEvents, dogfoodSummary)
         val usageAccessGranted = PermissionChecks.hasUsageAccess(this)
         val overlayGranted = PermissionChecks.canDrawOverlays(this)
         val notificationGranted = PermissionChecks.hasNotificationPermission(this)
@@ -668,9 +678,11 @@ class MainActivity : Activity() {
             "Stored dogfood events: ${dogfoodSummary.eventCount}"
         ).joinToString("\n")
 
+        dogfoodReviewText.text = DogfoodReviewRenderer.render(dogfoodReview)
+
         eventLogText.text = buildString {
             append("Dogfood event log\n")
-            val events = dogfoodEventStore.read().take(50)
+            val events = dogfoodEvents.take(50)
             if (events.isEmpty()) {
                 append("none")
             } else {
