@@ -12,6 +12,7 @@
 | 제품 전략/UX/사업 패키징 | [product-strategy-spec.md](product-strategy-spec.md) |
 | 실행 순서 | [build-first-execution-plan.md](build-first-execution-plan.md) |
 | 시장/니즈/피벗 게이트 | [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md) |
+| 현재 MVP 진행도/보완 우선순위 | [mvp-progress-audit.md](mvp-progress-audit.md) |
 | Android Sprint 1.1 | [android-sprint-1.1-design.md](android-sprint-1.1-design.md) |
 | 모바일 credit contract | [mobile-credit-contract.md](mobile-credit-contract.md) |
 | GitHub MVP PRD | [mvp-prd.md](mvp-prd.md) |
@@ -36,12 +37,14 @@
 | D-013 | 제품 포지션을 generic blocker가 아니라 developer proof ledger로 고정 | 차단 앱 시장은 붐비고 무료/저가 대안이 많다. 수익 명분은 차단 자체가 아니라 검증 가능한 개발 활동 ledger와 설명 가능한 credit 정책에서 나온다. | Accepted |
 | D-014 | Sprint 4 전 market/dogfood gate를 추가 | GitHub scoring을 본격 구현하기 전에 모바일 차단 효용, 본인 반복 사용, 자연스러운 scorable dev event 빈도를 확인해야 한다. | Accepted |
 | D-015 | 사용자-facing 제품은 score가 아니라 ledger/minutes/reasons 중심으로 설계 | raw score를 전면 노출하면 점수 게임을 유도한다. 사용자는 minutes, proof tier, reasons, risk flags만 보면 된다. | Accepted |
-| D-016 | 결제 구현은 Gate 4 전까지 금지 | 단순 blocker 구독은 가격 저항이 크다. proof ledger가 blocker 없이도 가치 있음을 확인하기 전에는 결제 기능을 만들지 않는다. | Accepted |
+| D-016 | 결제 구현은 Gate E 전까지 금지 | 단순 blocker 구독은 가격 저항이 크다. proof ledger가 blocker 없이도 가치 있음을 확인하기 전에는 결제 기능을 만들지 않는다. | Accepted |
 | D-017 | Android는 별도 debug log를 제거하고 dogfood event log를 단일 source of truth로 사용 | 같은 이벤트를 두 저장소에 쓰면 UI/TSV/summary가 어긋난다. | Accepted |
 | D-018 | GitHub webhook placeholder는 API에서 제거 | 실제 PR enrichment 없이 scoring decision을 반환하면 제품/테스트 신뢰를 깎는다. Sprint 4에서 dedupe/enrichment/ledger와 함께 다시 추가한다. | Accepted |
 | D-019 | 브랜드 톤은 “개발자지만 난 괜찮아”처럼 재미있고 개발자스럽게 간다 | 일반 blocker로 보이면 차별화가 약하다. 단, 장난 UX는 보안/권한/데이터 삭제와 분리한다. | Accepted |
 | D-020 | 수동 todo 완료만으로 unlock하지 않는다 | 제품 차별점은 self-report가 아니라 개발 증거 기반 credit이다. Todo는 quest label이고 proof-backed completion만 policy에 영향을 준다. | Accepted |
 | D-021 | 요일/휴일/free day/emergency unlock은 credit보다 상위 정책으로 둔다 | 예외 정책이 없으면 사용자는 앱을 삭제하거나 권한을 꺼버린다. 단, 모든 예외는 event log와 ledger에 남긴다. | Accepted |
+| D-022 | GitHub scoring 재개 전 MVP progress audit을 통과 기준으로 사용 | 현재 병목은 scoring 코드가 아니라 실기기 dogfood 데이터 부재다. Gate A/B/C 판단 없이 Sprint 4로 가면 잘못된 product risk를 늦게 발견한다. | Accepted |
+| D-023 | 다음 4개 PR은 dogfood runbook, event store tests, dogfood review UX, GitHub Sprint 4 entry spec 순서로 진행 | 모바일 차단 가치와 데이터 품질을 확인한 뒤 proof ledger로 넘어가야 한다. | Accepted |
 
 ## Revisit Triggers
 

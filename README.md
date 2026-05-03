@@ -53,6 +53,7 @@ Read the strategy docs before changing product direction:
 - [Product strategy](docs/product-strategy-spec.md)
 - [Proof policy MVP](docs/proof-policy-mvp.md)
 - [Market needs and pivot plan](docs/market-needs-and-pivot-plan.md)
+- [MVP progress audit](docs/mvp-progress-audit.md)
 - [App design](docs/app-design.md)
 - [Build-first execution plan](docs/build-first-execution-plan.md)
 - [Decision log](docs/decision-log.md)
@@ -164,9 +165,10 @@ pnpm typecheck
 
 Current recommended sequence:
 
-1. Run the Android prototype on a physical device for repeated dogfood sessions.
-2. Analyze exports with `pnpm android:dogfood:analyze`.
-3. Check Data Quality and decide Gate A/B/C from dogfood data before returning to GitHub scoring.
-4. Prepare iOS Xcode project and Family Controls entitlement work.
+1. Follow the [MVP progress audit](docs/mvp-progress-audit.md) and do not resume GitHub scoring yet.
+2. Run the Android prototype on a physical device for repeated dogfood sessions.
+3. Analyze exports with `pnpm android:dogfood:analyze`.
+4. Check Data Quality and decide Gate A/B/C from dogfood data before returning to GitHub scoring.
+5. Prepare iOS Xcode project and Family Controls entitlement work.
 
 Do not build payments, school/parent mode, leaderboard, money stakes, or full-diff AI scoring yet.

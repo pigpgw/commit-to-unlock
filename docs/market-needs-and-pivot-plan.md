@@ -158,7 +158,7 @@ Pivot A:
 
 ### Gate A: Enforcement viability
 
-이미 있는 Gate 0을 유지한다.
+기존 local enforcement gate를 Gate A로 통합한다.
 
 통과:
 

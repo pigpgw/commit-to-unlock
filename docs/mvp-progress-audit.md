@@ -1,7 +1,7 @@
 # MVP Progress Audit
 
-문서 상태: v0.1  
-점검일: 2026-05-03  
+문서 상태: v0.1
+점검일: 2026-05-03
 역할: 현재 구현/문서/시장 근거를 한 번에 점검하고, 다음 MVP 진행 판단을 고정한다.
 
 ## 1. Executive Verdict
@@ -129,19 +129,19 @@ GitHub-backed 개인 개발자 MVP 기준으로 보면 아직 30% 전후다. 이
 
 ### Must Fix Before Sprint 4
 
-1. Real device dogfood runbook  
+1. Real device dogfood runbook
    14일 테스트를 어떻게 실행하고 어떤 TSV를 보관할지 문서화한다.
 
-2. Dogfood decision record template  
+2. Dogfood decision record template
    analyzer 결과를 붙여 Gate A/B/C를 pass/fail/needs_data로 기록할 양식이 필요하다.
 
-3. Android event store unit coverage  
+3. Android event store unit coverage
    6-column export, legacy parse, sanitize, max 1,000 event behavior를 테스트해야 한다.
 
-4. Android device smoke checklist  
+4. Android device smoke checklist
    permission missing, foreground changed, overlay shown, credit spend, free day, emergency unlock을 실제 기기에서 체크한다.
 
-5. GitHub Sprint 4 entry spec  
+5. GitHub Sprint 4 entry spec
    webhook dedupe, PR enrichment, feature vector persistence, credit ledger write를 한 번에 설계해야 한다.
 
 ### Should Add If Dogfood Passes
@@ -165,16 +165,16 @@ GitHub-backed 개인 개발자 MVP 기준으로 보면 아직 30% 전후다. 이
 
 ## 10. Recommended Next 4 PRs
 
-1. `docs/dogfood-runbook`  
+1. `docs/dogfood-runbook`
    14일 Android dogfood 실행법, 파일명 규칙, Gate decision template.
 
-2. `test/android-event-store`  
+2. `test/android-event-store`
    DogfoodEventStore export/parse/sanitize/max events unit tests.
 
-3. `feature/android-dogfood-review`  
+3. `feature/android-dogfood-review`
    앱 내부에 Data Quality/Gate summary를 최소 표시하거나 export 직후 확인 UX 추가.
 
-4. `docs/github-sprint4-entry`  
+4. `docs/github-sprint4-entry`
    GitHub App permissions, webhook dedupe, enrichment, ledger write, privacy policy를 Sprint 4 착수 전 설계.
 
 이 4개 전에는 GitHub scoring 구현을 다시 시작하지 않는다.
