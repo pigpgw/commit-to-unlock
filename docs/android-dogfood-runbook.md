@@ -413,12 +413,15 @@ This is expected before enough sessions. Do not treat early `needs_data` as fail
 
 ## 12. Next PRs After This Runbook
 
-After this runbook is in `main`, continue in this order:
+Completed after this runbook:
 
-1. `test/android-event-store`
-2. `test/policy-golden-fixtures`
-3. `feature/android-privacy-permissions`
-4. `feature/android-dogfood-review`
-5. `docs/github-sprint4-entry`
+- `test/android-event-store`
+- `test/policy-golden-fixtures`
+
+Continue in this order:
+
+1. `feature/android-privacy-permissions`
+2. `feature/android-dogfood-review`
+3. `docs/github-sprint4-entry`
 
 Do not resume GitHub scoring until Gate A/B/D have enough evidence and the Sprint 4 entry spec is complete.

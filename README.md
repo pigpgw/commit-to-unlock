@@ -74,6 +74,7 @@ apps/
   api/      Fastify health-only scaffold; GitHub scoring is parked until Sprint 4
   ios/      SwiftUI and Screen Time API source/design skeleton
 docs/       Product, market, technical, and execution planning
+fixtures/   Cross-platform policy golden fixtures
 packages/
   scoring/  Rules-first scoring package scaffold, not wired to the API yet
   shared/   Shared TypeScript contracts

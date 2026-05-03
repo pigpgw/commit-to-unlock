@@ -1,8 +1,21 @@
 # MVP Progress Audit
 
-문서 상태: v0.1, snapshot reference. 현재 실행 순서는 [mvp-execution-plan.md](mvp-execution-plan.md)를 우선한다.
+문서 상태: v0.2, snapshot reference. 현재 실행 순서는 [mvp-execution-plan.md](mvp-execution-plan.md)를 우선한다.
 점검일: 2026-05-03
+최신 정리: 2026-05-03
 역할: 현재 구현/문서/시장 근거를 한 번에 점검하고, 다음 MVP 진행 판단을 고정한다.
+
+## 0. Current Cleanup Note
+
+이 문서는 진행도 snapshot이다. 최신 실행 순서는 [mvp-execution-plan.md](mvp-execution-plan.md)를 따른다.
+
+2026-05-03 현재 아래 선행 작업은 완료됐다.
+
+- `docs/dogfood-runbook`
+- `test/android-event-store`
+- `test/policy-golden-fixtures`
+
+현재 다음 작업은 `feature/android-privacy-permissions`다.
 
 ## 1. Executive Verdict
 
@@ -24,10 +37,10 @@
 | 영역 | 상태 | 판단 |
 | --- | --- | --- |
 | Android app | runnable prototype | 현재 유일한 실제 product surface |
-| Android policy engine | implemented + unit tested | shared TypeScript policy와 reason code를 맞춰야 함 |
+| Android policy engine | implemented + unit/golden-fixture tested | shared TypeScript policy와 같은 fixture로 검증됨 |
 | Dogfood logging/export | implemented | target/reason/credit structured TSV로 개선됨 |
 | Dogfood analyzer | implemented | Data Quality + Gate A/B/C snapshot 출력 |
-| Shared package | implemented scaffold | mobile credit/policy contract 기준점 |
+| Shared package | implemented scaffold | mobile credit/policy contract와 policy golden fixture 기준점 |
 | Scoring package | pure rules scaffold | Sprint 4 후보. API/mobile과 아직 연결하지 않음 |
 | API | `/health` only | GitHub placeholder 제거 상태가 맞음 |
 | iOS | source/design skeleton | Xcode/entitlement 전에는 runnable 검증 불가 |
@@ -131,19 +144,16 @@ GitHub-backed 개인 개발자 MVP 기준으로 보면 아직 30% 전후다. 이
 
 ### Must Fix Before Sprint 4
 
-1. Real device dogfood runbook
-   14일 테스트를 어떻게 실행하고 어떤 TSV를 보관할지 문서화한다.
+1. Android privacy and permission disclosure UI
+   Usage Access, Overlay, Notification, local event retention/export/clear, "not tamper-proof" 한계를 앱 안에서 설명한다.
 
-2. Dogfood decision record template
-   analyzer 결과를 붙여 Gate A/B/C를 pass/fail/needs_data로 기록할 양식이 필요하다.
-
-3. Android event store unit coverage
-   6-column export, legacy parse, sanitize, max 1,000 event behavior를 테스트해야 한다.
-
-4. Android device smoke checklist
+2. Android device smoke checklist 실행
    permission missing, foreground changed, overlay shown, credit spend, free day, emergency unlock을 실제 기기에서 체크한다.
 
-5. GitHub Sprint 4 entry spec
+3. 14일 dogfood export 수집
+   analyzer 결과를 붙여 Gate A/B/C를 pass/fail/needs_data로 기록한다.
+
+4. GitHub Sprint 4 entry spec
    webhook dedupe, PR enrichment, feature vector persistence, credit ledger write를 한 번에 설계해야 한다.
 
 ### Should Add If Dogfood Passes
@@ -167,24 +177,23 @@ GitHub-backed 개인 개발자 MVP 기준으로 보면 아직 30% 전후다. 이
 
 ## 10. Recommended Next PRs
 
-현재 최신 PR 순서는 [mvp-execution-plan.md](mvp-execution-plan.md)의 `Next PR Sequence`를 따른다. 이 snapshot 기준 다음 작업은 아래와 같다.
+현재 최신 PR 순서는 [mvp-execution-plan.md](mvp-execution-plan.md)의 `Next PR Sequence`를 따른다.
 
-1. `docs/dogfood-runbook`
-   14일 Android dogfood 실행법, 파일명 규칙, Gate decision template.
+완료:
 
-2. `test/android-event-store`
-   DogfoodEventStore export/parse/sanitize/max events unit tests.
+- `docs/dogfood-runbook`
+- `test/android-event-store`
+- `test/policy-golden-fixtures`
 
-3. `test/policy-golden-fixtures`
-   TypeScript shared policy와 Android Kotlin policy mirror가 같은 fixture 결과를 내도록 검증.
+다음:
 
-4. `feature/android-privacy-permissions`
+1. `feature/android-privacy-permissions`
    Usage Access/Overlay/Notification disclosure와 local dogfood data clear/export 설명.
 
-5. `feature/android-dogfood-review`
+2. `feature/android-dogfood-review`
    [design-research-and-ux-direction.md](design-research-and-ux-direction.md)의 sectioning 기준으로 Data Quality/Gate summary를 앱 안에 최소 표시하거나 export 직후 확인 UX 추가.
 
-6. `docs/github-sprint4-entry`
+3. `docs/github-sprint4-entry`
    GitHub App permissions, webhook dedupe, enrichment, ledger write, privacy policy를 Sprint 4 착수 전 설계.
 
 위 선행 작업과 Gate D 보안 기준 전에는 GitHub scoring 구현을 다시 시작하지 않는다.

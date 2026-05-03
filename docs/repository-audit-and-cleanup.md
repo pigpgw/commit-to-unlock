@@ -81,12 +81,18 @@ flowchart LR
 
 다음 정리 순서:
 
-1. `scripts/android-dogfood-export.sh` 결과를 요약하는 local TSV analyzer 추가.
-2. Android UI를 raw `LinearLayout`에서 작은 view factory/helpers로 정리.
-3. `DogfoodEventStore`에 event type 상수 또는 sealed class 도입.
-4. `packages/shared`의 `MobileCreditState`를 Android/iOS 문서와 자동 비교하는 작은 contract test 추가.
-5. iOS skeleton은 Xcode project 생성 전까지 문서 수준으로만 유지.
-6. Sprint 4 착수 전 `apps/api`에 persistence/dedupe 설계부터 추가하고, webhook route는 enrichment와 ledger가 함께 준비될 때만 복구.
+1. Android privacy/permission disclosure UI를 추가한다.
+2. Android UI를 raw `LinearLayout`에서 작은 view factory/helpers로 정리한다.
+3. `DogfoodEventStore`에 event type 상수 또는 sealed class를 도입할지 검토한다.
+4. `packages/shared`의 `MobileCreditState`를 Android/iOS 문서와 자동 비교하는 작은 contract test를 추가한다.
+5. iOS skeleton은 Xcode project 생성 전까지 문서 수준으로만 유지한다.
+6. Sprint 4 착수 전 `apps/api`에 persistence/dedupe 설계부터 추가하고, webhook route는 enrichment와 ledger가 함께 준비될 때만 복구한다.
+
+완료된 정리:
+
+- local TSV analyzer 추가.
+- `DogfoodEventStore` export/parse/sanitize/retention/dedupe unit test 추가.
+- TypeScript/Android policy golden fixture 추가.
 
 ## 6. Do Not Build Yet
 
