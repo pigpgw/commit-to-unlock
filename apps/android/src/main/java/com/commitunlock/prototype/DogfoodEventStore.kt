@@ -17,6 +17,7 @@ data class DogfoodSummary(
     val permissionFailures: Int,
     val overlayOpens: Int,
     val overlayCreditAdds: Int,
+    val automaticCreditSpends: Int,
     val manualCreditChanges: Int,
     val eventCount: Int
 )
@@ -64,7 +65,10 @@ class DogfoodEventStore(context: Context) {
             permissionFailures = recent.count { it.type == "permission_missing" },
             overlayOpens = recent.count { it.type == "overlay_open_app" },
             overlayCreditAdds = recent.count { it.type == "overlay_add_credit" },
-            manualCreditChanges = recent.count { it.type.startsWith("credit_") },
+            automaticCreditSpends = recent.count { it.type == "credit_auto_spent" },
+            manualCreditChanges = recent.count {
+                it.type == "credit_added" || it.type == "credit_spent" || it.type == "credit_reset"
+            },
             eventCount = recent.size
         )
     }

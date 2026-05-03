@@ -254,6 +254,7 @@ class MainActivity : Activity() {
             "Permission failures: ${summary.permissionFailures}",
             "Overlay open-app actions: ${summary.overlayOpens}",
             "Overlay test-credit unlocks: ${summary.overlayCreditAdds}",
+            "Automatic credit spends: ${summary.automaticCreditSpends}",
             "Manual credit changes: ${summary.manualCreditChanges}",
             "Stored dogfood events: ${summary.eventCount}"
         ).joinToString("\n")
