@@ -1,14 +1,16 @@
 # Commit-to-Unlock App Design
 
-문서 상태: v0.4
+문서 상태: v0.5
 역할: 제품/기술 통합 설계 기준 문서
 현재 최우선 구현: Android dogfood 데이터 수집과 Gate A/B/C 판단
 
-상세 결정 기록은 [decision-log.md](decision-log.md)를 따른다. 제품 전략/UX/사업 패키징은 [product-strategy-spec.md](product-strategy-spec.md)를 따른다. 시장/니즈/피벗 기준은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. Android 다음 구현 단위는 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)가 우선한다.
+상세 결정 기록은 [decision-log.md](decision-log.md)를 따른다. 제품 전략/UX/사업 패키징은 [product-strategy-spec.md](product-strategy-spec.md)를 따른다. proof/quest/요일/휴일/override 정책은 [proof-policy-mvp.md](proof-policy-mvp.md)를 따른다. 시장/니즈/피벗 기준은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. Android 다음 구현 단위는 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)가 우선한다.
 
 ## 1. 결정 요약
 
 Commit-to-Unlock은 “개발 활동을 했다고 직접 체크하면 앱을 열어주는 서비스”가 아니라, 검증 가능한 개발 이벤트를 크레딧 장부로 바꾸고 그 장부가 선택 앱 접근을 열고 닫는 제품이다.
+
+수동 todo는 계획일 뿐 unlock 권한이 없다. 오늘 할 일을 등록할 수는 있지만, 완료 판정은 commit, PR, review, CI, mock proof 같은 proof-backed event가 있어야 한다.
 
 시장 포지션은 generic screen-time blocker가 아니라 `developer proof ledger + optional blocking`이다. 차단 앱 자체는 무료/저가 경쟁이 강하고, 2026년에는 운동/걸음/학습 기반 earn-to-unlock 앱도 이미 보인다. 따라서 차별점은 “무언가를 하면 앱을 여는 것”이 아니라 “개발자의 검증 가능한 산출물을 설명 가능한 leisure credit으로 바꾸는 것”이다.
 
@@ -67,6 +69,8 @@ MVP의 사용자는 개인 개발자다. 학교/부모/MDM, 금전 스테이크,
 | Permissions | Usage Access, Overlay, Notification, Family Controls 상태 표시 | 1-2 |
 | Targets | Android package 또는 iOS activity selection 관리 | 1-2 |
 | Credit Test | mock credit 추가/소진/0 초기화 | 1 |
+| Policy | 적용 요일, 수동 휴일, emergency unlock, free day 상태 | P1-P2 |
+| Daily Quest | proof-backed 오늘의 개발 퀘스트 | P3 |
 | Blocked/Shield | 차단 사유, 현재 credit 0, 앱으로 돌아가기 | 1-2 |
 
 MVP 이후 상세 IA와 screen copy 규칙은 [product-strategy-spec.md](product-strategy-spec.md)의 `UX Information Architecture`와 `Screen Copy Rules`를 따른다. 특히 사용자는 raw score가 아니라 minutes, proof tier, reasons, risk flags를 본다.
@@ -171,6 +175,8 @@ stateDiagram-v2
 ```
 
 Android prototype은 selected target이 foreground이고 기기가 interactive 상태일 때 60초마다 1분을 자동 차감한다. 이 spend engine은 local dogfood 검증용이며, 서버 sync 이후에는 ledger/policy engine이 source of truth가 된다. iOS spend는 DeviceActivity 기반 검증 전까지 구현하지 않는다.
+
+차단 결정은 credit만 보지 않는다. policy engine은 요일, 시간, 수동 휴일, free day, emergency unlock을 credit보다 먼저 평가한다. 상세 우선순위와 데이터 모델은 [proof-policy-mvp.md](proof-policy-mvp.md)의 `Policy Resolution Order`를 따른다.
 
 ## 5. Backend And Scoring Design
 

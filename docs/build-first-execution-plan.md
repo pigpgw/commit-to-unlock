@@ -3,7 +3,7 @@
 결정: 인터뷰/설문 없이 만든다.  
 전략: 고객 검증을 말로 하지 않고, 먼저 `로컬 모바일 차단 -> mock credit -> selected app shield/block` 루프를 실제 기기/에뮬레이터에서 검증한다. GitHub scoring은 모바일 차단 가능성이 확인된 뒤 재개한다.
 
-제품/기술/UX의 기준 설계는 [app-design.md](app-design.md)를 따른다. 제품 전략/사업 패키징은 [product-strategy-spec.md](product-strategy-spec.md)를 따른다. 구현 판단은 [decision-log.md](decision-log.md)를 우선 확인한다. 시장/니즈/피벗 판단은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. 저장소 정리 기준은 [repository-audit-and-cleanup.md](repository-audit-and-cleanup.md)를 따른다. Android 상세 검증 기록은 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)를 따른다. 이 문서는 실행 순서와 milestone 기준을 관리한다.
+제품/기술/UX의 기준 설계는 [app-design.md](app-design.md)를 따른다. proof/quest/요일/휴일/override 정책은 [proof-policy-mvp.md](proof-policy-mvp.md)를 따른다. 제품 전략/사업 패키징은 [product-strategy-spec.md](product-strategy-spec.md)를 따른다. 구현 판단은 [decision-log.md](decision-log.md)를 우선 확인한다. 시장/니즈/피벗 판단은 [market-needs-and-pivot-plan.md](market-needs-and-pivot-plan.md)를 따른다. 저장소 정리 기준은 [repository-audit-and-cleanup.md](repository-audit-and-cleanup.md)를 따른다. Android 상세 검증 기록은 [android-sprint-1.1-design.md](android-sprint-1.1-design.md)를 따른다. 이 문서는 실행 순서와 milestone 기준을 관리한다.
 
 ## 1. 바뀐 원칙
 
@@ -103,6 +103,9 @@
 - daily cap
 - credit spend
 - clawback
+- active weekdays
+- manual holiday today
+- free day
 - override
 - appeal placeholder
 - suspicious activity flags
@@ -113,6 +116,26 @@
 - merged PR은 confirmed credit으로 승격
 - revert/duplicate patch는 clawback 후보가 됨
 - `/credits/today`가 모바일 앱이 바로 쓸 수 있는 형태로 응답
+
+### Milestone 4.5: Daily Quest And Exception Policy
+
+목표: todo 체크가 아니라 proof-backed daily quest와 예외 정책을 구현한다.
+
+기능:
+
+- daily quest 등록
+- required quest
+- proof-backed completed 상태
+- required quest all complete -> freeUntil today end
+- emergency unlock reason/duration/limit
+- active weekdays/time window
+- manual holiday today
+
+성공 기준:
+
+- 수동 체크만으로 unlock되지 않는다.
+- inactive weekday/manual holiday/freeUntil/emergency unlock은 credit보다 먼저 allow된다.
+- 모든 예외는 dogfood event 또는 ledger에 기록된다.
 
 ### Milestone 5: iOS Enforcement Spike
 

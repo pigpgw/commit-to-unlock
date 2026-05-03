@@ -49,6 +49,7 @@ Core principles:
 Read the strategy docs before changing product direction:
 
 - [Product strategy](docs/product-strategy-spec.md)
+- [Proof policy MVP](docs/proof-policy-mvp.md)
 - [Market needs and pivot plan](docs/market-needs-and-pivot-plan.md)
 - [App design](docs/app-design.md)
 - [Build-first execution plan](docs/build-first-execution-plan.md)
@@ -149,9 +150,11 @@ pnpm typecheck
 
 Current recommended sequence:
 
-1. Improve dogfood export analysis with a local TSV summary script.
-2. Run the Android prototype on a physical device for repeated dogfood sessions.
-3. Decide Gate 1 and Gate 2 from dogfood data before returning to GitHub scoring.
-4. Prepare iOS Xcode project and Family Controls entitlement work.
+1. Implement the local policy engine: active weekdays, manual holiday today, freeUntil, emergency unlock.
+2. Add daily quest local prototype with proof-backed completion, not todo-click unlock.
+3. Improve dogfood export analysis with a local TSV summary script.
+4. Run the Android prototype on a physical device for repeated dogfood sessions.
+5. Decide Gate 1 and Gate 2 from dogfood data before returning to GitHub scoring.
+6. Prepare iOS Xcode project and Family Controls entitlement work.
 
 Do not build payments, school/parent mode, leaderboard, money stakes, or full-diff AI scoring yet.
