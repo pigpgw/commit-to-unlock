@@ -178,6 +178,8 @@ Android prototype은 selected target이 foreground이고 기기가 interactive �
 
 차단 결정은 credit만 보지 않는다. policy engine은 요일, 시간, 수동 휴일, free day, emergency unlock을 credit보다 먼저 평가한다. 상세 우선순위와 데이터 모델은 [proof-policy-mvp.md](proof-policy-mvp.md)의 `Policy Resolution Order`를 따른다.
 
+정책 reason code는 `packages/shared/src/policy.ts`의 `evaluatePolicyDecision` 결과를 기준으로 한다. Android overlay는 이 reason을 dogfood event log에 기록하고, 사용자-facing copy는 reason별로 안전하게 매핑한다.
+
 ## 5. Backend And Scoring Design
 
 Sprint 4부터 서버를 다시 연결한다.
