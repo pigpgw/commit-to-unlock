@@ -12,6 +12,7 @@ It can:
 
 - ask a playful developer-only entry question on first launch
 - store local mock credit state
+- evaluate local policy reason codes for weekdays, time windows, manual holiday, mock free day, emergency unlock, and credit
 - detect the foreground app through `UsageStatsManager`
 - block selected package names with an overlay when credit is `0`
 - spend `1` mock credit minute after `60` seconds of foreground use on blocked targets
@@ -86,6 +87,7 @@ The Android Gradle Wrapper is committed, so global Gradle is not required.
 pnpm test
 pnpm build
 pnpm typecheck
+./gradlew :apps:android:testDebugUnitTest
 ./gradlew :apps:android:assembleDebug
 ./gradlew :apps:android:lintDebug
 ```
@@ -110,9 +112,12 @@ Use `ANDROID_SERIAL=<device-id>` when more than one Android device is connected.
 
 3. Grant Usage Access, Display over other apps, and Notifications.
 4. Add a target package, for example `com.android.chrome`.
-5. Reset credit to `0`, start the monitor, and open the target app.
-6. Add test credit and keep the target app foreground for 60 seconds.
-7. Export the dogfood TSV:
+5. Save the policy schedule. Default weekdays are Monday-Friday; leave active time blank for all day.
+6. Reset credit to `0`, start the monitor, and open the target app.
+7. Confirm the overlay shows a policy reason such as `credit_empty`.
+8. Add test credit and keep the target app foreground for 60 seconds.
+9. Test one exception path: mock free day, manual holiday, or emergency unlock.
+10. Export the dogfood TSV:
 
    ```bash
    pnpm android:dogfood:export
@@ -150,11 +155,10 @@ pnpm typecheck
 
 Current recommended sequence:
 
-1. Implement the local policy engine: active weekdays, manual holiday today, freeUntil, emergency unlock.
-2. Add daily quest local prototype with proof-backed completion, not todo-click unlock.
-3. Improve dogfood export analysis with a local TSV summary script.
-4. Run the Android prototype on a physical device for repeated dogfood sessions.
-5. Decide Gate 1 and Gate 2 from dogfood data before returning to GitHub scoring.
-6. Prepare iOS Xcode project and Family Controls entitlement work.
+1. Add daily quest local prototype with proof-backed completion, not todo-click unlock.
+2. Improve dogfood export analysis with a local TSV summary script.
+3. Run the Android prototype on a physical device for repeated dogfood sessions.
+4. Decide Gate 1 and Gate 2 from dogfood data before returning to GitHub scoring.
+5. Prepare iOS Xcode project and Family Controls entitlement work.
 
 Do not build payments, school/parent mode, leaderboard, money stakes, or full-diff AI scoring yet.

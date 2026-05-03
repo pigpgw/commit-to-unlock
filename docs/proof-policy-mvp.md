@@ -60,7 +60,7 @@ Commit-to-Unlock은 todo 앱이 아니다.
 - emergency unlock은 credit이 없어도 열어주지만 audit 대상이다.
 - credit spend는 마지막 허용 조건이다.
 
-현재 순수 함수 구현은 `packages/shared/src/policy.ts`의 `evaluatePolicyDecision`이다. Android/iOS/API는 같은 함수 또는 같은 reason code를 따라야 한다.
+현재 TypeScript 순수 함수 구현은 `packages/shared/src/policy.ts`의 `evaluatePolicyDecision`이다. Android prototype은 `apps/android/src/main/java/com/commitunlock/prototype/PolicyDecisionEngine.kt`에서 같은 reason code와 우선순위를 미러링한다. Android/iOS/API는 같은 함수 또는 같은 reason code를 따라야 한다.
 
 Decision reason:
 
@@ -272,6 +272,16 @@ Acceptance:
 - manual holiday today toggle
 - emergency unlock buttons
 - policy status summary
+
+현재 Android prototype 구현:
+
+- active weekdays checkbox
+- optional activeFrom/activeUntil input
+- manual holiday today toggle
+- mock free day until midnight
+- emergency unlock 5/15/30분, reason 필수, 일 3회/주 10회 제한
+- strict mode에서는 30분 emergency unlock 금지
+- overlay와 dogfood log에 policy reason 기록
 
 Acceptance:
 

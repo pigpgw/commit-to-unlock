@@ -11,10 +11,19 @@ This is the first runnable Commit-to-Unlock mobile prototype. It does not connec
 - Stores local mock credit state:
   - `remainingMinutes`
   - `blockedTargets`
+  - `freeUntil`
   - `strictMode`
   - `lastUpdatedAt`
+- Stores local policy state:
+  - active weekdays
+  - optional active time window
+  - manual holiday today
+  - public holiday behavior placeholder
+  - timezone
+- Stores emergency unlocks locally with reason, duration, `startedAt`, and `expiresAt`.
 - Uses `UsageStatsManager` to detect the foreground app.
 - Uses Android overlay permission to show a blocking screen when a blocked package is foreground and mock credit is `0`.
+- Applies policy reasons before credit: inactive weekday, outside active time, manual holiday, mock free day, and emergency unlock all allow access without spending credit.
 - Automatically spends `1` local credit minute for every `60` seconds of foreground use on blocked targets while the device is interactive.
 - Shows target, remaining credit, strict mode, and next action copy on the blocking overlay.
 - Shows the latest detected foreground package and a recent local dogfood event log for device testing.
@@ -94,13 +103,16 @@ Use this when checking Gradle output without installing on a device.
 
 6. Open Chrome once, return to Commit Unlock, and confirm `com.android.chrome` appears under recent external packages.
 7. Tap `Add latest external package`, or manually put `com.android.chrome` in blocked packages and tap `Save blocked packages`.
-8. Tap `Reset credit to 0`.
-9. Tap `Start monitor service`.
-10. Open Chrome. The blocking overlay should appear within a few seconds and show target, remaining credit, strict mode, and next action text.
-11. Return to Commit Unlock and tap `Add 5 test minutes`.
-12. Open Chrome again. The overlay should not stay visible while mock credit is above `0`.
-13. Keep Chrome foreground for at least 60 seconds and confirm one minute is spent automatically.
-14. Enable strict mode, reset credit to `0`, and open Chrome again. The overlay should not show the `Add 5 test minutes` shortcut.
+8. Leave weekdays as Monday-Friday, leave active time blank, and tap `Save policy schedule`.
+9. Tap `Reset credit to 0`.
+10. Tap `Start monitor service`.
+11. Open Chrome. The blocking overlay should appear within a few seconds and show target, reason `credit_empty`, remaining credit, strict mode, and next action text.
+12. Return to Commit Unlock and tap `Add 5 test minutes`.
+13. Open Chrome again. The overlay should not stay visible while mock credit is above `0`.
+14. Keep Chrome foreground for at least 60 seconds and confirm one minute is spent automatically.
+15. Reset credit to `0`, enter an emergency reason, tap `Emergency unlock 5 minutes`, then open Chrome. The overlay should not appear until the unlock expires.
+16. Tap `Set mock free day until midnight` and confirm the policy summary reason becomes `free_day`.
+17. Enable strict mode, reset credit to `0`, and open Chrome again. The overlay should not show the `Add 5 test minutes` shortcut.
 
 Use the in-app dogfood event log to inspect permission, foreground, target-match, overlay, and credit events.
 
@@ -117,6 +129,9 @@ Use it to track:
 - overlay test-credit unlocks
 - automatic credit spends
 - manual credit changes
+- policy blocks
+- emergency unlocks
+- mock free days
 
 Tap `Share dogfood export` to export a TSV with `timestamp`, `type`, and `detail` columns. This is local-only and does not upload data to any server.
 
