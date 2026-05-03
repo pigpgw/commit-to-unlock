@@ -4,6 +4,8 @@
 작성일: 2026-05-04
 역할: 기기별 차단 가능 범위, 사용자 선택 대상, 앱 삭제 가능성, 로그인/회원가입/로그아웃/회원탈퇴 UX 기준
 
+상위 기획/보안/개인정보 gate는 [product-security-hardening-plan.md](product-security-hardening-plan.md)를 따른다.
+
 ## 1. Product Decision
 
 Commit-to-Unlock은 사용자의 모든 서비스를 막는 앱이 아니다. 사용자가 직접 고른 방해 앱/웹사이트만 정책 대상이 된다.

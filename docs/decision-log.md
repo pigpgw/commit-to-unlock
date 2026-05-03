@@ -8,6 +8,7 @@
 | 주제 | 기준 문서 |
 | --- | --- |
 | 현재 MVP 실행 계획 | [mvp-execution-plan.md](mvp-execution-plan.md) |
+| 기획/보안 hardening gate | [product-security-hardening-plan.md](product-security-hardening-plan.md) |
 | Android dogfood 실행 절차 | [android-dogfood-runbook.md](android-dogfood-runbook.md) |
 | 전체 제품/기술 설계 | [app-design.md](app-design.md) |
 | proof/quest/policy MVP | [proof-policy-mvp.md](proof-policy-mvp.md) |
@@ -59,6 +60,7 @@
 | D-029 | TypeScript와 Android 정책 엔진은 공통 golden fixture로 drift를 막는다 | 모바일 enforcement와 서버/공유 정책이 어긋나면 같은 사용자 상태에서 다른 차단 결과가 나온다. Sprint 4 전부터 공통 JSON fixture를 양쪽 테스트에 적용한다. | Accepted |
 | D-030 | GitHub Sprint 4는 HMAC/dedupe/retention/ledger idempotency부터 시작한다 | PR enrichment 없는 scoring이나 dedupe 없는 ledger write는 제품 신뢰와 privacy를 동시에 깨뜨린다. GitHub runtime은 [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A-F 순서를 따른다. | Accepted |
 | D-031 | 앱은 삭제 가능하고, 선택한 target만 차단한다 | B2C self-control 제품에서 uninstall prevention, 전체 기기 잠금, 모든 서비스 차단은 정책/신뢰 리스크가 크다. 로그인/로그아웃/회원탈퇴/데이터 삭제는 [control-account-design.md](control-account-design.md)를 따른다. | Accepted |
+| D-032 | 모든 신규 기능은 product/security hardening gate를 먼저 통과한다 | 기획, 보안, 개인정보, 플랫폼 정책이 따로 움직이면 수익성 없는 blocker나 과잉 수집 GitHub 앱이 된다. 신규 기능은 [product-security-hardening-plan.md](product-security-hardening-plan.md)의 invariants, gate, stop list를 먼저 만족해야 한다. | Accepted |
 
 ## Revisit Triggers
 

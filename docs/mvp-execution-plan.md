@@ -33,13 +33,14 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 | 순서 | 문서 | 역할 |
 | --- | --- | --- |
 | 1 | [mvp-execution-plan.md](mvp-execution-plan.md) | 지금 무엇을 할지 결정하는 실행 계획 |
-| 2 | [android-dogfood-runbook.md](android-dogfood-runbook.md) | MVP-A 실기기 검증 절차 |
-| 3 | [decision-log.md](decision-log.md) | 다시 판단하지 않을 제품/기술 결정 |
-| 4 | [security-and-logic-review.md](security-and-logic-review.md) | 보안/정책/로직 gate |
-| 5 | [github-sprint4-entry.md](github-sprint4-entry.md) | GitHub runtime 진입 기준 |
-| 6 | [control-account-design.md](control-account-design.md) | 차단 범위, 계정, 탈퇴 UX |
-| 7 | [app-design.md](app-design.md) | 전체 제품/기술 설계 |
-| 8 | [proof-policy-mvp.md](proof-policy-mvp.md) | proof, quest, exception policy 상세 |
+| 2 | [product-security-hardening-plan.md](product-security-hardening-plan.md) | 기획/보안/개인정보/platform policy hardening gate |
+| 3 | [android-dogfood-runbook.md](android-dogfood-runbook.md) | MVP-A 실기기 검증 절차 |
+| 4 | [decision-log.md](decision-log.md) | 다시 판단하지 않을 제품/기술 결정 |
+| 5 | [security-and-logic-review.md](security-and-logic-review.md) | 보안/정책/로직 gate |
+| 6 | [github-sprint4-entry.md](github-sprint4-entry.md) | GitHub runtime 진입 기준 |
+| 7 | [control-account-design.md](control-account-design.md) | 차단 범위, 계정, 탈퇴 UX |
+| 8 | [app-design.md](app-design.md) | 전체 제품/기술 설계 |
+| 9 | [proof-policy-mvp.md](proof-policy-mvp.md) | proof, quest, exception policy 상세 |
 
 나머지 문서는 reference다. 충돌하면 이 문서와 decision log를 우선한다.
 
@@ -93,6 +94,7 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 | 문서 | 액션 |
 | --- | --- |
 | `mvp-execution-plan.md` | 신규 단일 실행 계획 |
+| `product-security-hardening-plan.md` | 신규 기능의 기획/보안/개인정보/platform hardening gate |
 | `android-dogfood-runbook.md` | MVP-A 실기기 dogfood 절차와 gate decision template |
 | `decision-log.md` | 결정만 유지 |
 | `security-and-logic-review.md` | Gate D와 보안 기준 유지 |
@@ -170,7 +172,7 @@ Archive 후보:
 | A: Enforcement viability | needs_data | 실기기 smoke pass, overlay <= 2초, 권한 상태 정확 | runbook smoke + privacy UI |
 | B: Dogfood need | needs_data | 14일 blocked attempt/override 데이터 | 14일 TSV collection |
 | C: Proof supply | needs_data | 14일 실제 GitHub/WakaTime/IDE proof 빈도 | mock proof + dev activity note |
-| D: Trust/privacy | needs_data | permission/privacy UI, retention/revoke/delete spec, webhook HMAC/dedupe spec | privacy UI + GitHub entry spec |
+| D: Trust/privacy | needs_data | product/security hardening invariants, permission/privacy UI, retention/revoke/delete spec, webhook HMAC/dedupe spec | hardening gate + GitHub entry spec |
 | E: Monetization | blocked | proof ledger 가치 확인 후 | 나중 |
 
 ## 8. Next PR Sequence
@@ -267,13 +269,25 @@ Deliverables:
 - Header / Permissions / Targets / Policy / Quest / Emergency / Credit / Monitor-Dogfood helpers
 - no behavior change
 
+### PR 9: Product and security hardening plan
+
+Status: complete as planning gate.
+
+Deliverables:
+
+- 기획/보안/개인정보/platform policy hardening gate
+- non-negotiable invariants
+- threat model, data classification, retention defaults
+- Android/iOS/GitHub/scoring/account hardening 기준
+- immediate implementation queue
+
 ## 9. Work Rules
 
 - 한 PR에 unrelated scope를 섞지 않는다.
 - 코드 삭제는 테스트/문서 기준 없이 하지 않는다.
 - Android behavior 변경 전에는 unit test를 먼저 보강한다.
 - Sprint 4 전까지 mobile mock credit을 API와 연결하지 않는다.
-- GitHub sync는 Gate D를 통과하기 전까지 구현하지 않는다.
+- GitHub sync는 [product-security-hardening-plan.md](product-security-hardening-plan.md)의 Gate D와 [github-sprint4-entry.md](github-sprint4-entry.md)를 통과하기 전까지 구현하지 않는다.
 - 로그인/회원가입/로그아웃/회원탈퇴 구현은 [control-account-design.md](control-account-design.md)의 삭제/권한/target guard를 먼저 만족해야 한다.
 - 결제/부모/학교/MDM/money stake는 계속 금지한다.
 
@@ -282,7 +296,7 @@ Deliverables:
 이 PR 이후 즉시 할 일:
 
 ```text
-real-device Android dogfood smoke, then Sprint 4 PR A: Webhook Security Foundation
+Android target guardrails, real-device Android dogfood smoke, then Sprint 4 PR A: Webhook Security Foundation
 ```
 
-이유: runbook, event store tests, policy golden fixtures, 권한/개인정보 disclosure, in-app Data Quality/Gate review, GitHub Sprint 4 entry spec은 완료됐다. 이제 실제 기기에서 Gate A/D smoke evidence를 만든 뒤 [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A부터 구현한다.
+이유: runbook, event store tests, policy golden fixtures, 권한/개인정보 disclosure, in-app Data Quality/Gate review, GitHub Sprint 4 entry spec, product/security hardening gate는 완료됐다. 이제 Android target guardrail을 코드로 고정하고, 실제 기기에서 Gate A/D smoke evidence를 만든 뒤 [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A부터 구현한다.

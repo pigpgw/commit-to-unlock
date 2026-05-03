@@ -52,6 +52,7 @@ Core principles:
 Read these docs in order before changing product direction or implementation priority:
 
 - [MVP execution plan](docs/mvp-execution-plan.md)
+- [Product and security hardening plan](docs/product-security-hardening-plan.md)
 - [Android dogfood runbook](docs/android-dogfood-runbook.md)
 - [Decision log](docs/decision-log.md)
 - [Security and logic review](docs/security-and-logic-review.md)
@@ -178,8 +179,9 @@ pnpm typecheck
 
 Current recommended sequence:
 
-1. Follow the [Android dogfood runbook](docs/android-dogfood-runbook.md) on a physical device.
-2. Use the [GitHub Sprint 4 entry spec](docs/github-sprint4-entry.md) as the implementation gate for webhook/security work.
-3. Keep Android changes limited to dogfood fixes and the control/account UX rules until Gate A/D has real-device evidence.
+1. Keep new work inside the guardrails in the [product and security hardening plan](docs/product-security-hardening-plan.md).
+2. Add Android target guardrails for own package, empty/duplicate packages, and dangerous/system targets.
+3. Follow the [Android dogfood runbook](docs/android-dogfood-runbook.md) on a physical device.
+4. Use the [GitHub Sprint 4 entry spec](docs/github-sprint4-entry.md) as the implementation gate for webhook/security work.
 
 Do not build payments, school/parent mode, leaderboard, money stakes, or full-diff AI scoring yet.
