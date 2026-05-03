@@ -39,6 +39,7 @@ This is the first runnable Commit-to-Unlock mobile prototype. It does not connec
 ## Quick Dogfood Loop
 
 Use this path for repeated local testing on a physical device.
+For the full 14-day protocol, gate criteria, export archive rules, and decision template, use [Android dogfood runbook](../../docs/android-dogfood-runbook.md).
 
 1. Connect one Android device with USB debugging enabled.
 2. Install and launch:

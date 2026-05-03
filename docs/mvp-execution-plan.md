@@ -32,10 +32,11 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 | 순서 | 문서 | 역할 |
 | --- | --- | --- |
 | 1 | [mvp-execution-plan.md](mvp-execution-plan.md) | 지금 무엇을 할지 결정하는 실행 계획 |
-| 2 | [decision-log.md](decision-log.md) | 다시 판단하지 않을 제품/기술 결정 |
-| 3 | [security-and-logic-review.md](security-and-logic-review.md) | 보안/정책/로직 gate |
-| 4 | [app-design.md](app-design.md) | 전체 제품/기술 설계 |
-| 5 | [proof-policy-mvp.md](proof-policy-mvp.md) | proof, quest, exception policy 상세 |
+| 2 | [android-dogfood-runbook.md](android-dogfood-runbook.md) | MVP-A 실기기 검증 절차 |
+| 3 | [decision-log.md](decision-log.md) | 다시 판단하지 않을 제품/기술 결정 |
+| 4 | [security-and-logic-review.md](security-and-logic-review.md) | 보안/정책/로직 gate |
+| 5 | [app-design.md](app-design.md) | 전체 제품/기술 설계 |
+| 6 | [proof-policy-mvp.md](proof-policy-mvp.md) | proof, quest, exception policy 상세 |
 
 나머지 문서는 reference다. 충돌하면 이 문서와 decision log를 우선한다.
 
@@ -89,6 +90,7 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 | 문서 | 액션 |
 | --- | --- |
 | `mvp-execution-plan.md` | 신규 단일 실행 계획 |
+| `android-dogfood-runbook.md` | MVP-A 실기기 dogfood 절차와 gate decision template |
 | `decision-log.md` | 결정만 유지 |
 | `security-and-logic-review.md` | Gate D와 보안 기준 유지 |
 | `app-design.md` | 기술/제품 설계 유지 |
@@ -160,9 +162,9 @@ Archive 후보:
 
 | Gate | 상태 | 통과 기준 | 다음 작업 |
 | --- | --- | --- | --- |
-| A: Enforcement viability | needs_data | 실기기 smoke pass, overlay <= 2초, 권한 상태 정확 | dogfood runbook |
-| B: Dogfood need | needs_data | 14일 blocked attempt/override 데이터 | dogfood runbook + TSV |
-| C: Proof supply | needs_data | 14일 실제 GitHub/WakaTime/IDE proof 빈도 | dev activity log |
+| A: Enforcement viability | needs_data | 실기기 smoke pass, overlay <= 2초, 권한 상태 정확 | runbook smoke + event store tests |
+| B: Dogfood need | needs_data | 14일 blocked attempt/override 데이터 | 14일 TSV collection |
+| C: Proof supply | needs_data | 14일 실제 GitHub/WakaTime/IDE proof 빈도 | mock proof + dev activity note |
 | D: Trust/privacy | needs_data | permission/privacy UI, retention/revoke/delete spec, webhook HMAC/dedupe spec | privacy UI + GitHub entry spec |
 | E: Monetization | blocked | proof ledger 가치 확인 후 | 나중 |
 
@@ -170,7 +172,7 @@ Archive 후보:
 
 ### PR 1: MVP execution plan
 
-Status: this work.
+Status: complete.
 
 Deliverables:
 
@@ -179,6 +181,8 @@ Deliverables:
 - existing docs에 source-of-truth 연결
 
 ### PR 2: Dogfood runbook
+
+Status: complete.
 
 Deliverables:
 
