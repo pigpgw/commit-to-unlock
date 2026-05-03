@@ -29,7 +29,12 @@ export interface ScoreDecision {
   needsHumanReview: boolean;
 }
 
-export type { MobileCreditState } from "./mobile-credit.js";
+export type {
+  MobileCreditState,
+  MobileDailyQuest,
+  MobileDailyQuestProofType,
+  MobileDailyQuestStatus
+} from "./mobile-credit.js";
 export type {
   EmergencyUnlock,
   PolicyCreditState,

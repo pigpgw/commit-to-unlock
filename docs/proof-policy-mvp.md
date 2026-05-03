@@ -123,6 +123,14 @@ Daily Quest는 todo가 아니라 proof를 묶는 label이다.
 - 모든 required quest가 completed이면 `freeUntil = 오늘 23:59:59`를 설정할 수 있다.
 - free day는 ledger/event log에 남긴다.
 
+현재 Android prototype 구현:
+
+- `DailyQuestStore`가 오늘 날짜 기준 quest를 SharedPreferences에 저장한다.
+- `Add daily quest plan`은 `planned` 상태만 만들며 unlock에 영향을 주지 않는다.
+- `Complete next quest with mock proof`는 required quest를 우선 `completed`로 바꾸고 `proofType=mock`을 기록한다.
+- required quest가 1개 이상이고 모두 `completed`이면 `freeUntil`을 해당 timezone의 자정 직전까지 설정한다.
+- 모든 추가/완료/free day 부여는 dogfood event로 남긴다.
+
 ## 6. Free Day
 
 Free day는 “오늘 할 일을 다 했으니 전체 프리” 정책이다.
@@ -295,6 +303,15 @@ Acceptance:
 - required flag
 - mock proof complete
 - all required completed -> freeUntil today end
+
+현재 Android prototype 구현:
+
+- daily quest title input
+- required flag
+- mock proof completion button
+- today-only local store
+- quest summary
+- dogfood summary counters
 
 Acceptance:
 

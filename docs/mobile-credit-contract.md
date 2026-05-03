@@ -12,6 +12,25 @@ export interface MobileCreditState {
 }
 ```
 
+Daily Quest is a local proof label, not an unlock checkbox:
+
+```ts
+export type MobileDailyQuestStatus = "planned" | "proof_seen" | "completed" | "rejected";
+
+export type MobileDailyQuestProofType = "commit" | "pull_request" | "review" | "mock";
+
+export interface MobileDailyQuest {
+  id: string;
+  title: string;
+  required: boolean;
+  proofType?: MobileDailyQuestProofType;
+  proofRef?: string;
+  status: MobileDailyQuestStatus;
+  createdAt: string;
+  completedAt?: string;
+}
+```
+
 ## Invariants
 
 - `remainingMinutes` is an integer minute balance and must never be negative.
@@ -20,6 +39,7 @@ export interface MobileCreditState {
 - `strictMode` means local convenience shortcuts are reduced. It does not mean tamper-proof control.
 - `lastUpdatedAt` is an ISO 8601 UTC string.
 - Android local dogfood automatically spends 1 minute after 60 seconds of interactive foreground use on a blocked target.
+- Daily Quest `planned` never unlocks by itself. Required quests must become `completed` through proof, currently Android local `mock`, before they can set `freeUntil`.
 
 ## Android Mapping
 
@@ -29,6 +49,7 @@ export interface MobileCreditState {
 - `freeUntil` in the future: allow access and log `free_day`-style policy reasons without spending credit.
 - `remainingMinutes > 0` while a blocked target stays foreground: spend 1 minute per 60 seconds of interactive use.
 - Target selection starts as manual package input. Production Android should prefer recent UsageStats-derived package suggestions over broad installed-app scanning.
+- Android stores today's `MobileDailyQuest[]` locally. Completing all required quests with mock proof sets `freeUntil` to local midnight and writes dogfood events.
 
 ## iOS Mapping
 
@@ -37,6 +58,7 @@ export interface MobileCreditState {
 - `remainingMinutes > 0`: clear shields.
 - `freeUntil` in the future: clear shields until that timestamp, then re-evaluate.
 - iOS selected targets are opaque privacy-preserving values; the UI should not promise app names for selected targets.
+- iOS should keep the same Daily Quest status semantics even if proof completion is driven by a server later.
 
 ## Future Server Sync
 

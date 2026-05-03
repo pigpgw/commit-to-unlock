@@ -22,6 +22,7 @@ import java.time.ZoneId
 
 class MainActivity : Activity() {
     private lateinit var creditStore: CreditStore
+    private lateinit var dailyQuestStore: DailyQuestStore
     private lateinit var developerGateStore: DeveloperGateStore
     private lateinit var dogfoodEventStore: DogfoodEventStore
     private lateinit var emergencyUnlockStore: EmergencyUnlockStore
@@ -31,6 +32,7 @@ class MainActivity : Activity() {
     private lateinit var statusText: TextView
     private lateinit var recentPackagesText: TextView
     private lateinit var policySummaryText: TextView
+    private lateinit var questSummaryText: TextView
     private lateinit var dogfoodSummaryText: TextView
     private lateinit var eventLogText: TextView
     private lateinit var packageInput: EditText
@@ -39,12 +41,15 @@ class MainActivity : Activity() {
     private lateinit var activeUntilInput: EditText
     private lateinit var applyPublicHolidaysInput: CheckBox
     private lateinit var manualHolidayInput: CheckBox
+    private lateinit var questTitleInput: EditText
+    private lateinit var questRequiredInput: CheckBox
     private lateinit var emergencyReasonInput: EditText
     private val weekdayInputs = mutableMapOf<Int, CheckBox>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         creditStore = CreditStore(this)
+        dailyQuestStore = DailyQuestStore(this)
         developerGateStore = DeveloperGateStore(this)
         dogfoodEventStore = DogfoodEventStore(this)
         emergencyUnlockStore = EmergencyUnlockStore(this)
@@ -204,6 +209,22 @@ class MainActivity : Activity() {
             setPadding(0, 20, 0, 10)
         }
 
+        questTitleInput = EditText(this).apply {
+            hint = "Daily quest title (ex: fix Android policy UI)"
+            minLines = 1
+        }
+
+        questRequiredInput = CheckBox(this).apply {
+            text = "Required for free day"
+            isChecked = true
+        }
+
+        questSummaryText = TextView(this).apply {
+            textSize = 13f
+            setTextColor(0xFF334155.toInt())
+            setPadding(0, 20, 0, 10)
+        }
+
         emergencyReasonInput = EditText(this).apply {
             hint = "Emergency unlock reason (required)"
             minLines = 1
@@ -260,6 +281,13 @@ class MainActivity : Activity() {
             renderState()
         })
         root.addView(policySummaryText)
+        root.addView(sectionLabel("Daily quest"))
+        root.addView(questTitleInput)
+        root.addView(questRequiredInput)
+        root.addView(button("Add daily quest plan") { addDailyQuest() })
+        root.addView(button("Complete next quest with mock proof") { completeNextQuestWithMockProof() })
+        root.addView(button("Clear today's quests") { clearDailyQuests() })
+        root.addView(questSummaryText)
         root.addView(sectionLabel("Emergency unlock"))
         root.addView(emergencyReasonInput)
         root.addView(button("Emergency unlock 5 minutes") { startEmergencyUnlock(5) })
@@ -381,6 +409,66 @@ class MainActivity : Activity() {
     }
 
     private fun setMockFreeDay() {
+        grantFreeDayUntilMidnight("manual_mock")
+        renderState()
+    }
+
+    private fun addDailyQuest() {
+        val title = questTitleInput.text.toString().trim()
+        if (title.isBlank()) {
+            Toast.makeText(this, "Daily quest title is required", Toast.LENGTH_SHORT).show()
+            dogfoodEventStore.record("daily_quest_rejected", "missing_title")
+            return
+        }
+
+        val policy = policyStore.read()
+        val quest = dailyQuestStore.add(
+            title = title,
+            required = questRequiredInput.isChecked,
+            timezone = policy.timezone
+        )
+        dogfoodEventStore.record(
+            "daily_quest_added",
+            "id=${quest.id} required=${quest.required} title=${quest.title}"
+        )
+        questTitleInput.setText("")
+        renderState()
+    }
+
+    private fun completeNextQuestWithMockProof() {
+        val policy = policyStore.read()
+        val quest = dailyQuestStore.completeNextWithMockProof(policy.timezone)
+        if (quest == null) {
+            Toast.makeText(this, "No planned quest is waiting for mock proof", Toast.LENGTH_SHORT).show()
+            dogfoodEventStore.record("daily_quest_mock_proof_rejected", "no_planned_quest")
+            renderState()
+            return
+        }
+
+        dogfoodEventStore.record(
+            "daily_quest_mock_completed",
+            "id=${quest.id} required=${quest.required} title=${quest.title}"
+        )
+
+        val quests = dailyQuestStore.read(policy.timezone)
+        if (DailyQuestPolicy.shouldGrantFreeDay(quests)) {
+            val freeUntil = grantFreeDayUntilMidnight("daily_quest")
+            dogfoodEventStore.record(
+                "daily_quest_free_day_granted",
+                "until=$freeUntil required_completed=${quests.count { it.required && it.status == DailyQuestStatus.COMPLETED }}"
+            )
+        }
+        renderState()
+    }
+
+    private fun clearDailyQuests() {
+        val policy = policyStore.read()
+        dailyQuestStore.clearToday(policy.timezone)
+        dogfoodEventStore.record("daily_quests_cleared")
+        renderState()
+    }
+
+    private fun grantFreeDayUntilMidnight(source: String): String {
         val policy = policyStore.read()
         val zoneId = runCatching { ZoneId.of(policy.timezone) }.getOrDefault(ZoneId.systemDefault())
         val freeUntil = LocalDate.now(zoneId)
@@ -391,8 +479,8 @@ class MainActivity : Activity() {
             .toString()
 
         creditStore.setFreeUntil(freeUntil)
-        dogfoodEventStore.record("free_day_set", "until=$freeUntil source=mock")
-        renderState()
+        dogfoodEventStore.record("free_day_set", "until=$freeUntil source=$source")
+        return freeUntil
     }
 
     private fun startEmergencyUnlock(durationMinutes: Int) {
@@ -466,6 +554,7 @@ class MainActivity : Activity() {
         val state = creditStore.read()
         val policy = policyStore.read()
         val activeUnlocks = emergencyUnlockStore.active()
+        val quests = dailyQuestStore.read(policy.timezone)
         val foregroundPackage = foregroundPackageOrNull()
         val decision = PolicyDecisionEngine.evaluate(
             PolicyDecisionInput(
@@ -514,6 +603,8 @@ class MainActivity : Activity() {
             "Active emergency unlock: ${activeUnlocks.firstOrNull()?.expiresAt ?: "none"}"
         ).joinToString("\n")
 
+        questSummaryText.text = buildQuestSummary(quests, state)
+
         recentPackagesText.text = buildString {
             append("Recent external packages\n")
             if (recentPackages.isEmpty()) {
@@ -531,6 +622,8 @@ class MainActivity : Activity() {
             "Policy blocks: ${summary.policyBlocks}",
             "Emergency unlocks: ${summary.emergencyUnlocks}",
             "Mock free days: ${summary.freeDays}",
+            "Daily quests added: ${summary.dailyQuestsAdded}",
+            "Daily quest mock completions: ${summary.dailyQuestMockCompletions}",
             "Permission failures: ${summary.permissionFailures}",
             "Overlay open-app actions: ${summary.overlayOpens}",
             "Overlay test-credit unlocks: ${summary.overlayCreditAdds}",
@@ -554,6 +647,28 @@ class MainActivity : Activity() {
         return listOf(event.timestamp.toString(), event.type, event.detail)
             .filter { it.isNotEmpty() }
             .joinToString(" ")
+    }
+
+    private fun buildQuestSummary(quests: List<DailyQuest>, state: CreditState): String {
+        val requiredCount = quests.count { it.required }
+        val completedRequiredCount = quests.count {
+            it.required && it.status == DailyQuestStatus.COMPLETED
+        }
+        return buildString {
+            append("Daily quest summary\n")
+            append("Required completed: $completedRequiredCount / $requiredCount\n")
+            append("Free day eligible: ${DailyQuestPolicy.shouldGrantFreeDay(quests)}\n")
+            append("Current free until: ${state.freeUntil ?: "none"}\n")
+            if (quests.isEmpty()) {
+                append("No quests planned today")
+            } else {
+                append(quests.joinToString("\n") { quest ->
+                    val requiredLabel = if (quest.required) "required" else "optional"
+                    val proofLabel = quest.proofType ?: "no-proof"
+                    "- [${quest.status.code}] ${quest.title} ($requiredLabel, $proofLabel)"
+                })
+            }
+        }
     }
 
     private fun recentExternalPackages(): List<String> {

@@ -123,6 +123,8 @@
 
 현재 1차 순수 정책 함수는 `packages/shared/src/policy.ts`에 있고, Android prototype은 같은 reason code를 `PolicyDecisionEngine`으로 미러링한다. Android/iOS/API가 같은 정책 순서를 유지해야 하므로 reason code 변경은 shared test와 Android unit test를 함께 바꾼다.
 
+Android prototype은 daily quest도 로컬 구현했다. `planned`는 unlock에 영향이 없고, mock proof로 required quest가 모두 `completed`일 때만 `freeUntil`을 설정한다.
+
 기능:
 
 - daily quest 등록
