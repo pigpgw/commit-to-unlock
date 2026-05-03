@@ -13,6 +13,7 @@ It can:
 - ask a playful developer-only entry question on first launch
 - store local mock credit state
 - evaluate local policy reason codes for weekdays, time windows, manual holiday, mock free day, emergency unlock, and credit
+- add daily quest plans and complete them with local mock proof before free day is granted
 - detect the foreground app through `UsageStatsManager`
 - block selected package names with an overlay when credit is `0`
 - spend `1` mock credit minute after `60` seconds of foreground use on blocked targets
@@ -116,8 +117,9 @@ Use `ANDROID_SERIAL=<device-id>` when more than one Android device is connected.
 6. Reset credit to `0`, start the monitor, and open the target app.
 7. Confirm the overlay shows a policy reason such as `credit_empty`.
 8. Add test credit and keep the target app foreground for 60 seconds.
-9. Test one exception path: mock free day, manual holiday, or emergency unlock.
-10. Export the dogfood TSV:
+9. Add a required daily quest, then complete it with mock proof and confirm `free_day`.
+10. Test one exception path: mock free day, manual holiday, or emergency unlock.
+11. Export the dogfood TSV:
 
    ```bash
    pnpm android:dogfood:export
@@ -155,10 +157,9 @@ pnpm typecheck
 
 Current recommended sequence:
 
-1. Add daily quest local prototype with proof-backed completion, not todo-click unlock.
-2. Improve dogfood export analysis with a local TSV summary script.
-3. Run the Android prototype on a physical device for repeated dogfood sessions.
-4. Decide Gate 1 and Gate 2 from dogfood data before returning to GitHub scoring.
-5. Prepare iOS Xcode project and Family Controls entitlement work.
+1. Improve dogfood export analysis with a local TSV summary script.
+2. Run the Android prototype on a physical device for repeated dogfood sessions.
+3. Decide Gate 1 and Gate 2 from dogfood data before returning to GitHub scoring.
+4. Prepare iOS Xcode project and Family Controls entitlement work.
 
 Do not build payments, school/parent mode, leaderboard, money stakes, or full-diff AI scoring yet.
