@@ -9,16 +9,19 @@ import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import java.time.LocalDate
 
 class MonitorService : Service() {
     private lateinit var creditStore: CreditStore
     private lateinit var debugLogStore: DebugLogStore
+    private lateinit var dogfoodEventStore: DogfoodEventStore
     private lateinit var foregroundReader: ForegroundAppReader
     private lateinit var monitorStateStore: MonitorStateStore
     private lateinit var overlay: BlockOverlay
     private val handler = Handler(Looper.getMainLooper())
     private var lastForegroundPackage: String? = null
     private var showingBlockedPackage: String? = null
+    private var lastHeartbeatDay: String? = null
 
     private val pollRunnable = object : Runnable {
         override fun run() {
@@ -31,6 +34,7 @@ class MonitorService : Service() {
         super.onCreate()
         creditStore = CreditStore(this)
         debugLogStore = DebugLogStore(this)
+        dogfoodEventStore = DogfoodEventStore(this)
         foregroundReader = ForegroundAppReader(this)
         monitorStateStore = MonitorStateStore(this)
         overlay = BlockOverlay(this)
@@ -38,6 +42,7 @@ class MonitorService : Service() {
         startForeground(NOTIFICATION_ID, notification("Monitoring selected apps"))
         monitorStateStore.setRunning(true)
         debugLogStore.record("monitor_started")
+        dogfoodEventStore.record("monitor_started")
         handler.post(pollRunnable)
     }
 
@@ -46,20 +51,25 @@ class MonitorService : Service() {
         hideOverlay("monitor_stopped")
         monitorStateStore.setRunning(false)
         debugLogStore.record("monitor_stopped")
+        dogfoodEventStore.record("monitor_stopped")
         super.onDestroy()
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     private fun poll() {
+        recordHeartbeat()
+
         if (!PermissionChecks.hasUsageAccess(this)) {
             debugLogStore.record("usage_access_missing")
+            dogfoodEventStore.record("permission_missing", "usage_access")
             hideOverlay("usage_access_missing")
             return
         }
 
         if (!PermissionChecks.canDrawOverlays(this)) {
             debugLogStore.record("overlay_permission_missing")
+            dogfoodEventStore.record("permission_missing", "overlay")
             hideOverlay("overlay_permission_missing")
             return
         }
@@ -70,6 +80,7 @@ class MonitorService : Service() {
         if (foregroundPackage != null && foregroundPackage != lastForegroundPackage) {
             lastForegroundPackage = foregroundPackage
             debugLogStore.record("foreground_changed:$foregroundPackage")
+            dogfoodEventStore.record("foreground_changed", foregroundPackage)
         }
 
         val shouldBlock = foregroundPackage != null &&
@@ -91,27 +102,42 @@ class MonitorService : Service() {
         }
     }
 
+    private fun recordHeartbeat() {
+        val today = LocalDate.now().toString()
+        if (lastHeartbeatDay == today) return
+
+        lastHeartbeatDay = today
+        dogfoodEventStore.record("monitor_heartbeat", "date=$today")
+    }
+
     private fun showOverlay(foregroundPackage: String, strictMode: Boolean) {
         if (showingBlockedPackage == foregroundPackage) return
 
+        dogfoodEventStore.record("blocked_attempt", foregroundPackage)
         overlay.hide()
         overlay.show(
             packageName = foregroundPackage,
             canAddCredit = !strictMode,
-            onOpenApp = { openMainActivity() },
+            onOpenApp = {
+                dogfoodEventStore.record("overlay_open_app", foregroundPackage)
+                openMainActivity()
+            },
             onAddCredit = {
                 creditStore.addMinutes(5)
                 debugLogStore.record("credit_added:5")
+                dogfoodEventStore.record("overlay_add_credit", "package=$foregroundPackage minutes=5")
                 hideOverlay("credit_added")
             }
         )
         showingBlockedPackage = foregroundPackage
         debugLogStore.record("overlay_shown:$foregroundPackage")
+        dogfoodEventStore.record("overlay_shown", foregroundPackage)
     }
 
     private fun hideOverlay(reason: String) {
         if (showingBlockedPackage != null) {
             debugLogStore.record("overlay_hidden:$reason")
+            dogfoodEventStore.record("overlay_hidden", "package=$showingBlockedPackage reason=$reason")
         }
         overlay.hide()
         showingBlockedPackage = null
