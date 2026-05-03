@@ -17,6 +17,7 @@ class BlockOverlay(private val context: Context) {
     fun show(
         packageName: String,
         strictMode: Boolean,
+        reasonCode: String,
         onOpenApp: () -> Unit,
         onAddCredit: () -> Unit
     ) {
@@ -38,7 +39,7 @@ class BlockOverlay(private val context: Context) {
         }
 
         val message = TextView(context).apply {
-            text = "This app is paused because your selected-app credit is 0 minutes."
+            text = "This app is paused because the local policy decision is blocked."
             textSize = 17f
             setTextColor(0xFFE5E7EB.toInt())
             gravity = Gravity.CENTER
@@ -46,7 +47,7 @@ class BlockOverlay(private val context: Context) {
         }
 
         val targetState = TextView(context).apply {
-            text = "Target: $packageName\nRemaining credit: 0 minutes\nStrict mode: ${if (strictMode) "on" else "off"}"
+            text = "Target: $packageName\nReason: $reasonCode\nRemaining credit: 0 minutes\nStrict mode: ${if (strictMode) "on" else "off"}"
             textSize = 15f
             setTextColor(0xFFCBD5E1.toInt())
             gravity = Gravity.CENTER

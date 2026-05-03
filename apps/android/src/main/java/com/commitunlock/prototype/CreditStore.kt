@@ -16,6 +16,7 @@ class CreditStore(context: Context) {
         return CreditState(
             remainingMinutes = prefs.getInt(KEY_REMAINING_MINUTES, 0),
             blockedTargets = targets,
+            freeUntil = prefs.getString(KEY_FREE_UNTIL, null),
             strictMode = prefs.getBoolean(KEY_STRICT_MODE, false),
             lastUpdatedAt = prefs.getString(KEY_LAST_UPDATED_AT, Instant.now().toString())
                 ?: Instant.now().toString()
@@ -26,6 +27,7 @@ class CreditStore(context: Context) {
         prefs.edit()
             .putInt(KEY_REMAINING_MINUTES, state.remainingMinutes.coerceAtLeast(0))
             .putString(KEY_TARGETS, state.blockedTargets.joinToString(","))
+            .putString(KEY_FREE_UNTIL, state.freeUntil)
             .putBoolean(KEY_STRICT_MODE, state.strictMode)
             .putString(KEY_LAST_UPDATED_AT, state.lastUpdatedAt)
             .apply()
@@ -55,9 +57,18 @@ class CreditStore(context: Context) {
         ))
     }
 
+    fun setFreeUntil(freeUntil: String?) {
+        val current = read()
+        save(current.copy(
+            freeUntil = freeUntil,
+            lastUpdatedAt = Instant.now().toString()
+        ))
+    }
+
     companion object {
         private const val KEY_REMAINING_MINUTES = "remaining_minutes"
         private const val KEY_TARGETS = "blocked_targets"
+        private const val KEY_FREE_UNTIL = "free_until"
         private const val KEY_STRICT_MODE = "strict_mode"
         private const val KEY_LAST_UPDATED_AT = "last_updated_at"
     }

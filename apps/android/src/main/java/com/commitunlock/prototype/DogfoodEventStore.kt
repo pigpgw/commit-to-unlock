@@ -16,6 +16,9 @@ data class DogfoodEvent(
 data class DogfoodSummary(
     val monitorEnabledDays: Int,
     val blockedAttempts: Int,
+    val policyBlocks: Int,
+    val emergencyUnlocks: Int,
+    val freeDays: Int,
     val permissionFailures: Int,
     val overlayOpens: Int,
     val overlayCreditAdds: Int,
@@ -73,6 +76,9 @@ class DogfoodEventStore(context: Context) {
         return DogfoodSummary(
             monitorEnabledDays = enabledDays,
             blockedAttempts = recent.count { it.type == "blocked_attempt" },
+            policyBlocks = recent.count { it.type == "policy_blocked" },
+            emergencyUnlocks = recent.count { it.type == "emergency_unlock_started" },
+            freeDays = recent.count { it.type == "free_day_set" },
             permissionFailures = recent.count { it.type == "permission_missing" },
             overlayOpens = recent.count { it.type == "overlay_open_app" },
             overlayCreditAdds = recent.count { it.type == "overlay_add_credit" },

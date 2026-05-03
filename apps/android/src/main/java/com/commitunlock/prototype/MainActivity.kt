@@ -14,28 +14,43 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import android.widget.Toast
+import java.time.Duration
 import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 class MainActivity : Activity() {
     private lateinit var creditStore: CreditStore
     private lateinit var developerGateStore: DeveloperGateStore
     private lateinit var dogfoodEventStore: DogfoodEventStore
+    private lateinit var emergencyUnlockStore: EmergencyUnlockStore
     private lateinit var foregroundReader: ForegroundAppReader
     private lateinit var monitorStateStore: MonitorStateStore
+    private lateinit var policyStore: PolicyStore
     private lateinit var statusText: TextView
     private lateinit var recentPackagesText: TextView
+    private lateinit var policySummaryText: TextView
     private lateinit var dogfoodSummaryText: TextView
     private lateinit var eventLogText: TextView
     private lateinit var packageInput: EditText
     private lateinit var strictModeInput: CheckBox
+    private lateinit var activeFromInput: EditText
+    private lateinit var activeUntilInput: EditText
+    private lateinit var applyPublicHolidaysInput: CheckBox
+    private lateinit var manualHolidayInput: CheckBox
+    private lateinit var emergencyReasonInput: EditText
+    private val weekdayInputs = mutableMapOf<Int, CheckBox>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         creditStore = CreditStore(this)
         developerGateStore = DeveloperGateStore(this)
         dogfoodEventStore = DogfoodEventStore(this)
+        emergencyUnlockStore = EmergencyUnlockStore(this)
         foregroundReader = ForegroundAppReader(this)
         monitorStateStore = MonitorStateStore(this)
+        policyStore = PolicyStore(this)
         if (developerGateStore.isAccepted()) {
             showMainPrototype()
         } else {
@@ -165,6 +180,35 @@ class MainActivity : Activity() {
             text = "Strict mode mock flag"
         }
 
+        activeFromInput = EditText(this).apply {
+            hint = "Active from HH:mm (blank = 00:00)"
+            setSingleLine(true)
+        }
+
+        activeUntilInput = EditText(this).apply {
+            hint = "Active until HH:mm (blank = 24:00)"
+            setSingleLine(true)
+        }
+
+        applyPublicHolidaysInput = CheckBox(this).apply {
+            text = "Apply on public holidays (manual placeholder)"
+        }
+
+        manualHolidayInput = CheckBox(this).apply {
+            text = "Treat today as holiday"
+        }
+
+        policySummaryText = TextView(this).apply {
+            textSize = 13f
+            setTextColor(0xFF334155.toInt())
+            setPadding(0, 20, 0, 10)
+        }
+
+        emergencyReasonInput = EditText(this).apply {
+            hint = "Emergency unlock reason (required)"
+            minLines = 1
+        }
+
         recentPackagesText = TextView(this).apply {
             textSize = 13f
             setTextColor(0xFF334155.toInt())
@@ -197,6 +241,35 @@ class MainActivity : Activity() {
         })
         root.addView(packageInput)
         root.addView(strictModeInput)
+        root.addView(sectionLabel("Policy schedule"))
+        weekdayInputs.clear()
+        weekdayLabels.forEach { (day, label) ->
+            val checkbox = CheckBox(this).apply { text = label }
+            weekdayInputs[day] = checkbox
+            root.addView(checkbox)
+        }
+        root.addView(activeFromInput)
+        root.addView(activeUntilInput)
+        root.addView(applyPublicHolidaysInput)
+        root.addView(manualHolidayInput)
+        root.addView(button("Save policy schedule") { savePolicy() })
+        root.addView(button("Set mock free day until midnight") { setMockFreeDay() })
+        root.addView(button("Clear mock free day") {
+            creditStore.setFreeUntil(null)
+            dogfoodEventStore.record("free_day_cleared")
+            renderState()
+        })
+        root.addView(policySummaryText)
+        root.addView(sectionLabel("Emergency unlock"))
+        root.addView(emergencyReasonInput)
+        root.addView(button("Emergency unlock 5 minutes") { startEmergencyUnlock(5) })
+        root.addView(button("Emergency unlock 15 minutes") { startEmergencyUnlock(15) })
+        root.addView(button("Emergency unlock 30 minutes") { startEmergencyUnlock(30) })
+        root.addView(button("Clear emergency unlocks") {
+            emergencyUnlockStore.clear()
+            dogfoodEventStore.record("emergency_unlocks_cleared")
+            renderState()
+        })
         root.addView(recentPackagesText)
         root.addView(button("Save blocked packages") { saveTargets() })
         root.addView(button("Add latest external package") { addLatestExternalPackage() })
@@ -247,6 +320,15 @@ class MainActivity : Activity() {
         }
     }
 
+    private fun sectionLabel(label: String): TextView {
+        return TextView(this).apply {
+            text = label
+            textSize = 16f
+            setTextColor(0xFF111827.toInt())
+            setPadding(0, 22, 0, 8)
+        }
+    }
+
     private fun saveTargets() {
         val targets = packageInput.text.toString()
             .split(",")
@@ -261,6 +343,92 @@ class MainActivity : Activity() {
             lastUpdatedAt = Instant.now().toString()
         ))
         dogfoodEventStore.record("targets_saved", "count=${targets.size} strict=${strictModeInput.isChecked}")
+        renderState()
+    }
+
+    private fun savePolicy() {
+        val activeFrom = normalizedTime(activeFromInput.text.toString())
+        val activeUntil = normalizedTime(activeUntilInput.text.toString())
+        if (activeFrom == INVALID_TIME || activeUntil == INVALID_TIME) {
+            Toast.makeText(this, "Use HH:mm time, for example 09:30", Toast.LENGTH_SHORT).show()
+            dogfoodEventStore.record("policy_save_rejected", "invalid_time")
+            renderState()
+            return
+        }
+
+        val current = policyStore.read()
+        val timezone = ZoneId.systemDefault().id
+        val selectedWeekdays = weekdayInputs
+            .filter { it.value.isChecked }
+            .keys
+            .sorted()
+        val today = LocalDate.now(ZoneId.of(timezone)).toString()
+
+        policyStore.save(current.copy(
+            activeWeekdays = selectedWeekdays,
+            activeFrom = activeFrom,
+            activeUntil = activeUntil,
+            applyOnPublicHolidays = applyPublicHolidaysInput.isChecked,
+            manualHolidayDate = if (manualHolidayInput.isChecked) today else null,
+            timezone = timezone
+        ))
+
+        dogfoodEventStore.record(
+            "policy_saved",
+            "weekdays=${selectedWeekdays.joinToString(",")} from=${activeFrom.orEmpty()} until=${activeUntil.orEmpty()} manualHoliday=${manualHolidayInput.isChecked}"
+        )
+        renderState()
+    }
+
+    private fun setMockFreeDay() {
+        val policy = policyStore.read()
+        val zoneId = runCatching { ZoneId.of(policy.timezone) }.getOrDefault(ZoneId.systemDefault())
+        val freeUntil = LocalDate.now(zoneId)
+            .plusDays(1)
+            .atStartOfDay(zoneId)
+            .minusNanos(1)
+            .toInstant()
+            .toString()
+
+        creditStore.setFreeUntil(freeUntil)
+        dogfoodEventStore.record("free_day_set", "until=$freeUntil source=mock")
+        renderState()
+    }
+
+    private fun startEmergencyUnlock(durationMinutes: Int) {
+        val reason = emergencyReasonInput.text.toString().trim()
+        val policy = policyStore.read()
+        val credit = creditStore.read()
+        val now = Instant.now()
+
+        when {
+            reason.isBlank() -> {
+                Toast.makeText(this, "Emergency unlock reason is required", Toast.LENGTH_SHORT).show()
+                dogfoodEventStore.record("emergency_unlock_rejected", "missing_reason")
+                return
+            }
+            credit.strictMode && durationMinutes == 30 -> {
+                Toast.makeText(this, "Strict mode blocks 30 minute emergency unlocks", Toast.LENGTH_SHORT).show()
+                dogfoodEventStore.record("emergency_unlock_rejected", "strict_mode_30")
+                return
+            }
+            emergencyUnlockStore.countStartedToday(policy.timezone, now) >= DAILY_EMERGENCY_LIMIT -> {
+                Toast.makeText(this, "Daily emergency unlock limit reached", Toast.LENGTH_SHORT).show()
+                dogfoodEventStore.record("emergency_unlock_rejected", "daily_limit")
+                return
+            }
+            emergencyUnlockStore.countStartedSince(now.minus(Duration.ofDays(7)), now) >= WEEKLY_EMERGENCY_LIMIT -> {
+                Toast.makeText(this, "Weekly emergency unlock limit reached", Toast.LENGTH_SHORT).show()
+                dogfoodEventStore.record("emergency_unlock_rejected", "weekly_limit")
+                return
+            }
+        }
+
+        val unlock = emergencyUnlockStore.start(durationMinutes, reason, now)
+        dogfoodEventStore.record(
+            "emergency_unlock_started",
+            "id=${unlock.id} minutes=$durationMinutes reason=$reason"
+        )
         renderState()
     }
 
@@ -296,8 +464,29 @@ class MainActivity : Activity() {
 
     private fun renderState() {
         val state = creditStore.read()
+        val policy = policyStore.read()
+        val activeUnlocks = emergencyUnlockStore.active()
+        val foregroundPackage = foregroundPackageOrNull()
+        val decision = PolicyDecisionEngine.evaluate(
+            PolicyDecisionInput(
+                currentPackage = foregroundPackage,
+                ownPackage = packageName,
+                now = Instant.now(),
+                creditState = state,
+                policyState = policy,
+                activeEmergencyUnlocks = activeUnlocks,
+                isPublicHoliday = false
+            )
+        )
         packageInput.setText(state.blockedTargets.joinToString(", "))
         strictModeInput.isChecked = state.strictMode
+        weekdayInputs.forEach { (day, checkbox) ->
+            checkbox.isChecked = policy.activeWeekdays.contains(day)
+        }
+        activeFromInput.setText(policy.activeFrom.orEmpty())
+        activeUntilInput.setText(policy.activeUntil.orEmpty())
+        applyPublicHolidaysInput.isChecked = policy.applyOnPublicHolidays
+        manualHolidayInput.isChecked = policy.isManualHolidayActive()
         val recentPackages = recentExternalPackages()
 
         statusText.text = listOf(
@@ -305,11 +494,24 @@ class MainActivity : Activity() {
             "Overlay Permission: ${if (PermissionChecks.canDrawOverlays(this)) "granted" else "missing"}",
             "Notification Permission: ${if (PermissionChecks.hasNotificationPermission(this)) "granted" else "missing"}",
             "Monitor service: ${if (monitorStateStore.isRunning()) "running" else "stopped"}",
-            "Current foreground: ${currentForegroundPackage()}",
+            "Current foreground: ${foregroundPackage ?: foregroundUnavailableReason()}",
             "Remaining mock credit: ${state.remainingMinutes} minutes",
+            "Mock free until: ${state.freeUntil ?: "none"}",
             "Blocked targets: ${state.blockedTargets.ifEmpty { listOf("none") }.joinToString(", ")}",
             "Strict mode: ${state.strictMode}",
             "Last updated: ${state.lastUpdatedAt}"
+        ).joinToString("\n")
+
+        policySummaryText.text = listOf(
+            "Policy summary",
+            "Decision: ${decision.reason.code} (${if (decision.allowed) "allowed" else "blocked"})",
+            "Credit spend on use: ${decision.shouldSpendCredit}",
+            "Active weekdays: ${policy.activeWeekdays.takeIf { it.isNotEmpty() }?.joinToString(",") ?: "none"}",
+            "Active time: ${(policy.activeFrom ?: "00:00")} - ${(policy.activeUntil ?: "24:00")}",
+            "Manual holiday today: ${policy.isManualHolidayActive()}",
+            "Public holiday setting: ${if (policy.applyOnPublicHolidays) "apply" else "skip"}",
+            "Timezone: ${policy.timezone}",
+            "Active emergency unlock: ${activeUnlocks.firstOrNull()?.expiresAt ?: "none"}"
         ).joinToString("\n")
 
         recentPackagesText.text = buildString {
@@ -326,6 +528,9 @@ class MainActivity : Activity() {
             "Dogfood summary (last 14 days)",
             "Monitor enabled days: ${summary.monitorEnabledDays} / 8 target",
             "Blocked attempts: ${summary.blockedAttempts} / 8 target",
+            "Policy blocks: ${summary.policyBlocks}",
+            "Emergency unlocks: ${summary.emergencyUnlocks}",
+            "Mock free days: ${summary.freeDays}",
             "Permission failures: ${summary.permissionFailures}",
             "Overlay open-app actions: ${summary.overlayOpens}",
             "Overlay test-credit unlocks: ${summary.overlayCreditAdds}",
@@ -357,9 +562,29 @@ class MainActivity : Activity() {
             .filter { it != packageName }
     }
 
-    private fun currentForegroundPackage(): String {
-        if (!PermissionChecks.hasUsageAccess(this)) return "unknown (usage access missing)"
-        return foregroundReader.currentForegroundPackage() ?: "unknown"
+    private fun foregroundPackageOrNull(): String? {
+        if (!PermissionChecks.hasUsageAccess(this)) return null
+        return foregroundReader.currentForegroundPackage()
+    }
+
+    private fun foregroundUnavailableReason(): String {
+        return if (PermissionChecks.hasUsageAccess(this)) {
+            "unknown"
+        } else {
+            "unknown (usage access missing)"
+        }
+    }
+
+    private fun normalizedTime(value: String): String? {
+        val trimmed = value.trim()
+        if (trimmed.isEmpty()) return null
+        if (!TIME_REGEX.matches(trimmed)) return INVALID_TIME
+
+        val hour = trimmed.substringBefore(":").toInt()
+        val minute = trimmed.substringAfter(":").toInt()
+        if (hour !in 0..23 || minute !in 0..59) return INVALID_TIME
+
+        return "%02d:%02d".format(hour, minute)
     }
 
     private fun shareDogfoodExport() {
@@ -385,5 +610,21 @@ class MainActivity : Activity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         renderState()
+    }
+
+    companion object {
+        private const val INVALID_TIME = "__invalid_time__"
+        private const val DAILY_EMERGENCY_LIMIT = 3
+        private const val WEEKLY_EMERGENCY_LIMIT = 10
+        private val TIME_REGEX = Regex("""^\d{1,2}:\d{2}$""")
+        private val weekdayLabels = listOf(
+            1 to "Monday",
+            2 to "Tuesday",
+            3 to "Wednesday",
+            4 to "Thursday",
+            5 to "Friday",
+            6 to "Saturday",
+            7 to "Sunday"
+        )
     }
 }
