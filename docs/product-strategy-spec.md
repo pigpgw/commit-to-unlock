@@ -1,6 +1,6 @@
 # Commit-to-Unlock Product Strategy Spec
 
-문서 상태: v0.1  
+문서 상태: v0.2
 역할: 기획, UX, 사업 모델, 개발 우선순위를 하나의 실행 기준으로 묶는다.  
 전제: 인터뷰/설문/fake-door 없이 build-first로 간다. 단, 제품이 약하면 빠르게 축소하거나 피벗한다.
 
@@ -107,6 +107,7 @@ Job-to-be-done:
 | Privacy by default | private repo raw diff는 기본 저장하지 않는다. |
 | No shame copy | 중독/실패/벌점보다 회복/리듬/떳떳한 휴식을 말한다. |
 | Policy-compliant control | 전체 폰 잠금, 삭제 방지, 우회적인 Accessibility 사용은 피한다. |
+| Proof-backed quests | 오늘 할 일은 등록할 수 있지만, unlock은 개발 증거가 있어야 한다. |
 
 ## 5. Core Product Loops
 
@@ -142,6 +143,25 @@ flowchart LR
 
 - 사용자는 “왜 10분/25분/45분인지” 이해한다.
 - scoring을 조작하려는 행동보다 실제 작업을 하는 편이 더 쉽다.
+
+### Loop B2: Quest Loop
+
+```mermaid
+flowchart LR
+  A["Plan daily quest"] --> B["Do developer work"]
+  B --> C["Proof appears"]
+  C --> D{"Proof passes rule?"}
+  D -->|Yes| E["Quest completed"]
+  D -->|No| F["Quest remains planned/rejected"]
+  E --> G{"All required done?"}
+  G -->|Yes| H["Free day until midnight"]
+```
+
+성공 기준:
+
+- todo click만으로 해제되지 않는다.
+- 모든 required quest가 proof-backed completed일 때만 free day가 된다.
+- free day는 기록되고 다음 회고에 표시된다.
 
 ### Loop C: Reflection Loop
 
