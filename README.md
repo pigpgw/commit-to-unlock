@@ -23,6 +23,8 @@ It can:
 - show a recent dogfood event log in the app
 - export structured dogfood events as TSV through Android share sheet or `adb`
 
+The Android emulator smoke flow has been verified on Android 13: selected Chrome target blocks at `0` mock minutes, unlocks after adding `5` test minutes, and spends `1` minute after `60` seconds of foreground use. A physical-device smoke pass is still required before treating MVP-A as evidence-complete.
+
 It does not yet:
 
 - connect to GitHub
@@ -55,6 +57,7 @@ Read these docs in order before changing product direction or implementation pri
 - [MVP execution plan](docs/mvp-execution-plan.md)
 - [Product and security hardening plan](docs/product-security-hardening-plan.md)
 - [Competitive service review](docs/competitive-service-review.md)
+- [MVP gap analysis](docs/mvp-gap-analysis.md)
 - [Android dogfood runbook](docs/android-dogfood-runbook.md)
 - [Decision log](docs/decision-log.md)
 - [Security and logic review](docs/security-and-logic-review.md)
@@ -178,8 +181,10 @@ Current recommended sequence:
 
 1. Keep new work inside the guardrails in the [product and security hardening plan](docs/product-security-hardening-plan.md).
 2. Use the [competitive service review](docs/competitive-service-review.md) to keep the product out of generic blocker pricing traps.
-3. Follow the [Android dogfood runbook](docs/android-dogfood-runbook.md) on a physical device.
-4. Draft the desktop/browser companion spike before treating mobile-only as a paid product.
-5. Use the [GitHub Sprint 4 entry spec](docs/github-sprint4-entry.md) as the implementation gate for webhook/security work.
+3. Use the [MVP gap analysis](docs/mvp-gap-analysis.md) as the current 부족한 것 register.
+4. Follow the [Android dogfood runbook](docs/android-dogfood-runbook.md) on a physical device.
+5. Fix monitor runtime/stale-state reliability found during emulator dogfood.
+6. Draft the desktop/browser companion spike before treating mobile-only as a paid product.
+7. Use the [GitHub Sprint 4 entry spec](docs/github-sprint4-entry.md) as the implementation gate for webhook/security work.
 
 Do not build payments, school/parent mode, leaderboard, money stakes, or full-diff AI scoring yet.
