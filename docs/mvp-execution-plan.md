@@ -1,6 +1,6 @@
 # MVP Execution Plan
 
-문서 상태: v0.5
+문서 상태: v0.6
 작성일: 2026-05-03
 최종 정리: 2026-05-04
 역할: 현재 MVP의 단일 실행 계획, 남은 작업 목록, 문서/코드 정리 기준
@@ -385,7 +385,7 @@ Deliverables:
 
 ### PR 16: MVP gap analysis
 
-Status: in progress.
+Status: complete.
 
 Deliverables:
 
@@ -394,7 +394,32 @@ Deliverables:
 - emulator evidence vs physical-device evidence split
 - next sequence: real-device smoke, monitor reliability, desktop/browser companion, webhook security foundation
 
-## 10. Work Rules
+## 10. Remaining Work Plan
+
+남은 작업은 아래 순서로 처리한다. 이 순서를 바꾸려면 [decision-log.md](decision-log.md)에 revisit 이유를 남긴다.
+
+| 순서 | 권장 브랜치 | 유형 | 목표 | 완료 기준 | 선행 조건 |
+| --- | --- | --- | --- | --- | --- |
+| 17 | `fix/android-monitor-runtime-state` | fix | 저장된 monitor intent와 실제 foreground service 상태를 분리한다. | force-stop/restart/reinstall 후 UI가 stale/running을 구분하고, heartbeat stale 상태를 표시한다. Android unit test 통과. | 없음 |
+| 18 | `docs/real-device-dogfood-evidence` | docs | 물리 Android 기기 smoke 결과를 runbook 형식으로 기록한다. | 기기/OS/권한/overlay 지연/0분 차단/+5분 허용/60초 차감/exception 결과와 TSV export 위치 기록. | PR 17 권장 |
+| 19 | `docs/browser-companion-spike` | docs | paid moat 후보인 Chrome/browser companion 범위를 확정한다. | extension target/domain model, local mock credit sync, 차단 interstitial, privacy boundary, do-not-build 범위 문서화. | PR 18 권장 |
+| 20 | `feature/github-webhook-security` | feature | Sprint 4 PR A: GitHub webhook 보안 기초를 구현한다. | raw body HMAC 검증, delivery dedupe, event allowlist, no raw diff storage, tests. | Gate A/D smoke evidence, github-sprint4-entry 기준 |
+| 21 | `feature/credit-ledger-foundation` | feature | 서버 credit ledger의 최소 event model을 만든다. | append-only ledger, idempotency key, mobile credit shape read API, tests. | PR 20 |
+| 22 | `feature/github-pr-enrichment` | feature | PR files/reviews/checks enrichment를 scoring 전 단계로 구현한다. | GitHub App installation/repo allowlist, feature vector extraction, private repo raw diff 저장 금지, tests. | PR 20-21 |
+| 23 | `test/proof-supply-sample` | test | PR-only proof 공급량이 충분한지 작은 표본으로 검증한다. | 14일 실제 dev activity note 또는 sample export에서 PR/commit/WakaTime 후보 빈도 정리. | PR 18 또는 실제 dogfood 데이터 |
+| 24 | `docs/ios-entitlement-spike` | docs | iOS FamilyControls/ManagedSettings 실구현 착수 조건을 재확인한다. | Xcode/Developer 계정/entitlement 상태, target selection/shield flow, 실제 기기 필요조건 정리. | Android Gate A가 fail이 아닐 것 |
+
+### Stop Conditions
+
+아래 상황이면 다음 단계로 넘어가지 않는다.
+
+- PR 17 전: monitor가 실제 서비스 상태를 거짓으로 보여주는 상태에서 dogfood를 계속하지 않는다.
+- PR 18 전: emulator smoke만으로 GitHub runtime을 시작하지 않는다.
+- PR 20 전: webhook HMAC/dedupe 없이 credit ledger write를 만들지 않는다.
+- PR 21 전: mobile mock credit을 API와 sync하지 않는다.
+- Gate E 전: 결제, 구독, money stake를 만들지 않는다.
+
+## 11. Work Rules
 
 - 한 PR에 unrelated scope를 섞지 않는다.
 - 코드 삭제는 테스트/문서 기준 없이 하지 않는다.
@@ -404,13 +429,15 @@ Deliverables:
 - 로그인/회원가입/로그아웃/회원탈퇴 구현은 [control-account-design.md](control-account-design.md)의 삭제/권한/target guard를 먼저 만족해야 한다.
 - Android-only local blocker를 유료 제품으로 포장하지 않는다. paid work는 [competitive-service-review.md](competitive-service-review.md)의 proof ledger/cross-device moat 기준을 따른다.
 - 결제/부모/학교/MDM/money stake는 계속 금지한다.
+- 새 문서는 기존 active doc의 역할로 흡수할 수 없을 때만 만든다. 실행 순서는 이 문서에, 부족한 이유는 [mvp-gap-analysis.md](mvp-gap-analysis.md)에 둔다.
+- 완료된 작업은 긴 설명을 늘리지 말고 PR 번호, 결과, 검증 기준만 남긴다.
 
-## 11. Immediate Next Action
+## 12. Immediate Next Action
 
 이 PR 이후 즉시 할 일:
 
 ```text
-real-device Android dogfood smoke, monitor runtime reliability fix, desktop/browser companion spike, then Sprint 4 PR A: Webhook Security Foundation
+PR 17 fix/android-monitor-runtime-state
 ```
 
-이유: runbook, event store tests, policy golden fixtures, 권한/개인정보 disclosure, in-app Data Quality/Gate review, GitHub Sprint 4 entry spec, product/security hardening gate, competitive service review, Android target guardrails, emulator smoke는 완료됐다. 이제 실제 기기에서 Gate A/D smoke evidence를 만든다. 그 다음 emulator dogfood 중 드러난 monitor runtime stale-state 리스크를 고치고, Freedom/Cold Turkey/FocusMe류가 보여준 desktop/browser paid moat를 우리 proof ledger에 연결하는 spike를 작성한 뒤 [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A부터 구현한다.
+이유: runbook, event store tests, policy golden fixtures, 권한/개인정보 disclosure, in-app Data Quality/Gate review, GitHub Sprint 4 entry spec, product/security hardening gate, competitive service review, Android target guardrails, emulator smoke는 완료됐다. 이제 emulator dogfood 중 드러난 monitor runtime stale-state 리스크를 먼저 고친다. 그 다음 실제 기기에서 Gate A/D smoke evidence를 만들고, desktop/browser paid moat spike와 [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A로 넘어간다.

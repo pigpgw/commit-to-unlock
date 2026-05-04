@@ -177,14 +177,12 @@ pnpm typecheck
 
 ## Next Recommended Work
 
-Current recommended sequence:
+Current recommended sequence is maintained in [MVP execution plan](docs/mvp-execution-plan.md#10-remaining-work-plan). Short version:
 
-1. Keep new work inside the guardrails in the [product and security hardening plan](docs/product-security-hardening-plan.md).
-2. Use the [competitive service review](docs/competitive-service-review.md) to keep the product out of generic blocker pricing traps.
-3. Use the [MVP gap analysis](docs/mvp-gap-analysis.md) as the current 부족한 것 register.
-4. Follow the [Android dogfood runbook](docs/android-dogfood-runbook.md) on a physical device.
-5. Fix monitor runtime/stale-state reliability found during emulator dogfood.
-6. Draft the desktop/browser companion spike before treating mobile-only as a paid product.
-7. Use the [GitHub Sprint 4 entry spec](docs/github-sprint4-entry.md) as the implementation gate for webhook/security work.
+1. Fix Android monitor runtime/stale-state reliability found during emulator dogfood.
+2. Run and document physical-device Android dogfood smoke evidence.
+3. Draft the browser/desktop companion spike before treating mobile-only as a paid product.
+4. Start GitHub Sprint 4 with webhook HMAC/dedupe, not scoring.
+5. Build credit ledger foundation before mobile API sync.
 
 Do not build payments, school/parent mode, leaderboard, money stakes, or full-diff AI scoring yet.
