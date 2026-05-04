@@ -1,6 +1,6 @@
 # Commit-to-Unlock Decision Log
 
-문서 상태: v0.4
+문서 상태: v0.5
 목적: 구현자가 다시 판단하지 않아도 되는 제품/기술 결정 기록
 
 ## Current Source Of Truth
@@ -59,6 +59,7 @@
 | D-035 | 현재 MVP는 code-complete가 아니라 dogfood-data-gated 상태다 | Android local prototype은 빌드/테스트 가능한 수준까지 왔지만, 실제 기기에서 14일 데이터가 없으면 제품성/수익성 판단은 아직 불가능하다. | Accepted |
 | D-036 | Android emulator smoke는 통과했지만 real-device Gate A/D를 대체하지 않는다 | Android 13 AVD에서 0분 차단, +5분 허용, 60초 차감은 확인됐다. 하지만 제조사 배터리/overlay/foreground service 제약은 물리 기기에서만 드러난다. | Accepted |
 | D-037 | 다음 보완 순서는 real-device smoke, monitor reliability, desktop/browser companion, webhook security foundation이다 | 부족한 것은 기능 아이디어가 아니라 evidence와 paid moat다. stale monitor state와 desktop/browser 확장을 먼저 다룬 뒤 GitHub runtime은 HMAC/dedupe부터 시작한다. | Accepted |
+| D-038 | 남은 작업 계획은 새 문서가 아니라 `mvp-execution-plan.md`에 유지한다 | 문서가 다시 분산되면 실행 순서가 흔들린다. 부족한 이유는 `mvp-gap-analysis.md`, 실제 PR 순서는 `mvp-execution-plan.md`, 변경 불가 결정은 이 문서에 둔다. | Accepted |
 
 ## Revisit Triggers
 
