@@ -1,6 +1,6 @@
 # MVP Execution Plan
 
-문서 상태: v0.4
+문서 상태: v0.5
 작성일: 2026-05-03
 최종 정리: 2026-05-04
 역할: 현재 MVP의 단일 실행 계획, 남은 작업 목록, 문서/코드 정리 기준
@@ -35,13 +35,14 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 | 1 | [mvp-execution-plan.md](mvp-execution-plan.md) | 지금 무엇을 할지 결정하는 실행 계획 |
 | 2 | [product-security-hardening-plan.md](product-security-hardening-plan.md) | 기획/보안/개인정보/platform policy hardening gate |
 | 3 | [competitive-service-review.md](competitive-service-review.md) | 경쟁 서비스 조사와 차별화/수익화 gate |
-| 4 | [android-dogfood-runbook.md](android-dogfood-runbook.md) | MVP-A 실기기 검증 절차 |
-| 5 | [decision-log.md](decision-log.md) | 다시 판단하지 않을 제품/기술 결정 |
-| 6 | [security-and-logic-review.md](security-and-logic-review.md) | 보안/정책/로직 gate |
-| 7 | [github-sprint4-entry.md](github-sprint4-entry.md) | GitHub runtime 진입 기준 |
-| 8 | [control-account-design.md](control-account-design.md) | 차단 범위, 계정, 탈퇴 UX |
-| 9 | [app-design.md](app-design.md) | 전체 제품/기술 설계 |
-| 10 | [proof-policy-mvp.md](proof-policy-mvp.md) | proof, quest, exception policy 상세 |
+| 4 | [mvp-gap-analysis.md](mvp-gap-analysis.md) | 현재 부족한 것, 최신 조사 반영, 다음 보완 우선순위 |
+| 5 | [android-dogfood-runbook.md](android-dogfood-runbook.md) | MVP-A 실기기 검증 절차 |
+| 6 | [decision-log.md](decision-log.md) | 다시 판단하지 않을 제품/기술 결정 |
+| 7 | [security-and-logic-review.md](security-and-logic-review.md) | 보안/정책/로직 gate |
+| 8 | [github-sprint4-entry.md](github-sprint4-entry.md) | GitHub runtime 진입 기준 |
+| 9 | [control-account-design.md](control-account-design.md) | 차단 범위, 계정, 탈퇴 UX |
+| 10 | [app-design.md](app-design.md) | 전체 제품/기술 설계 |
+| 11 | [proof-policy-mvp.md](proof-policy-mvp.md) | proof, quest, exception policy 상세 |
 
 삭제된 과거 계획/스냅샷 문서는 git history에서만 확인한다. 충돌하면 이 문서와 decision log를 우선한다.
 
@@ -81,6 +82,7 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 | --- | --- | --- |
 | Android app | runnable local prototype + target guardrails | 현재 유일한 product surface |
 | Android dogfood | runbook/log/export/analyzer/in-app review 있음 | 14일 실기기 데이터 필요 |
+| Android emulator smoke | Android 13 AVD에서 0분 차단, +5분 허용, 60초 자동 차감 확인 | 실기기 smoke 전 단계 통과 |
 | Android UI | 긴 화면을 section helper와 pure text/time helper로 분리함 | 실기기 dogfood fix만 추가 |
 | Shared policy | TS canonical + Android mirror + golden fixtures | 정책 drift 방지 기준 확보 |
 | Scoring package | pure rules scaffold | 유지. runtime 연결 금지 |
@@ -112,6 +114,7 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 
 - 실제 Android 기기 smoke evidence.
 - 14일 dogfood TSV 1세트.
+- force-stop/reinstall/reboot 이후 monitor stored state와 실제 service state drift 처리.
 - 제조사별 overlay/background 제한 확인.
 - 실제 GitHub/WakaTime/IDE proof 빈도 확인.
 - desktop/browser companion 설계.
@@ -126,6 +129,7 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 | `mvp-execution-plan.md` | 단일 실행 계획, MVP 현황, 남은 gate |
 | `product-security-hardening-plan.md` | 신규 기능의 기획/보안/개인정보/platform hardening gate |
 | `competitive-service-review.md` | 경쟁 서비스 조사, paid moat, desktop/browser companion, WakaTime fallback 판단 |
+| `mvp-gap-analysis.md` | 현재 부족한 것 register, external research update, 다음 보완 순서 |
 | `android-dogfood-runbook.md` | MVP-A 실기기 dogfood 절차와 gate decision template |
 | `decision-log.md` | 다시 판단하지 않을 결정 |
 | `security-and-logic-review.md` | Gate D와 보안 기준 |
@@ -367,6 +371,29 @@ Deliverables:
 - unnecessary forced JavaScript action runtime override removed
 - README branch examples aligned with the repo task-branch convention
 
+### PR 15: Android overlay foreground stability
+
+Status: complete.
+
+Deliverables:
+
+- Android 13 emulator dogfood smoke
+- foreground package resolver for UsageStats lookback gaps
+- overlay persistence when foreground appears as own app or null
+- 60-second credit auto-spend verification after overlay unlock
+- resolver unit tests
+
+### PR 16: MVP gap analysis
+
+Status: in progress.
+
+Deliverables:
+
+- current 부족한 것 register
+- platform/competitive research refresh
+- emulator evidence vs physical-device evidence split
+- next sequence: real-device smoke, monitor reliability, desktop/browser companion, webhook security foundation
+
 ## 10. Work Rules
 
 - 한 PR에 unrelated scope를 섞지 않는다.
@@ -383,7 +410,7 @@ Deliverables:
 이 PR 이후 즉시 할 일:
 
 ```text
-real-device Android dogfood smoke, desktop/browser companion spike, then Sprint 4 PR A: Webhook Security Foundation
+real-device Android dogfood smoke, monitor runtime reliability fix, desktop/browser companion spike, then Sprint 4 PR A: Webhook Security Foundation
 ```
 
-이유: runbook, event store tests, policy golden fixtures, 권한/개인정보 disclosure, in-app Data Quality/Gate review, GitHub Sprint 4 entry spec, product/security hardening gate, competitive service review, Android target guardrails는 완료됐다. 이제 실제 기기에서 Gate A/D smoke evidence를 만든다. 그 다음 Freedom/Cold Turkey/FocusMe류가 보여준 desktop/browser paid moat를 우리 proof ledger에 연결하는 spike를 작성한 뒤 [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A부터 구현한다.
+이유: runbook, event store tests, policy golden fixtures, 권한/개인정보 disclosure, in-app Data Quality/Gate review, GitHub Sprint 4 entry spec, product/security hardening gate, competitive service review, Android target guardrails, emulator smoke는 완료됐다. 이제 실제 기기에서 Gate A/D smoke evidence를 만든다. 그 다음 emulator dogfood 중 드러난 monitor runtime stale-state 리스크를 고치고, Freedom/Cold Turkey/FocusMe류가 보여준 desktop/browser paid moat를 우리 proof ledger에 연결하는 spike를 작성한 뒤 [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A부터 구현한다.

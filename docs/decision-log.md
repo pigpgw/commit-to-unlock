@@ -10,6 +10,7 @@
 | 현재 MVP 실행 계획 | [mvp-execution-plan.md](mvp-execution-plan.md) |
 | 기획/보안 hardening gate | [product-security-hardening-plan.md](product-security-hardening-plan.md) |
 | 경쟁 서비스 조사/차별화 | [competitive-service-review.md](competitive-service-review.md) |
+| 현재 부족한 것 register | [mvp-gap-analysis.md](mvp-gap-analysis.md) |
 | Android dogfood 실행 절차 | [android-dogfood-runbook.md](android-dogfood-runbook.md) |
 | 전체 제품/기술 설계 | [app-design.md](app-design.md) |
 | proof/quest/policy MVP | [proof-policy-mvp.md](proof-policy-mvp.md) |
@@ -56,6 +57,8 @@
 | D-033 | paid 제품은 generic blocker가 아니라 proof ledger + cross-device policy로 판다 | Opal/Freedom/Jomo/Roots/ScreenZen/Cold Turkey/FocusMe가 blocker 시장을 이미 차지하고, ScreenZen 같은 무료 대안이 가격 기준을 낮춘다. Commit-to-Unlock의 유료 명분은 [competitive-service-review.md](competitive-service-review.md)의 proof ledger, browser/desktop companion, multi-source proof, sync/history에 둔다. | Accepted |
 | D-034 | 오래된 PRD/스프린트/스냅샷 문서는 삭제하고 active docs만 유지한다 | 같은 결정을 여러 문서가 다르게 설명하면 구현 순서가 흔들린다. 삭제된 문서의 유효한 내용은 [mvp-execution-plan.md](mvp-execution-plan.md), [app-design.md](app-design.md), [competitive-service-review.md](competitive-service-review.md), [product-security-hardening-plan.md](product-security-hardening-plan.md)에 흡수한다. | Accepted |
 | D-035 | 현재 MVP는 code-complete가 아니라 dogfood-data-gated 상태다 | Android local prototype은 빌드/테스트 가능한 수준까지 왔지만, 실제 기기에서 14일 데이터가 없으면 제품성/수익성 판단은 아직 불가능하다. | Accepted |
+| D-036 | Android emulator smoke는 통과했지만 real-device Gate A/D를 대체하지 않는다 | Android 13 AVD에서 0분 차단, +5분 허용, 60초 차감은 확인됐다. 하지만 제조사 배터리/overlay/foreground service 제약은 물리 기기에서만 드러난다. | Accepted |
+| D-037 | 다음 보완 순서는 real-device smoke, monitor reliability, desktop/browser companion, webhook security foundation이다 | 부족한 것은 기능 아이디어가 아니라 evidence와 paid moat다. stale monitor state와 desktop/browser 확장을 먼저 다룬 뒤 GitHub runtime은 HMAC/dedupe부터 시작한다. | Accepted |
 
 ## Revisit Triggers
 
