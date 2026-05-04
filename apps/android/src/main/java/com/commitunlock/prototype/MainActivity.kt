@@ -373,13 +373,14 @@ class MainActivity : Activity() {
 
     private fun addMonitorAndDogfoodSection(root: LinearLayout) {
         root.addView(button("Start monitor service") {
-            monitorStateStore.setRunning(true)
+            monitorStateStore.setDesiredRunning(true)
             dogfoodEventStore.record("monitor_start_requested")
             startForegroundService(Intent(this, MonitorService::class.java))
             renderState()
         })
         root.addView(button("Stop monitor service") {
-            monitorStateStore.setRunning(false)
+            monitorStateStore.setDesiredRunning(false)
+            monitorStateStore.clearHeartbeat()
             dogfoodEventStore.record("monitor_stop_requested")
             stopService(Intent(this, MonitorService::class.java))
             renderState()
@@ -650,6 +651,9 @@ class MainActivity : Activity() {
         val usageAccessGranted = PermissionChecks.hasUsageAccess(this)
         val overlayGranted = PermissionChecks.canDrawOverlays(this)
         val notificationGranted = PermissionChecks.hasNotificationPermission(this)
+        val monitorRuntime = monitorStateStore.runtimeStatus(
+            serviceRunning = MonitorServiceInspector.isMonitorServiceRunning(this)
+        )
         val decision = PolicyDecisionEngine.evaluate(
             PolicyDecisionInput(
                 currentPackage = foregroundPackage,
@@ -675,7 +679,9 @@ class MainActivity : Activity() {
             "Usage Access: ${if (usageAccessGranted) "granted" else "missing"}",
             "Overlay Permission: ${if (overlayGranted) "granted" else "missing"}",
             "Notification Permission: ${if (notificationGranted) "granted" else "missing"}",
-            "Monitor service: ${if (monitorStateStore.isRunning()) "running" else "stopped"}",
+            "Monitor desired: ${if (monitorRuntime.desiredRunning) "enabled" else "disabled"}",
+            "Monitor service: ${monitorRuntime.state.code}",
+            "Monitor heartbeat: ${PrototypeText.monitorHeartbeat(monitorRuntime)}",
             "Current foreground: ${foregroundPackage ?: foregroundUnavailableReason()}",
             "Remaining mock credit: ${state.remainingMinutes} minutes",
             "Mock free until: ${state.freeUntil ?: "none"}",

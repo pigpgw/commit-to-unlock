@@ -52,7 +52,8 @@ class MonitorService : Service() {
         overlay = BlockOverlay(this)
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, notification("Monitoring selected apps"))
-        monitorStateStore.setRunning(true)
+        monitorStateStore.setDesiredRunning(true)
+        monitorStateStore.recordHeartbeat()
         dogfoodEventStore.record("monitor_started")
         handler.post(pollRunnable)
     }
@@ -60,7 +61,7 @@ class MonitorService : Service() {
     override fun onDestroy() {
         handler.removeCallbacks(pollRunnable)
         hideOverlay("monitor_stopped")
-        monitorStateStore.setRunning(false)
+        monitorStateStore.clearHeartbeat()
         dogfoodEventStore.record("monitor_stopped")
         super.onDestroy()
     }
@@ -143,6 +144,7 @@ class MonitorService : Service() {
     }
 
     private fun recordHeartbeat() {
+        monitorStateStore.recordHeartbeat()
         val today = LocalDate.now().toString()
         if (lastHeartbeatDay == today) return
 

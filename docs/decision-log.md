@@ -1,6 +1,6 @@
 # Commit-to-Unlock Decision Log
 
-문서 상태: v0.5
+문서 상태: v0.6
 목적: 구현자가 다시 판단하지 않아도 되는 제품/기술 결정 기록
 
 ## Current Source Of Truth
@@ -60,6 +60,7 @@
 | D-036 | Android emulator smoke는 통과했지만 real-device Gate A/D를 대체하지 않는다 | Android 13 AVD에서 0분 차단, +5분 허용, 60초 차감은 확인됐다. 하지만 제조사 배터리/overlay/foreground service 제약은 물리 기기에서만 드러난다. | Accepted |
 | D-037 | 다음 보완 순서는 real-device smoke, monitor reliability, desktop/browser companion, webhook security foundation이다 | 부족한 것은 기능 아이디어가 아니라 evidence와 paid moat다. stale monitor state와 desktop/browser 확장을 먼저 다룬 뒤 GitHub runtime은 HMAC/dedupe부터 시작한다. | Accepted |
 | D-038 | 남은 작업 계획은 새 문서가 아니라 `mvp-execution-plan.md`에 유지한다 | 문서가 다시 분산되면 실행 순서가 흔들린다. 부족한 이유는 `mvp-gap-analysis.md`, 실제 PR 순서는 `mvp-execution-plan.md`, 변경 불가 결정은 이 문서에 둔다. | Accepted |
+| D-039 | Monitor 상태 표시는 저장된 bool이 아니라 heartbeat 기반 runtime evidence를 사용한다 | force-stop/reinstall/reboot에서 저장값만 보면 UI가 실제로 죽은 service를 running으로 표시할 수 있다. 사용자가 켜고 싶어 하는 상태와 실제 heartbeat 상태를 분리한다. | Accepted |
 
 ## Revisit Triggers
 

@@ -44,4 +44,9 @@ object PrototypeText {
             "unknown (usage access missing)"
         }
     }
+
+    fun monitorHeartbeat(snapshot: MonitorRuntimeSnapshot): String {
+        val heartbeatAgeMillis = snapshot.heartbeatAgeMillis ?: return "none"
+        return "${heartbeatAgeMillis / 1_000L}s ago"
+    }
 }
