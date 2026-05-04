@@ -84,6 +84,7 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 | Android dogfood | runbook/log/export/analyzer/in-app review 있음 | 14일 실기기 데이터 필요 |
 | Android emulator smoke | Android 13 AVD에서 0분 차단, +5분 허용, 60초 자동 차감 확인 | 실기기 smoke 전 단계 통과 |
 | Android UI | 긴 화면을 section helper와 pure text/time helper로 분리함 | 실기기 dogfood fix만 추가 |
+| Android monitor state | desired state와 heartbeat 기반 runtime state 분리 | force-stop stale 표시 가능 |
 | Shared policy | TS canonical + Android mirror + golden fixtures | 정책 drift 방지 기준 확보 |
 | Scoring package | pure rules scaffold | 유지. runtime 연결 금지 |
 | API | health-only, localhost/CORS-closed default | 유지. Sprint 4 전 auth/webhook 금지 |
@@ -114,7 +115,6 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 
 - 실제 Android 기기 smoke evidence.
 - 14일 dogfood TSV 1세트.
-- force-stop/reinstall/reboot 이후 monitor stored state와 실제 service state drift 처리.
 - 제조사별 overlay/background 제한 확인.
 - 실제 GitHub/WakaTime/IDE proof 빈도 확인.
 - desktop/browser companion 설계.
@@ -394,13 +394,24 @@ Deliverables:
 - emulator evidence vs physical-device evidence split
 - next sequence: real-device smoke, monitor reliability, desktop/browser companion, webhook security foundation
 
+### PR 17: Android monitor runtime state
+
+Status: complete.
+
+Deliverables:
+
+- stored monitor desired state separated from runtime evidence
+- heartbeat-based `running` / `stale` / `stopped` state
+- UI shows desired state, runtime state, and heartbeat age
+- force-stop/reinstall stale-state bug guarded by pure status tests
+- Android unit tests
+
 ## 10. Remaining Work Plan
 
 남은 작업은 아래 순서로 처리한다. 이 순서를 바꾸려면 [decision-log.md](decision-log.md)에 revisit 이유를 남긴다.
 
 | 순서 | 권장 브랜치 | 유형 | 목표 | 완료 기준 | 선행 조건 |
 | --- | --- | --- | --- | --- | --- |
-| 17 | `fix/android-monitor-runtime-state` | fix | 저장된 monitor intent와 실제 foreground service 상태를 분리한다. | force-stop/restart/reinstall 후 UI가 stale/running을 구분하고, heartbeat stale 상태를 표시한다. Android unit test 통과. | 없음 |
 | 18 | `docs/real-device-dogfood-evidence` | docs | 물리 Android 기기 smoke 결과를 runbook 형식으로 기록한다. | 기기/OS/권한/overlay 지연/0분 차단/+5분 허용/60초 차감/exception 결과와 TSV export 위치 기록. | PR 17 권장 |
 | 19 | `docs/browser-companion-spike` | docs | paid moat 후보인 Chrome/browser companion 범위를 확정한다. | extension target/domain model, local mock credit sync, 차단 interstitial, privacy boundary, do-not-build 범위 문서화. | PR 18 권장 |
 | 20 | `feature/github-webhook-security` | feature | Sprint 4 PR A: GitHub webhook 보안 기초를 구현한다. | raw body HMAC 검증, delivery dedupe, event allowlist, no raw diff storage, tests. | Gate A/D smoke evidence, github-sprint4-entry 기준 |
@@ -413,7 +424,6 @@ Deliverables:
 
 아래 상황이면 다음 단계로 넘어가지 않는다.
 
-- PR 17 전: monitor가 실제 서비스 상태를 거짓으로 보여주는 상태에서 dogfood를 계속하지 않는다.
 - PR 18 전: emulator smoke만으로 GitHub runtime을 시작하지 않는다.
 - PR 20 전: webhook HMAC/dedupe 없이 credit ledger write를 만들지 않는다.
 - PR 21 전: mobile mock credit을 API와 sync하지 않는다.
@@ -437,7 +447,7 @@ Deliverables:
 이 PR 이후 즉시 할 일:
 
 ```text
-PR 17 fix/android-monitor-runtime-state
+PR 18 docs/real-device-dogfood-evidence
 ```
 
-이유: runbook, event store tests, policy golden fixtures, 권한/개인정보 disclosure, in-app Data Quality/Gate review, GitHub Sprint 4 entry spec, product/security hardening gate, competitive service review, Android target guardrails, emulator smoke는 완료됐다. 이제 emulator dogfood 중 드러난 monitor runtime stale-state 리스크를 먼저 고친다. 그 다음 실제 기기에서 Gate A/D smoke evidence를 만들고, desktop/browser paid moat spike와 [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A로 넘어간다.
+이유: runbook, event store tests, policy golden fixtures, 권한/개인정보 disclosure, in-app Data Quality/Gate review, GitHub Sprint 4 entry spec, product/security hardening gate, competitive service review, Android target guardrails, emulator smoke, monitor runtime stale-state fix는 완료됐다. 이제 실제 기기에서 Gate A/D smoke evidence를 만들고, desktop/browser paid moat spike와 [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A로 넘어간다.

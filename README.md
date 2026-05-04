@@ -179,10 +179,9 @@ pnpm typecheck
 
 Current recommended sequence is maintained in [MVP execution plan](docs/mvp-execution-plan.md#10-remaining-work-plan). Short version:
 
-1. Fix Android monitor runtime/stale-state reliability found during emulator dogfood.
-2. Run and document physical-device Android dogfood smoke evidence.
-3. Draft the browser/desktop companion spike before treating mobile-only as a paid product.
-4. Start GitHub Sprint 4 with webhook HMAC/dedupe, not scoring.
-5. Build credit ledger foundation before mobile API sync.
+1. Run and document physical-device Android dogfood smoke evidence.
+2. Draft the browser/desktop companion spike before treating mobile-only as a paid product.
+3. Start GitHub Sprint 4 with webhook HMAC/dedupe, not scoring.
+4. Build credit ledger foundation before mobile API sync.
 
 Do not build payments, school/parent mode, leaderboard, money stakes, or full-diff AI scoring yet.

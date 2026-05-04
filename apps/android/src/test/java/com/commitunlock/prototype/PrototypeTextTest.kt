@@ -60,4 +60,30 @@ class PrototypeTextTest {
             PrototypeText.foregroundUnavailableReason(hasUsageAccess = false)
         )
     }
+
+    @Test
+    fun formatsMonitorHeartbeat() {
+        assertEquals(
+            "3s ago",
+            PrototypeText.monitorHeartbeat(
+                MonitorRuntimeSnapshot(
+                    desiredRunning = true,
+                    state = MonitorRuntimeState.RUNNING,
+                    lastHeartbeatAtMillis = 1_000L,
+                    heartbeatAgeMillis = 3_500L
+                )
+            )
+        )
+        assertEquals(
+            "none",
+            PrototypeText.monitorHeartbeat(
+                MonitorRuntimeSnapshot(
+                    desiredRunning = true,
+                    state = MonitorRuntimeState.STALE,
+                    lastHeartbeatAtMillis = null,
+                    heartbeatAgeMillis = null
+                )
+            )
+        )
+    }
 }
