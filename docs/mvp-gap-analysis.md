@@ -91,7 +91,7 @@ iOS:
 | P0 | 실기기 foreground/service failure evidence 부족 | UsageStats/FGS/overlay edge case가 제조사별로 다를 수 있음 | runbook smoke에서 failure state와 recovery copy를 관찰 |
 | P1 | desktop/browser companion 설계 없음 | 개발자 distraction은 PC/browser에 많음 | Chrome extension 또는 desktop helper spike 작성 |
 | P1 | GitHub proof 공급량 미검증 | PR-only면 개인 개발자 activation이 낮을 수 있음 | WakaTime/IDE/commit batch fallback decision point 추가 |
-| P1 | dogfood export redaction 없음 | package name/quest title 공유가 민감할 수 있음 | export redaction option 설계 |
+| P1 | dogfood export redaction | package name/quest title 공유가 민감할 수 있음 | 완료. 원본 export와 redacted export를 앱에서 분리 |
 | P1 | Android UI가 여전히 긴 단일 Activity | 유지보수 비용 증가 | smoke evidence 후 ViewModel/state 분리 |
 | P2 | iOS entitlement 실검증 없음 | Screen Time API는 승인/실기기 변수가 큼 | Xcode/Developer setup 이후 별도 iOS spike |
 | P2 | API/GitHub runtime 없음 | MVP-B로 가려면 HMAC/dedupe/ledger 필요 | Sprint 4 PR A부터 작게 구현 |

@@ -6,12 +6,14 @@ This is the first runnable Commit-to-Unlock product surface. It is a local-only 
 
 `RC 0.1` is ready for emulator demo and private dogfood. The next evidence gate is physical-device smoke plus a 14-day dogfood run.
 
-Verified on `CommitUnlockApi33` Android 13 emulator on 2026-05-05:
+Verified on `CommitUnlockApi33` Android 13 emulator on 2026-05-06:
 
 - first-run developer gate and rejection branch render correctly
 - permission status appears on the home dashboard
 - setup checklist explains missing prerequisites before monitor start
+- notification permission is user-triggered from the permission section, not an automatic first-run prompt
 - `com.android.chrome` can be saved as a selected target
+- local mock credit is capped at `240` minutes
 - reliable Chrome demo reset sets all days, zero credit, Chrome target, and no bypasses
 - selected target + `0` mock credit displays the blocking overlay
 - selected target + positive mock credit allows access
@@ -133,6 +135,8 @@ The prototype stores the latest 1,000 local dogfood events and can export a TSV 
 - `policy_reason`
 - `credit_remaining`
 - `detail`
+
+The in-app `Share redacted dogfood export` action keeps policy reasons and credit values but hides target package names, quest titles, and emergency reasons before opening the Android share sheet.
 
 Export and analyze:
 

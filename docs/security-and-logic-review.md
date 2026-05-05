@@ -91,8 +91,8 @@ own app / no foreground
 
 보완할 점:
 
-1. Sprint 1.2 이후 `CreditStore`에 max local test cap을 둔다.
-   예: debug prototype에서는 240분 이상 local mock credit 저장 금지.
+1. `CreditStore`는 max local test cap을 둔다.
+   현재 Android prototype은 `LocalCreditPolicy.MAX_LOCAL_TEST_MINUTES = 240`으로 저장/추가/읽기 경로를 clamp한다.
 
 2. Sprint 4 이후 local state는 cache가 되고 server ledger가 source of truth가 된다.
    모바일이 credit을 임의 증가시키는 API는 만들지 않는다.
@@ -158,7 +158,7 @@ Emergency Unlock 방향도 맞다. 사용자에게 우회 수단이 없으면 �
 | P0 before Play/Internal test | in-app prominent permission disclosure | Usage Access/Overlay 목적과 저장 데이터를 명시 |
 | P0 before Play/Internal test | privacy screen | dogfood log/package name/quest title 저장과 clear/export 설명 |
 | P1 | package name validation | 잘못된 입력과 자기 package 저장 방지 UX 개선 |
-| P1 | event redaction option | export에서 target package/quest title을 숨기는 옵션 |
+| P1 | event redaction option | 완료. in-app redacted dogfood export는 target package, quest title, emergency reason을 숨긴다 |
 | P1 | foreground detection failure state | 제조사/OS별 UsageStats 불안정성을 사용자에게 설명 |
 | P2 | encrypted preferences review | GitHub token 등 민감 토큰 저장 전 Android Keystore 기반 저장 검토 |
 

@@ -153,6 +153,8 @@ Android local MVP에서 이미 완료된 hardening:
 - dogfood event log를 단일 로컬 이벤트 저장소로 사용.
 - strictMode가 true이면 overlay 안의 테스트 shortcut 제한.
 - `credit 0으로 초기화` 버튼.
+- local mock credit은 `240`분 상한으로 clamp해 테스트 shortcut이 비현실적인 잔액을 만들지 못하게 한다.
+- dogfood export는 원본 TSV와 redacted TSV를 분리한다. redacted export는 target package, quest title, emergency reason을 숨긴다.
 - target guardrail로 자기 앱, Settings, launcher, permission controller, core service 저장 차단.
 - public holiday placeholder UI 제거. 실제 holiday source 전까지 Android local MVP는 공휴일 설정을 노출하지 않는다.
 - time input parsing과 dogfood/quest text formatting을 순수 Kotlin helper로 분리.

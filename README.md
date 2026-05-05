@@ -26,6 +26,7 @@ That means the app should not become a generic screen-time blocker. The paid pro
 
 - Playful first-run developer gate.
 - Local mock credit state with `remainingMinutes`, `blockedTargets`, `strictMode`, and `lastUpdatedAt`.
+- Local mock credit is capped at `240` minutes so prototype shortcuts cannot create unrealistic balances.
 - Manual package targets, with guardrails against blocking this app, launcher/settings/permission-controller, and core system services.
 - Setup checklist that explains why blocking is not ready before the monitor starts.
 - Reliable Chrome demo reset that clears bypasses, enables all days, sets `com.android.chrome`, and resets credit to `0`.
@@ -35,6 +36,7 @@ That means the app should not become a generic screen-time blocker. The paid pro
 - Automatic spend of `1` mock minute after `60` seconds of foreground use.
 - Weekday, time-window, manual holiday, free-day, daily-quest, and emergency-unlock policy paths.
 - Local dogfood event log, TSV export, analyzer, and in-app Gate A/B/C/D review.
+- Optional redacted dogfood export for sharing evidence without target package names, quest titles, or emergency reasons.
 - Android emulator evidence on Android 13, including block, unlock, and spend flow.
 
 ## Not Promised
@@ -52,7 +54,7 @@ The trust rule is simple: users choose what gets blocked, the app remains uninst
 
 ## Screenshots
 
-Captured from the `CommitUnlockApi33` Android emulator on 2026-05-05. These are real app screens, not marketing mockups.
+Captured from the `CommitUnlockApi33` Android emulator on 2026-05-06. These are real app screens, not marketing mockups.
 
 | Developer gate | Rejection branch |
 | --- | --- |
@@ -111,11 +113,11 @@ Use a physical Android device for product evidence. The emulator smoke is useful
 pnpm android:dogfood
 ```
 
-Grant:
+Grant from the in-app permission section:
 
 - Usage Access
 - Display over other apps
-- Notifications on Android 13+
+- Notifications on Android 13+ if you want monitor status in the notification shade
 
 Then run the shortest smoke:
 
