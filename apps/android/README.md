@@ -33,6 +33,7 @@ This is the first runnable Commit-to-Unlock mobile prototype. It does not connec
 - Shows the latest detected foreground package and a recent local dogfood event log for device testing.
 - Shows an in-app dogfood review with Data Quality coverage, Gate A/B/C/D status, and recommendations.
 - Shows recent foreground packages from UsageStats so a target can be added without installed-app scanning.
+- Shows monitor desired state, runtime state, and heartbeat age separately so a force-stopped service is not reported as healthy.
 - Hides the overlay test-credit shortcut when strict mode is enabled.
 - Stores a structured dogfood event log for the last 1,000 local events and keeps a local TSV export file for `adb` collection.
 - Does not use AccessibilityService.
@@ -113,7 +114,9 @@ Use this when checking Gradle output without installing on a device.
 5. Tap `Refresh status` and confirm:
    - `Usage Access: granted`
    - `Overlay Permission: granted`
+   - `Monitor desired: disabled`
    - `Monitor service: stopped`
+   - `Monitor heartbeat: none`
 
 6. Open Chrome once, return to Commit Unlock, and confirm `com.android.chrome` appears under recent external packages.
 7. Tap `Add latest external package`, or manually put `com.android.chrome` in blocked packages and tap `Save blocked packages`.

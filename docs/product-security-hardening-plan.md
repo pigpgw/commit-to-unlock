@@ -1,6 +1,6 @@
 # Product And Security Hardening Plan
 
-문서 상태: v0.1
+문서 상태: v0.2
 작성일: 2026-05-04
 역할: Commit-to-Unlock의 기획, 보안, 개인정보, 플랫폼 정책, 수익성 판단을 하나의 실행 gate로 묶는다.
 
@@ -421,12 +421,18 @@ Gate D는 Sprint 4의 hard blocker다. HMAC, dedupe, retention, revoke/delete �
 2. `feature/android-target-guardrails`
    own package 제거, empty/duplicate normalization, dangerous/system target denylist draft, unit tests.
 
+3. `fix/android-monitor-runtime-state`
+   desired monitor state와 heartbeat-backed runtime state를 분리해 stale service 표시를 막는다.
+
+4. `docs/phase-one-closeout`
+   1차 구현을 code/test/docs closeout으로 닫고, 제품성 증거는 실기기 dogfood gate로 분리한다.
+
 남은 작업 순서는 이렇다.
 
-1. `test/android-real-device-smoke`
+1. `docs/real-device-dogfood-evidence`
    실제 기기 runbook 결과를 문서화하고 Gate A/D evidence를 남긴다.
 
-2. `docs/desktop-browser-companion-spike`
+2. `docs/browser-companion-spike`
    [competitive-service-review.md](competitive-service-review.md)의 Freedom, Cold Turkey, FocusMe 교훈을 바탕으로 proof ledger와 desktop/browser enforcement를 연결하는 설계를 작성한다.
 
 3. `feature/github-webhook-security`

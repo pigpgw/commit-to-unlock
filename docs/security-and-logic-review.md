@@ -1,8 +1,8 @@
 # Security And Logic Review
 
-문서 상태: v0.2
+문서 상태: v0.3
 점검일: 2026-05-03
-최신 보강: 2026-05-04
+최신 보강: 2026-05-05
 역할: 전체 로직, 계획, 정책, 보안 설계 점검 및 보완 기준
 
 기획/보안/개인정보/platform policy의 상위 hardening gate는 [product-security-hardening-plan.md](product-security-hardening-plan.md)를 따른다.
@@ -370,13 +370,15 @@ Completed after this review:
 - `docs/product-security-hardening-plan`
 - `docs/competitive-service-review`
 - `feature/android-target-guardrails`
+- `fix/android-monitor-runtime-state`
+- `docs/phase-one-closeout`
 
 Continue in this order:
 
-1. Android real-device dogfood smoke
+1. `docs/real-device-dogfood-evidence`
    권한, overlay, local log/export, Gate A/D copy가 실제 기기에서 납득되는지 확인한다.
 
-2. `docs/desktop-browser-companion-spike`
+2. `docs/browser-companion-spike`
    경쟁 서비스 조사상 desktop/browser enforcement가 paid moat가 될 가능성이 높다. GitHub webhook runtime 전에 proof ledger와 desktop/browser policy 연결 설계를 작성한다.
 
 3. `feature/github-webhook-security`

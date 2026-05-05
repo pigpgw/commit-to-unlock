@@ -1,7 +1,8 @@
 # Competitive Service Review
 
-문서 상태: v0.1
+문서 상태: v0.2
 조사일: 2026-05-04
+최종 정리: 2026-05-05
 역할: 다른 스크린타임, 포커스, earn-to-unlock, 개발자 생산성 서비스를 비교하고 Commit-to-Unlock의 기획/수익화/개발 우선순위를 보완한다.
 
 ## 1. Executive Verdict
@@ -260,10 +261,10 @@ Verified dev work becomes guilt-free leisure credit.
 1. `feature/android-target-guardrails`
    selected target만 막는 신뢰 약속을 코드로 고정한다.
 
-2. `test/android-real-device-smoke`
+2. `docs/real-device-dogfood-evidence`
    generic blocker처럼 보이기 전에 실제 enforcement가 되는지 확인한다.
 
-3. `docs/desktop-browser-companion-spike`
+3. `docs/browser-companion-spike`
    Freedom, one sec, Jomo, Cold Turkey, FocusMe가 보여준 cross-device/desktop paid moat를 우리 proof ledger와 연결하는 설계를 작성한다.
 
 4. `feature/github-webhook-security`

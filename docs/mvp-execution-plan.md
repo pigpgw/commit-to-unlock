@@ -1,13 +1,18 @@
 # MVP Execution Plan
 
-문서 상태: v0.6
+문서 상태: v0.7
 작성일: 2026-05-03
-최종 정리: 2026-05-04
+최종 정리: 2026-05-05
 역할: 현재 MVP의 단일 실행 계획, 남은 작업 목록, 문서/코드 정리 기준
 
 ## 1. Current Decision
 
-현재 제품은 계속 만든다. 단, 지금 만들 제품은 GitHub scoring 앱이 아니라 `Android local blocker dogfood MVP`다.
+현재 제품은 계속 만든다. 1차 구현은 `Android local blocker dogfood MVP`로 마무리한다.
+
+1차 마무리의 의미:
+
+- Android local prototype, policy, dogfood log/export/analyzer, target guardrail, monitor runtime state, active docs, CI baseline은 닫는다.
+- 제품성 검증은 닫지 않는다. 실제 Android 기기 smoke와 14일 dogfood 데이터가 없으면 GitHub runtime, sync, monetization으로 넘어가지 않는다.
 
 현재 최우선 목표:
 
@@ -93,7 +98,16 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 
 ## 5. MVP Closeout Status
 
-현재 MVP-A는 `local Android prototype code-complete, dogfood-data-gated` 상태다.
+현재 MVP-A는 `phase-1 code/test/docs closed, dogfood-data-gated` 상태다.
+
+1차 closeout 기준:
+
+- local Android blocker가 debug APK로 빌드된다.
+- 앱이 선택 target, local mock credit, policy exception, daily quest, emergency unlock, dogfood event를 한 흐름으로 처리한다.
+- emulator smoke에서 0분 차단, +5분 허용, 60초 차감이 확인됐다.
+- monitor desired state와 heartbeat runtime state가 분리됐다.
+- active docs가 Android-first MVP와 GitHub-deferred 전략으로 정리됐다.
+- CI와 로컬 테스트 기준이 정해졌다.
 
 완료:
 
@@ -204,7 +218,7 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 
 | Gate | 상태 | 통과 기준 | 다음 작업 |
 | --- | --- | --- | --- |
-| A: Enforcement viability | needs_data | 실기기 smoke pass, overlay <= 2초, 권한 상태 정확 | runbook smoke + privacy UI |
+| A: Enforcement viability | needs_data | 실기기 smoke pass, overlay <= 2초, 권한 상태 정확 | runbook smoke |
 | B: Dogfood need | needs_data | 14일 blocked attempt/override 데이터 | 14일 TSV collection |
 | C: Proof supply | needs_data | 14일 실제 GitHub/WakaTime/IDE proof 빈도 | mock proof + dev activity note |
 | D: Trust/privacy | needs_data | product/security hardening invariants, permission/privacy UI, retention/revoke/delete spec, webhook HMAC/dedupe spec | hardening gate + GitHub entry spec |
@@ -406,27 +420,39 @@ Deliverables:
 - force-stop/reinstall stale-state bug guarded by pure status tests
 - Android unit tests
 
+### PR 18: Phase 1 closeout
+
+Status: complete.
+
+Deliverables:
+
+- 1차 closeout definition clarified
+- README and Android README aligned with current monitor status UI
+- MVP gap analysis updated after monitor reliability fix
+- decision log records that phase 1 closeout is not product evidence completion
+- remaining work renumbered around real-device evidence first
+
 ## 10. Remaining Work Plan
 
 남은 작업은 아래 순서로 처리한다. 이 순서를 바꾸려면 [decision-log.md](decision-log.md)에 revisit 이유를 남긴다.
 
 | 순서 | 권장 브랜치 | 유형 | 목표 | 완료 기준 | 선행 조건 |
 | --- | --- | --- | --- | --- | --- |
-| 18 | `docs/real-device-dogfood-evidence` | docs | 물리 Android 기기 smoke 결과를 runbook 형식으로 기록한다. | 기기/OS/권한/overlay 지연/0분 차단/+5분 허용/60초 차감/exception 결과와 TSV export 위치 기록. | PR 17 권장 |
-| 19 | `docs/browser-companion-spike` | docs | paid moat 후보인 Chrome/browser companion 범위를 확정한다. | extension target/domain model, local mock credit sync, 차단 interstitial, privacy boundary, do-not-build 범위 문서화. | PR 18 권장 |
-| 20 | `feature/github-webhook-security` | feature | Sprint 4 PR A: GitHub webhook 보안 기초를 구현한다. | raw body HMAC 검증, delivery dedupe, event allowlist, no raw diff storage, tests. | Gate A/D smoke evidence, github-sprint4-entry 기준 |
-| 21 | `feature/credit-ledger-foundation` | feature | 서버 credit ledger의 최소 event model을 만든다. | append-only ledger, idempotency key, mobile credit shape read API, tests. | PR 20 |
-| 22 | `feature/github-pr-enrichment` | feature | PR files/reviews/checks enrichment를 scoring 전 단계로 구현한다. | GitHub App installation/repo allowlist, feature vector extraction, private repo raw diff 저장 금지, tests. | PR 20-21 |
-| 23 | `test/proof-supply-sample` | test | PR-only proof 공급량이 충분한지 작은 표본으로 검증한다. | 14일 실제 dev activity note 또는 sample export에서 PR/commit/WakaTime 후보 빈도 정리. | PR 18 또는 실제 dogfood 데이터 |
-| 24 | `docs/ios-entitlement-spike` | docs | iOS FamilyControls/ManagedSettings 실구현 착수 조건을 재확인한다. | Xcode/Developer 계정/entitlement 상태, target selection/shield flow, 실제 기기 필요조건 정리. | Android Gate A가 fail이 아닐 것 |
+| 19 | `docs/real-device-dogfood-evidence` | docs | 물리 Android 기기 smoke 결과를 runbook 형식으로 기록한다. | 기기/OS/권한/overlay 지연/0분 차단/+5분 허용/60초 차감/exception 결과와 TSV export 위치 기록. | PR 18 |
+| 20 | `docs/browser-companion-spike` | docs | paid moat 후보인 Chrome/browser companion 범위를 확정한다. | extension target/domain model, local mock credit sync, 차단 interstitial, privacy boundary, do-not-build 범위 문서화. | PR 19 권장 |
+| 21 | `feature/github-webhook-security` | feature | Sprint 4 PR A: GitHub webhook 보안 기초를 구현한다. | raw body HMAC 검증, delivery dedupe, event allowlist, no raw diff storage, tests. | Gate A/D smoke evidence, github-sprint4-entry 기준 |
+| 22 | `feature/credit-ledger-foundation` | feature | 서버 credit ledger의 최소 event model을 만든다. | append-only ledger, idempotency key, mobile credit shape read API, tests. | PR 21 |
+| 23 | `feature/github-pr-enrichment` | feature | PR files/reviews/checks enrichment를 scoring 전 단계로 구현한다. | GitHub App installation/repo allowlist, feature vector extraction, private repo raw diff 저장 금지, tests. | PR 21-22 |
+| 24 | `test/proof-supply-sample` | test | PR-only proof 공급량이 충분한지 작은 표본으로 검증한다. | 14일 실제 dev activity note 또는 sample export에서 PR/commit/WakaTime 후보 빈도 정리. | PR 19 또는 실제 dogfood 데이터 |
+| 25 | `docs/ios-entitlement-spike` | docs | iOS FamilyControls/ManagedSettings 실구현 착수 조건을 재확인한다. | Xcode/Developer 계정/entitlement 상태, target selection/shield flow, 실제 기기 필요조건 정리. | Android Gate A가 fail이 아닐 것 |
 
 ### Stop Conditions
 
 아래 상황이면 다음 단계로 넘어가지 않는다.
 
-- PR 18 전: emulator smoke만으로 GitHub runtime을 시작하지 않는다.
-- PR 20 전: webhook HMAC/dedupe 없이 credit ledger write를 만들지 않는다.
-- PR 21 전: mobile mock credit을 API와 sync하지 않는다.
+- PR 19 전: emulator smoke만으로 GitHub runtime을 시작하지 않는다.
+- PR 21 전: webhook HMAC/dedupe 없이 credit ledger write를 만들지 않는다.
+- PR 22 전: mobile mock credit을 API와 sync하지 않는다.
 - Gate E 전: 결제, 구독, money stake를 만들지 않는다.
 
 ## 11. Work Rules
@@ -447,7 +473,7 @@ Deliverables:
 이 PR 이후 즉시 할 일:
 
 ```text
-PR 18 docs/real-device-dogfood-evidence
+PR 19 docs/real-device-dogfood-evidence
 ```
 
-이유: runbook, event store tests, policy golden fixtures, 권한/개인정보 disclosure, in-app Data Quality/Gate review, GitHub Sprint 4 entry spec, product/security hardening gate, competitive service review, Android target guardrails, emulator smoke, monitor runtime stale-state fix는 완료됐다. 이제 실제 기기에서 Gate A/D smoke evidence를 만들고, desktop/browser paid moat spike와 [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A로 넘어간다.
+이유: 1차 구현 closeout은 완료됐다. runbook, event store tests, policy golden fixtures, 권한/개인정보 disclosure, in-app Data Quality/Gate review, GitHub Sprint 4 entry spec, product/security hardening gate, competitive service review, Android target guardrails, emulator smoke, monitor runtime stale-state fix까지 닫았다. 이제 실제 기기에서 Gate A/D smoke evidence를 만들고, desktop/browser paid moat spike와 [github-sprint4-entry.md](github-sprint4-entry.md)의 PR A로 넘어간다.

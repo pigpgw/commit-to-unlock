@@ -1,20 +1,22 @@
 # MVP Gap Analysis
 
-문서 상태: v0.1
+문서 상태: v0.2
 조사일: 2026-05-04
+최종 정리: 2026-05-05
 역할: 현재 MVP에서 부족한 점, 최신 플랫폼/경쟁 서비스 조사 반영, 다음 보완 우선순위를 한 곳에 고정한다.
 
 ## 1. Executive Verdict
 
-현재 Android MVP는 `code-complete`에 가깝지만, 제품 판단은 아직 `evidence-incomplete`다.
+현재 Android MVP는 1차 구현 기준으로 `code-complete`다. 제품 판단은 아직 `evidence-incomplete`다.
 
 이번 점검 결론:
 
 1. Android 로컬 차단 플로우는 에뮬레이터에서 검증됐다.
-2. 아직 실제 물리 Android 기기 smoke evidence가 없다.
-3. 모바일 차단만으로는 유료화가 약하다. paid moat는 `developer proof ledger + desktop/browser companion + sync/history`다.
-4. GitHub scoring은 계속 보류한다. 먼저 real-device Gate A/D evidence와 webhook security foundation이 필요하다.
-5. 지금 추가 구현할 1순위는 새 기능이 아니라 dogfood evidence, foreground/service 회복력, desktop/browser companion 설계다.
+2. target guardrail, foreground resolver, monitor heartbeat state까지 1차 안정화는 끝났다.
+3. 아직 실제 물리 Android 기기 smoke evidence가 없다.
+4. 모바일 차단만으로는 유료화가 약하다. paid moat는 `developer proof ledger + desktop/browser companion + sync/history`다.
+5. GitHub scoring은 계속 보류한다. 먼저 real-device Gate A/D evidence와 webhook security foundation이 필요하다.
+6. 지금 추가 구현할 1순위는 새 기능이 아니라 dogfood evidence와 desktop/browser companion 설계다.
 
 ## 2. Current Evidence
 
@@ -23,6 +25,7 @@
 | Android build | Gradle assemble/lint/unit test 통과 | pass |
 | Repo checks | `pnpm test`, `pnpm build`, `pnpm typecheck` 통과 | pass |
 | Emulator enforcement | Android 13 AVD에서 Chrome 0분 차단, +5분 허용, 60초 후 1분 자동 차감 확인 | pass |
+| Monitor runtime state | desired state와 heartbeat-backed runtime state 분리, stale 판정 unit test 추가 | pass |
 | Real device enforcement | 실제 물리 기기 연결 검증 없음 | blocker |
 | Dogfood duration | 14일 TSV 세트 없음 | blocker |
 | Monetization evidence | 경쟁 서비스 기준 mobile-only blocker는 free/low-price anchor가 강함 | weak |
@@ -85,8 +88,7 @@ iOS:
 | --- | --- | --- | --- |
 | P0 | 실제 Android 기기 smoke 없음 | emulator와 실제 제조사 OS 제약은 다름 | 물리 기기 1대 이상에서 runbook 재수행 |
 | P0 | 14일 dogfood TSV 없음 | 니즈/반복 사용/override 판단 불가 | 14일 수집 전 monetization/GitHub runtime 금지 |
-| P0 | stale monitor state 가능성 | force-stop 후 UI가 service running으로 착각할 수 있음 | 실제 service 상태와 stored intent 분리 |
-| P0 | foreground/service failure recovery 부족 | UsageStats/FGS/overlay edge case가 product trust를 깎음 | failure state와 recovery copy 추가 |
+| P0 | 실기기 foreground/service failure evidence 부족 | UsageStats/FGS/overlay edge case가 제조사별로 다를 수 있음 | runbook smoke에서 failure state와 recovery copy를 관찰 |
 | P1 | desktop/browser companion 설계 없음 | 개발자 distraction은 PC/browser에 많음 | Chrome extension 또는 desktop helper spike 작성 |
 | P1 | GitHub proof 공급량 미검증 | PR-only면 개인 개발자 activation이 낮을 수 있음 | WakaTime/IDE/commit batch fallback decision point 추가 |
 | P1 | dogfood export redaction 없음 | package name/quest title 공유가 민감할 수 있음 | export redaction option 설계 |
@@ -109,20 +111,7 @@ iOS:
 - TSV export 1개 이상.
 - Gate A/D가 pass 또는 명확한 fix list로 정리됨.
 
-### Step 2: Monitor Reliability Fix
-
-목표:
-
-- stored `monitor_state.running`과 실제 foreground service 상태를 분리한다.
-- force-stop/reinstall/reboot/permission revoke 후 UI가 거짓 상태를 보여주지 않게 한다.
-
-권장 구현:
-
-- `MonitorRuntimeStatus` helper 추가.
-- MainActivity는 stored desired state와 actual service/running evidence를 구분 표시.
-- service heartbeat timestamp를 저장하고, 오래된 heartbeat면 stale로 표시.
-
-### Step 3: Desktop/Browser Companion Spike
+### Step 2: Desktop/Browser Companion Spike
 
 목표:
 
@@ -135,7 +124,7 @@ iOS:
 - target은 domain pattern list.
 - 차단 방식은 redirect/interstitial page, not full browser lockdown.
 
-### Step 4: Sprint 4 Webhook Security Foundation
+### Step 3: Sprint 4 Webhook Security Foundation
 
 목표:
 
@@ -149,7 +138,7 @@ iOS:
 - no raw diff storage.
 - audit/event table scaffold.
 
-### Step 5: Proof Supply Decision
+### Step 4: Proof Supply Decision
 
 목표:
 
