@@ -101,6 +101,22 @@ class DogfoodReviewEngineTest {
     }
 
     @Test
+    fun gateAFailsWhenOverlayShowFailsAfterTargetMatch() {
+        val events = listOf(
+            event("foreground_changed", target = "com.video.app"),
+            event("blocked_attempt", target = "com.video.app", policyReason = "credit_empty", creditRemaining = 0),
+            event("overlay_show_failed", target = "com.video.app", policyReason = "credit_empty", creditRemaining = 0)
+        )
+
+        val review = analyze(events)
+        val gateA = review.gates.single { it.id == "A" }
+
+        assertEquals(DogfoodReviewGateStatus.FAIL, gateA.status)
+        assertTrue(gateA.checks.any { it.label == "Overlay show failures" && !it.passed })
+        assertTrue(review.recommendations.any { it.contains("Overlay show failures") })
+    }
+
+    @Test
     fun gateBPassesWithEightMonitorDaysAndBlockedAttempts() {
         val events = (0L until 8L).flatMap { day ->
             listOf(
@@ -206,6 +222,7 @@ class DogfoodReviewEngineTest {
             permissionFailures = events.count { it.type == "permission_missing" },
             overlayOpens = events.count { it.type == "overlay_open_app" },
             overlayCreditAdds = events.count { it.type == "overlay_add_credit" },
+            overlayFailures = events.count { it.type == "overlay_show_failed" },
             automaticCreditSpends = events.count { it.type == "credit_auto_spent" },
             manualCreditChanges = events.count {
                 it.type == "credit_added" || it.type == "credit_spent" || it.type == "credit_reset"

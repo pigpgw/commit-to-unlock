@@ -59,6 +59,7 @@ Screenshots are stored in `docs/assets/screenshots/android/`.
 - Shows target, remaining credit, strict mode, and next action copy on the blocking overlay.
 - Shows the latest detected foreground package and a recent local dogfood event log for device testing.
 - Shows an in-app dogfood review with Data Quality coverage, Gate A/B/C/D status, and recommendations.
+- Logs `overlay_show_failed` if Android rejects the blocking overlay after a target match, instead of crashing the monitor.
 - Shows recent foreground packages from UsageStats so a target can be added without installed-app scanning.
 - Shows monitor desired state, runtime state, and heartbeat age separately so a force-stopped service is not reported as healthy.
 - Hides the overlay test-credit shortcut when strict mode is enabled.
