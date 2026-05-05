@@ -241,13 +241,10 @@ class MainActivity : Activity() {
         section.addView(privacySummaryText)
         UiKit.addGap(section, 8)
         section.addView(button("Open Usage Access", UiKit.ButtonTone.PRIMARY) {
-            startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+            openUsageAccessSettings()
         })
         section.addView(button("Open Overlay Settings") {
-            startActivity(Intent(
-                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                Uri.parse("package:$packageName")
-            ))
+            openOverlaySettings()
         })
         section.addView(button("Request Notifications") {
             requestNotificationPermission()
@@ -376,11 +373,7 @@ class MainActivity : Activity() {
             startMonitorFromUi()
         })
         section.addView(button("Stop monitor", UiKit.ButtonTone.DANGER) {
-            monitorStateStore.setDesiredRunning(false)
-            monitorStateStore.clearHeartbeat()
-            dogfoodEventStore.record("monitor_stop_requested")
-            stopService(Intent(this, MonitorService::class.java))
-            renderState()
+            stopMonitorFromUi()
         })
         section.addView(button("Refresh status") { renderState() })
         section.addView(statusText)
@@ -693,14 +686,11 @@ class MainActivity : Activity() {
             when {
                 !usageAccessGranted -> {
                     Toast.makeText(this, "Usage Access is required before the monitor can start.", Toast.LENGTH_LONG).show()
-                    startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+                    openUsageAccessSettings()
                 }
                 !overlayGranted -> {
                     Toast.makeText(this, "Overlay permission is required before the blocker can show.", Toast.LENGTH_LONG).show()
-                    startActivity(Intent(
-                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                        Uri.parse("package:$packageName")
-                    ))
+                    openOverlaySettings()
                 }
                 state.blockedTargets.isEmpty() -> {
                     Toast.makeText(this, "Add at least one target package first.", Toast.LENGTH_LONG).show()
@@ -712,9 +702,36 @@ class MainActivity : Activity() {
 
         monitorStateStore.setDesiredRunning(true)
         dogfoodEventStore.record("monitor_start_requested")
-        startForegroundService(Intent(this, MonitorService::class.java))
+        if (!startMonitorServiceSafely()) {
+            renderState()
+            return
+        }
         Toast.makeText(this, "Monitor started. Open a selected app with zero credit to test blocking.", Toast.LENGTH_LONG).show()
         renderState()
+    }
+
+    private fun stopMonitorFromUi() {
+        monitorStateStore.setDesiredRunning(false)
+        monitorStateStore.clearHeartbeat()
+        dogfoodEventStore.record("monitor_stop_requested")
+        runCatching {
+            stopService(Intent(this, MonitorService::class.java))
+        }.onFailure { error ->
+            dogfoodEventStore.record("monitor_stop_failed", error.errorDetail())
+            Toast.makeText(this, "Monitor stop failed. Close the app or force stop from Android settings.", Toast.LENGTH_LONG).show()
+        }
+        renderState()
+    }
+
+    private fun startMonitorServiceSafely(): Boolean {
+        return runCatching {
+            startForegroundService(Intent(this, MonitorService::class.java))
+        }.onFailure { error ->
+            monitorStateStore.setDesiredRunning(false)
+            monitorStateStore.clearHeartbeat()
+            dogfoodEventStore.record("monitor_start_failed", error.errorDetail())
+            Toast.makeText(this, "Monitor could not start. Check permissions and battery/background restrictions.", Toast.LENGTH_LONG).show()
+        }.isSuccess
     }
 
     private fun recordRejectedTargets(rejected: List<TargetRejection>) {
@@ -854,6 +871,7 @@ class MainActivity : Activity() {
             "Overlay open-app actions: ${dogfoodSummary.overlayOpens}",
             "Overlay test-credit unlocks: ${dogfoodSummary.overlayCreditAdds}",
             "Overlay show failures: ${dogfoodSummary.overlayFailures}",
+            "Runtime failures: ${dogfoodSummary.runtimeFailures}",
             "Automatic credit spends: ${dogfoodSummary.automaticCreditSpends}",
             "Manual credit changes: ${dogfoodSummary.manualCreditChanges}",
             "Stored dogfood events: ${dogfoodSummary.eventCount}"
@@ -951,15 +969,61 @@ class MainActivity : Activity() {
             putExtra(Intent.EXTRA_SUBJECT, "Commit Unlock ${label}dogfood export")
             putExtra(Intent.EXTRA_TEXT, export)
         }
-        startActivity(Intent.createChooser(intent, "Share ${label}dogfood export"))
+        runCatching {
+            startActivity(Intent.createChooser(intent, "Share ${label}dogfood export"))
+        }.onFailure { error ->
+            dogfoodEventStore.record("dogfood_export_share_failed", "redacted=$redactSensitive ${error.errorDetail()}")
+            Toast.makeText(this, "No share target opened. Use adb export from the Android README.", Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 10)
+            runCatching {
+                requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 10)
+            }.onFailure { error ->
+                dogfoodEventStore.record("notification_permission_request_failed", error.errorDetail())
+                Toast.makeText(this, "Notification permission request could not open.", Toast.LENGTH_LONG).show()
+            }
         } else {
             Toast.makeText(this, "Notifications do not need runtime approval on this Android version.", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun openUsageAccessSettings(): Boolean {
+        return openExternalActivity(
+            intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS),
+            failureEventDetail = "usage_access",
+            failureToast = "Usage Access settings could not open. Open Android Settings manually."
+        )
+    }
+
+    private fun openOverlaySettings(): Boolean {
+        return openExternalActivity(
+            intent = Intent(
+                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:$packageName")
+            ),
+            failureEventDetail = "overlay",
+            failureToast = "Overlay settings could not open. Open Android Settings manually."
+        )
+    }
+
+    private fun openExternalActivity(
+        intent: Intent,
+        failureEventDetail: String,
+        failureToast: String
+    ): Boolean {
+        return runCatching {
+            startActivity(intent)
+        }.onFailure { error ->
+            dogfoodEventStore.record("settings_open_failed", "$failureEventDetail ${error.errorDetail()}")
+            Toast.makeText(this, failureToast, Toast.LENGTH_LONG).show()
+        }.isSuccess
+    }
+
+    private fun Throwable.errorDetail(): String {
+        return "${javaClass.simpleName}:${message.orEmpty()}"
     }
 
     override fun onRequestPermissionsResult(

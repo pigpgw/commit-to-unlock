@@ -6,46 +6,52 @@ import android.content.Context
 import android.os.Build
 
 class ForegroundAppReader(context: Context) {
-    private val usageStats = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+    private val usageStats = context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
 
     fun currentForegroundPackage(): String? {
-        val now = System.currentTimeMillis()
-        val events = usageStats.queryEvents(now - LOOKBACK_MS, now)
-        val event = UsageEvents.Event()
-        var latestPackage: String? = null
-        var latestTimestamp = 0L
+        val manager = usageStats ?: return null
+        return runCatching {
+            val now = System.currentTimeMillis()
+            val events = manager.queryEvents(now - LOOKBACK_MS, now)
+            val event = UsageEvents.Event()
+            var latestPackage: String? = null
+            var latestTimestamp = 0L
 
-        while (events.hasNextEvent()) {
-            events.getNextEvent(event)
-            if (
-                isForegroundEvent(event.eventType) &&
-                event.timeStamp >= latestTimestamp
-            ) {
-                latestPackage = event.packageName
-                latestTimestamp = event.timeStamp
+            while (events.hasNextEvent()) {
+                events.getNextEvent(event)
+                if (
+                    isForegroundEvent(event.eventType) &&
+                    event.timeStamp >= latestTimestamp
+                ) {
+                    latestPackage = event.packageName
+                    latestTimestamp = event.timeStamp
+                }
             }
-        }
 
-        return latestPackage
+            latestPackage
+        }.getOrNull()
     }
 
     fun recentForegroundPackages(limit: Int = DEFAULT_RECENT_LIMIT): List<String> {
-        val now = System.currentTimeMillis()
-        val events = usageStats.queryEvents(now - RECENT_LOOKBACK_MS, now)
-        val event = UsageEvents.Event()
-        val latestByPackage = mutableMapOf<String, Long>()
+        val manager = usageStats ?: return emptyList()
+        return runCatching {
+            val now = System.currentTimeMillis()
+            val events = manager.queryEvents(now - RECENT_LOOKBACK_MS, now)
+            val event = UsageEvents.Event()
+            val latestByPackage = mutableMapOf<String, Long>()
 
-        while (events.hasNextEvent()) {
-            events.getNextEvent(event)
-            if (isForegroundEvent(event.eventType)) {
-                latestByPackage[event.packageName] = event.timeStamp
+            while (events.hasNextEvent()) {
+                events.getNextEvent(event)
+                if (isForegroundEvent(event.eventType)) {
+                    latestByPackage[event.packageName] = event.timeStamp
+                }
             }
-        }
 
-        return latestByPackage.entries
-            .sortedByDescending { it.value }
-            .map { it.key }
-            .take(limit)
+            latestByPackage.entries
+                .sortedByDescending { it.value }
+                .map { it.key }
+                .take(limit)
+        }.getOrDefault(emptyList())
     }
 
     private fun isForegroundEvent(eventType: Int): Boolean {

@@ -117,6 +117,24 @@ class DogfoodReviewEngineTest {
     }
 
     @Test
+    fun gateAFailsWhenRuntimeFailuresAreLogged() {
+        val events = listOf(
+            event("foreground_changed", target = "com.video.app"),
+            event("overlay_shown", target = "com.video.app", policyReason = "credit_empty", creditRemaining = 0),
+            event("blocked_attempt", target = "com.video.app", policyReason = "credit_empty", creditRemaining = 0),
+            event("monitor_start_failed", detail = "ForegroundServiceStartNotAllowedException")
+        )
+
+        val review = analyze(events)
+        val gateA = review.gates.single { it.id == "A" }
+
+        assertEquals(DogfoodReviewGateStatus.FAIL, gateA.status)
+        assertEquals(1, review.metrics.getValue("runtimeFailures"))
+        assertTrue(gateA.checks.any { it.label == "Runtime failure events" && !it.passed })
+        assertTrue(review.recommendations.any { it.contains("Runtime failures") })
+    }
+
+    @Test
     fun gateBPassesWithEightMonitorDaysAndBlockedAttempts() {
         val events = (0L until 8L).flatMap { day ->
             listOf(
@@ -223,6 +241,14 @@ class DogfoodReviewEngineTest {
             overlayOpens = events.count { it.type == "overlay_open_app" },
             overlayCreditAdds = events.count { it.type == "overlay_add_credit" },
             overlayFailures = events.count { it.type == "overlay_show_failed" },
+            runtimeFailures = events.count {
+                it.type == "settings_open_failed" ||
+                    it.type == "dogfood_export_share_failed" ||
+                    it.type == "monitor_start_failed" ||
+                    it.type == "monitor_stop_failed" ||
+                    it.type == "notification_permission_request_failed" ||
+                    it.type == "open_main_failed"
+            },
             automaticCreditSpends = events.count { it.type == "credit_auto_spent" },
             manualCreditChanges = events.count {
                 it.type == "credit_added" || it.type == "credit_spent" || it.type == "credit_reset"

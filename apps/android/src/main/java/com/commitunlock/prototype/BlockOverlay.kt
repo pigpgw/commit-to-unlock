@@ -10,7 +10,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 
 class BlockOverlay(private val context: Context) {
-    private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as? WindowManager
     private var overlayView: View? = null
 
     fun show(
@@ -20,6 +20,7 @@ class BlockOverlay(private val context: Context) {
         onOpenApp: () -> Unit,
         onAddCredit: () -> Unit
     ): Boolean {
+        val manager = windowManager ?: return false
         if (overlayView != null) return true
         val canAddCredit = !strictMode
 
@@ -140,14 +141,18 @@ class BlockOverlay(private val context: Context) {
         )
 
         return runCatching {
-            windowManager.addView(container, params)
+            manager.addView(container, params)
             overlayView = container
         }.isSuccess
     }
 
     fun hide() {
+        val manager = windowManager ?: run {
+            overlayView = null
+            return
+        }
         overlayView?.let { view ->
-            runCatching { windowManager.removeView(view) }
+            runCatching { manager.removeView(view) }
         }
         overlayView = null
     }

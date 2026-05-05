@@ -139,6 +139,20 @@ class DogfoodEventStoreTest {
     }
 
     @Test
+    fun summaryCountsRuntimeFailures() {
+        val storage = FakeDogfoodEventStorage()
+        val clock = StepClock(Instant.parse("2026-05-04T12:00:00Z"))
+        val store = DogfoodEventStore(storage, clock::now)
+
+        store.record("settings_open_failed", "usage_access ActivityNotFoundException")
+        store.record("dogfood_export_share_failed", "ActivityNotFoundException")
+
+        val summary = store.summary(Instant.parse("2026-05-04T12:00:01Z"))
+
+        assertEquals(2, summary.runtimeFailures)
+    }
+
+    @Test
     fun redactedExportHidesTargetsAndSensitiveDetails() {
         val storage = FakeDogfoodEventStorage()
         val clock = StepClock(Instant.parse("2026-05-04T12:00:00Z"))
@@ -158,9 +172,40 @@ class DogfoodEventStoreTest {
         assertEquals("credit_empty", row[3])
         assertEquals("id=quest-1 required=true title=<redacted>", row[5])
     }
+
+    @Test
+    fun recordSurvivesExportFileWriteFailure() {
+        val storage = FakeDogfoodEventStorage(writeExportSucceeds = false)
+        val clock = StepClock(Instant.parse("2026-05-04T12:00:00Z"))
+        val store = DogfoodEventStore(storage, clock::now)
+
+        store.recordStructured(
+            type = "monitor_start_failed",
+            detail = "ForegroundServiceStartNotAllowedException"
+        )
+
+        assertEquals("monitor_start_failed", store.read().single().type)
+        assertEquals(emptyList(), storage.exports)
+    }
+
+    @Test
+    fun recordDoesNotExportWhenRawWriteFails() {
+        val storage = FakeDogfoodEventStorage(writeRawSucceeds = false)
+        val clock = StepClock(Instant.parse("2026-05-04T12:00:00Z"))
+        val store = DogfoodEventStore(storage, clock::now)
+
+        store.recordStructured(type = "monitor_started")
+
+        assertEquals(emptyList(), store.read())
+        assertEquals(1, storage.exports.size)
+    }
 }
 
-private class FakeDogfoodEventStorage(initialRaw: List<String> = emptyList()) : DogfoodEventStorage {
+private class FakeDogfoodEventStorage(
+    initialRaw: List<String> = emptyList(),
+    private val writeRawSucceeds: Boolean = true,
+    private val writeExportSucceeds: Boolean = true
+) : DogfoodEventStorage {
     private var raw = initialRaw
     val exports = mutableListOf<String>()
 
@@ -169,12 +214,15 @@ private class FakeDogfoodEventStorage(initialRaw: List<String> = emptyList()) : 
     }
 
     override fun writeRaw(events: List<String>): Boolean {
+        if (!writeRawSucceeds) return false
         raw = events.toList()
         return true
     }
 
-    override fun writeExport(export: String) {
+    override fun writeExport(export: String): Boolean {
+        if (!writeExportSucceeds) return false
         exports += export
+        return true
     }
 }
 

@@ -199,6 +199,13 @@ ANDROID_SERIAL=<device-id> pnpm android:dogfood:export
 - Confirm the monitor service is running.
 - Confirm current weekday/time policy is active and no free-day or emergency exception is active.
 
+### Settings, share sheet, or monitor start fails
+
+- The app records `settings_open_failed`, `dogfood_export_share_failed`, or `monitor_start_failed` in the local dogfood event log instead of crashing.
+- Open Android Settings manually if a vendor build does not expose the expected Usage Access or Overlay settings intent.
+- If monitor start fails, re-check Usage Access, Overlay permission, notification permission, and battery/background restrictions, then start the monitor again.
+- If the share sheet fails, export with `pnpm android:dogfood:export` from a connected device.
+
 ### Dogfood export is empty
 
 - Open the app once after installing.

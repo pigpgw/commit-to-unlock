@@ -37,6 +37,7 @@ That means the app should not become a generic screen-time blocker. The paid pro
 - Weekday, time-window, manual holiday, free-day, daily-quest, and emergency-unlock policy paths.
 - Local dogfood event log, TSV export, analyzer, and in-app Gate A/B/C/D review.
 - Optional redacted dogfood export for sharing evidence without target package names, quest titles, or emergency reasons.
+- Runtime failure paths for settings, sharing, monitor startup, overlay, and export are logged instead of crashing the prototype.
 - Android emulator evidence on Android 13, including block, unlock, and spend flow.
 
 ## Not Promised

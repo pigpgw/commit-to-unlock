@@ -52,8 +52,7 @@ class MonitorService : Service() {
         monitorStateStore = MonitorStateStore(this)
         policyStore = PolicyStore(this)
         overlay = BlockOverlay(this)
-        createNotificationChannel()
-        startForeground(NOTIFICATION_ID, notification("Monitoring selected apps"))
+        if (!startForegroundSafely()) return
         monitorStateStore.setDesiredRunning(true)
         recordHeartbeat(force = true)
         dogfoodEventStore.record("monitor_started")
@@ -262,8 +261,11 @@ class MonitorService : Service() {
     }
 
     private fun isDeviceInteractive(): Boolean {
-        val powerManager = getSystemService(PowerManager::class.java)
-        return powerManager.isInteractive
+        return runCatching {
+            val powerManager = getSystemService(PowerManager::class.java)
+                ?: return@runCatching true
+            powerManager.isInteractive
+        }.getOrDefault(true)
     }
 
     private fun evaluatePolicy(
@@ -410,7 +412,23 @@ class MonitorService : Service() {
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
-        startActivity(intent)
+        runCatching {
+            startActivity(intent)
+        }.onFailure { error ->
+            dogfoodEventStore.record("open_main_failed", error.errorDetail())
+        }
+    }
+
+    private fun startForegroundSafely(): Boolean {
+        return runCatching {
+            createNotificationChannel()
+            startForeground(NOTIFICATION_ID, notification("Monitoring selected apps"))
+        }.onFailure { error ->
+            monitorStateStore.setDesiredRunning(false)
+            monitorStateStore.clearHeartbeat()
+            dogfoodEventStore.record("monitor_start_failed", "foreground ${error.errorDetail()}")
+            stopSelf()
+        }.isSuccess
     }
 
     private fun notification(text: String): Notification {
@@ -438,7 +456,12 @@ class MonitorService : Service() {
             NotificationManager.IMPORTANCE_LOW
         )
         val manager = getSystemService(NotificationManager::class.java)
+            ?: return
         manager.createNotificationChannel(channel)
+    }
+
+    private fun Throwable.errorDetail(): String {
+        return "${javaClass.simpleName}:${message.orEmpty()}"
     }
 
     companion object {

@@ -117,6 +117,7 @@ object DogfoodReviewEngine {
         val overlayShows = metrics.getValue("overlayShows")
         val overlayFailures = metrics.getValue("overlayFailures")
         val permissionFailures = metrics.getValue("permissionFailures")
+        val runtimeFailures = metrics.getValue("runtimeFailures")
         val applicableQualityEvents = dataQuality.sumOf { it.events }
         val populatedQualityEvents = dataQuality.sumOf { it.populated }
         val qualityCoveragePass = applicableQualityEvents > 0 &&
@@ -149,6 +150,12 @@ object DogfoodReviewEngine {
                     passed = permissionFailures > 0 || review.eventCount > 0,
                     actual = permissionFailures.toString(),
                     target = "event log exists; permission_missing appears on failures"
+                ),
+                DogfoodReviewGateCheck(
+                    label = "Runtime failure events",
+                    passed = runtimeFailures == 0,
+                    actual = runtimeFailures.toString(),
+                    target = "0 settings/share/monitor runtime failure events"
                 )
             ),
             hasEnoughData = review.eventCount > 0,
@@ -278,6 +285,9 @@ object DogfoodReviewEngine {
         if (metrics.getValue("overlayFailures") > 0) {
             notes += "Overlay show failures were logged; verify Display over other apps, OEM background limits, and addView timing before paid release."
         }
+        if (metrics.getValue("runtimeFailures") > 0) {
+            notes += "Runtime failures were logged; inspect settings/share/monitor events before treating dogfood data as clean."
+        }
         if (metrics.getValue("dailyQuestAdds") > 0 && metrics.getValue("dailyQuestMockCompletions") == 0) {
             notes += "Daily quests are planned but not completed with proof; test the mock proof loop before GitHub scoring."
         }
@@ -358,6 +368,14 @@ object DogfoodReviewEngine {
         val overlayOpens = setOf("overlay_open_app")
         val overlayCreditAdds = setOf("overlay_add_credit")
         val overlayFailures = setOf("overlay_show_failed")
+        val runtimeFailures = setOf(
+            "settings_open_failed",
+            "dogfood_export_share_failed",
+            "monitor_start_failed",
+            "monitor_stop_failed",
+            "notification_permission_request_failed",
+            "open_main_failed"
+        )
         val autoCreditSpends = setOf("credit_auto_spent")
         val manualCreditChanges = setOf("credit_added", "credit_spent", "credit_reset")
         val freeDays = setOf("free_day_set")
@@ -376,6 +394,7 @@ object DogfoodReviewEngine {
         "overlayOpens" to eventTypes.overlayOpens,
         "overlayCreditAdds" to eventTypes.overlayCreditAdds,
         "overlayFailures" to eventTypes.overlayFailures,
+        "runtimeFailures" to eventTypes.runtimeFailures,
         "autoCreditSpends" to eventTypes.autoCreditSpends,
         "manualCreditChanges" to eventTypes.manualCreditChanges,
         "freeDays" to eventTypes.freeDays,

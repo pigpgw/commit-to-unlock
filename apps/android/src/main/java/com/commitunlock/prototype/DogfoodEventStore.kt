@@ -28,6 +28,7 @@ data class DogfoodSummary(
     val overlayOpens: Int,
     val overlayCreditAdds: Int,
     val overlayFailures: Int,
+    val runtimeFailures: Int,
     val automaticCreditSpends: Int,
     val manualCreditChanges: Int,
     val eventCount: Int
@@ -115,6 +116,7 @@ class DogfoodEventStore internal constructor(
             overlayOpens = recent.count { it.type == "overlay_open_app" },
             overlayCreditAdds = recent.count { it.type == "overlay_add_credit" },
             overlayFailures = recent.count { it.type == "overlay_show_failed" },
+            runtimeFailures = recent.count { runtimeFailureTypes.contains(it.type) },
             automaticCreditSpends = recent.count { it.type == "credit_auto_spent" },
             manualCreditChanges = recent.count {
                 it.type == "credit_added" || it.type == "credit_spent" || it.type == "credit_reset"
@@ -172,7 +174,7 @@ class DogfoodEventStore internal constructor(
         )
     }
 
-    private fun writeExportFile(rawEvents: List<String> = readRaw()) {
+    private fun writeExportFile(rawEvents: List<String> = readRaw()): Boolean {
         val rows = rawEvents
             .mapNotNull { parse(it) }
             .sortedBy { it.timestamp }
@@ -181,7 +183,7 @@ class DogfoodEventStore internal constructor(
             .filter { it.isNotEmpty() }
             .joinToString("\n")
 
-        storage.writeExport(export)
+        return storage.writeExport(export)
     }
 
     private fun sanitize(value: String): String {
@@ -217,13 +219,21 @@ class DogfoodEventStore internal constructor(
         private const val MAX_EVENTS = 1_000
         private const val SUMMARY_DAYS = 14L
         private const val EXPORT_HEADER = "timestamp\ttype\ttarget\tpolicy_reason\tcredit_remaining\tdetail"
+        private val runtimeFailureTypes = setOf(
+            "settings_open_failed",
+            "dogfood_export_share_failed",
+            "monitor_start_failed",
+            "monitor_stop_failed",
+            "notification_permission_request_failed",
+            "open_main_failed"
+        )
     }
 }
 
 internal interface DogfoodEventStorage {
     fun readRaw(): List<String>
     fun writeRaw(events: List<String>): Boolean
-    fun writeExport(export: String)
+    fun writeExport(export: String): Boolean
 }
 
 private class AndroidDogfoodEventStorage(context: Context) : DogfoodEventStorage {
@@ -231,25 +241,31 @@ private class AndroidDogfoodEventStorage(context: Context) : DogfoodEventStorage
     private val prefs = appContext.getSharedPreferences("dogfood_events", Context.MODE_PRIVATE)
 
     override fun readRaw(): List<String> {
-        return prefs.getString(KEY_EVENTS, "")
-            .orEmpty()
-            .lines()
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
+        return runCatching {
+            prefs.getString(KEY_EVENTS, "")
+                .orEmpty()
+                .lines()
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+        }.getOrDefault(emptyList())
     }
 
     override fun writeRaw(events: List<String>): Boolean {
-        return if (events.isEmpty()) {
-            prefs.edit().remove(KEY_EVENTS).commit()
-        } else {
-            prefs.edit().putString(KEY_EVENTS, events.joinToString("\n")).commit()
-        }
+        return runCatching {
+            if (events.isEmpty()) {
+                prefs.edit().remove(KEY_EVENTS).commit()
+            } else {
+                prefs.edit().putString(KEY_EVENTS, events.joinToString("\n")).commit()
+            }
+        }.getOrDefault(false)
     }
 
-    override fun writeExport(export: String) {
-        appContext.openFileOutput(DOGFOOD_EXPORT_FILE_NAME, Context.MODE_PRIVATE).use { output ->
-            output.write(export.toByteArray(Charsets.UTF_8))
-        }
+    override fun writeExport(export: String): Boolean {
+        return runCatching {
+            appContext.openFileOutput(DOGFOOD_EXPORT_FILE_NAME, Context.MODE_PRIVATE).use { output ->
+                output.write(export.toByteArray(Charsets.UTF_8))
+            }
+        }.isSuccess
     }
 
     private companion object {
