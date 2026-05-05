@@ -1,48 +1,56 @@
 # Commit-to-Unlock
 
-Commit-to-Unlock is a developer self-regulation product: verified developer proof-of-work becomes leisure credit for selected distracting apps.
+[![CI](https://github.com/pigpgw/commit-to-unlock/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/pigpgw/commit-to-unlock/actions/workflows/ci.yml)
 
-The project is intentionally build-first. There are no interviews, surveys, landing-page validation, payments, parent/school controls, or GitHub scoring in the current sprint. The first product risk is whether local mobile enforcement is useful enough to keep enabled.
+개발자지만 난 괜찮아.
 
-## Current Status
+Commit-to-Unlock turns verified developer work into leisure credit for selected distracting apps. The current release candidate is intentionally local-first: Android can already block user-selected apps with mock credits, while GitHub scoring stays parked until real-device enforcement evidence is strong enough.
 
-Phase 1 is closed as `Android local blocker RC 0.1, evidence-gated`.
+```text
+코드를 냈으면, 쉬는 시간도 떳떳하게.
+```
 
-That means the runnable prototype, policy logic, dogfood logging, analyzer, design guardrails, and CI baseline are complete enough for local dogfood. It does not mean the product is validated. Real-device smoke evidence and a 14-day dogfood data set are still required before GitHub scoring, sync, or monetization work resumes.
+## Current Stage
 
-The current runnable prototype is Android-only and local-only. The release-candidate polish pass tightened the Android visual system, captured emulator screenshots, and kept the product promise narrow: selected distracting apps can be blocked by local credit and policy state. It still is not a public paid release.
+`Android local blocker RC 0.1` is complete enough for local demo, emulator smoke, and private dogfood. It is not a public paid release.
 
-It can:
+The most important product decision is still this:
 
-- ask a playful developer-only entry question on first launch
-- store local mock credit state
-- evaluate local policy reason codes for weekdays, time windows, manual holiday, mock free day, emergency unlock, and credit
-- add daily quest plans and complete them with local mock proof before free day is granted
-- detect the foreground app through `UsageStatsManager`
-- block selected package names with an overlay when credit is `0`
-- normalize/reject unsafe target packages before saving, including this app, empty/duplicate entries, launcher/settings/permission-controller, and core system services
-- spend `1` mock credit minute after `60` seconds of foreground use on blocked targets
-- show a dogfood summary for the last 14 days
-- show an in-app dogfood review with Data Quality and Gate A/B/C/D status
-- show a recent dogfood event log in the app
-- export structured dogfood events as TSV through Android share sheet or `adb`
-- distinguish desired monitor state from heartbeat-backed runtime state
+```text
+Developer proof ledger first. Selected-app enforcement second.
+```
 
-The Android emulator smoke flow has been verified on Android 13: selected Chrome target blocks at `0` mock minutes, unlocks after adding `5` test minutes, and spends `1` minute after `60` seconds of foreground use. A physical-device smoke pass is still required before treating MVP-A as evidence-complete.
+That means the app should not become a generic screen-time blocker. The paid product later depends on proof history, GitHub/WakaTime/IDE evidence, credit ledger sync, browser or desktop enforcement, and explainable reward logic. The local Android blocker is the first technical gate, not the whole business.
 
-It does not yet:
+## What Works Now
 
-- connect to GitHub
-- score PRs or commits
-- sync with a server
-- use AccessibilityService
-- lock the whole phone
-- prevent uninstall
-- handle payments or money stakes
+- Playful first-run developer gate.
+- Local mock credit state with `remainingMinutes`, `blockedTargets`, `strictMode`, and `lastUpdatedAt`.
+- Manual package targets, with guardrails against blocking this app, launcher/settings/permission-controller, and core system services.
+- `UsageStatsManager` foreground-app detection.
+- Overlay block screen when a selected target is foreground and local credit is `0`.
+- Access allowed when mock credit is above `0` or a policy exception applies.
+- Automatic spend of `1` mock minute after `60` seconds of foreground use.
+- Weekday, time-window, manual holiday, free-day, daily-quest, and emergency-unlock policy paths.
+- Local dogfood event log, TSV export, analyzer, and in-app Gate A/B/C/D review.
+- Android emulator evidence on Android 13, including block, unlock, and spend flow.
 
-## Android RC 0.1 Screenshots
+## Not Promised
 
-Captured on `CommitUnlockApi33` Android emulator on 2026-05-05. These are real app screenshots, not mocked marketing frames.
+These are deliberately outside RC 0.1:
+
+- GitHub login, webhook ingestion, PR scoring, or commit scoring.
+- Server sync, account system, payments, subscriptions, or money stake.
+- iOS runtime enforcement before Xcode, device testing, and Family Controls entitlement work.
+- AccessibilityService, Device Admin, uninstall prevention, or whole-phone lock.
+- Parent, school, MDM, or child-safety mode.
+- AI code-quality judgment or raw private diff storage.
+
+The trust rule is simple: users choose what gets blocked, the app remains uninstallable, and account/settings/delete paths must never be trapped.
+
+## Screenshots
+
+Captured from the `CommitUnlockApi33` Android emulator on 2026-05-05. These are real app screens, not marketing mockups.
 
 | Developer gate | Rejection branch |
 | --- | --- |
@@ -64,85 +72,9 @@ Captured on `CommitUnlockApi33` Android emulator on 2026-05-05. These are real a
 | --- |
 | ![Overlay blocking Chrome because local leisure credit is zero](docs/assets/screenshots/android/09-block-overlay.png) |
 
-## Release Candidate Notes
+## Quick Start
 
-RC 0.1 is suitable for local demo and sales discovery, not store distribution.
-
-Sales one-liner:
-
-> 코드를 냈으면, 쉬는 시간도 떳떳하게.
-
-Short English positioning:
-
-> Verified developer work becomes leisure credit for selected distracting apps.
-
-Current demo script:
-
-1. Launch the Android app and answer the developer gate.
-2. Show that only selected package names can be blocked.
-3. Save `com.android.chrome`, reset credit to `0`, and start the monitor.
-4. Open Chrome and show the blocking overlay.
-5. Add `5` test minutes and show access is allowed while credit remains.
-6. Show policy exceptions: weekdays, time window, manual free day, daily quest mock proof, and emergency unlock.
-7. Show dogfood review and TSV export path for validation evidence.
-
-Do not sell or describe RC 0.1 as whole-phone lock, uninstall prevention, parent control, school MDM, GitHub scoring, or AI code-quality judgment.
-
-## Product Direction
-
-The product should not compete as a generic screen-time blocker. The recommended position is:
-
-> Verified dev work becomes guilt-free leisure credit.
-
-Core principles:
-
-- Fun developer tone, serious policy boundaries.
-- Explain before restrict.
-- Ledger over score.
-- Proof over self-report.
-- Local-first enforcement before GitHub scoring.
-- Privacy by default.
-- No shame copy.
-- Policy-compliant control.
-
-Design and market references used for this release-candidate pass:
-
-- [Google Play preview asset guidance](https://support.google.com/googleplay/android-developer/answer/9866151): screenshots should show real app experience, avoid noisy extra text, and keep assets current.
-- [Material Design buttons](https://m3.material.io/components/buttons/overview) and [cards](https://m3.material.io/components/cards/overview): the Android UI uses clear action hierarchy, restrained panels, and 8dp radii.
-- [Opal pricing](https://opalapp.com/pricing), [Freedom pricing](https://freedom.to/premium), [ScreenZen](https://screenzen.co/), and [one sec platforms](https://one-sec.app/browser-extension): generic blockers already compete on strict mode, schedules, free plans, and cross-device support, so this product stays focused on developer proof and selected-app credit.
-
-Read these docs in order before changing product direction or implementation priority:
-
-- [MVP execution plan](docs/mvp-execution-plan.md)
-- [Product and security hardening plan](docs/product-security-hardening-plan.md)
-- [Competitive service review](docs/competitive-service-review.md)
-- [MVP gap analysis](docs/mvp-gap-analysis.md)
-- [Android dogfood runbook](docs/android-dogfood-runbook.md)
-- [Decision log](docs/decision-log.md)
-- [Security and logic review](docs/security-and-logic-review.md)
-- [GitHub Sprint 4 entry spec](docs/github-sprint4-entry.md)
-- [Control and account design](docs/control-account-design.md)
-- [App design](docs/app-design.md)
-- [Proof policy MVP](docs/proof-policy-mvp.md)
-
-Old snapshot/planning docs were removed after their still-valid decisions were folded into the active docs above. Use git history for the deleted references when historical context is needed.
-
-## Repository Layout
-
-```text
-apps/
-  android/  Android local blocker prototype
-  api/      Fastify health-only scaffold; GitHub scoring is parked until Sprint 4
-  ios/      SwiftUI and Screen Time API source/design skeleton
-docs/       Current product, market, technical, and execution planning
-fixtures/   Cross-platform policy golden fixtures
-packages/
-  scoring/  Rules-first scoring package scaffold, not wired to the API yet
-  shared/   Shared TypeScript contracts
-scripts/    Local dogfood helper scripts
-```
-
-## Prerequisites
+Prerequisites:
 
 - Node.js 22+
 - pnpm 10+
@@ -150,63 +82,111 @@ scripts/    Local dogfood helper scripts
 - Android SDK 33
 - Android platform-tools for `adb`
 
-The Android Gradle Wrapper is committed, so global Gradle is not required.
-
-## Common Commands
+Clone and verify:
 
 ```bash
+git clone https://github.com/pigpgw/commit-to-unlock.git
+cd commit-to-unlock
+pnpm install
 pnpm test
 pnpm build
 pnpm typecheck
+```
+
+The Android Gradle Wrapper is committed, so global Gradle is not required.
+
+```bash
 ./gradlew :apps:android:testDebugUnitTest
 ./gradlew :apps:android:assembleDebug
 ./gradlew :apps:android:lintDebug
 ```
 
-Android dogfood helpers:
+## Run The Android Prototype
+
+Use a physical Android device for product evidence. The emulator smoke is useful, but real-device data is the remaining MVP-A gate.
 
 ```bash
 pnpm android:dogfood
-pnpm android:dogfood:export
-pnpm android:dogfood:analyze
 ```
 
-Use `ANDROID_SERIAL=<device-id>` when more than one Android device is connected.
+Grant:
 
-## Android Dogfood Flow
+- Usage Access
+- Display over other apps
+- Notifications on Android 13+
 
-For repeated device testing and gate decisions, follow the detailed [Android dogfood runbook](docs/android-dogfood-runbook.md).
+Then run the shortest smoke:
 
-1. Connect an Android device with USB debugging enabled.
-2. Install and launch:
-
-   ```bash
-   pnpm android:dogfood
-   ```
-
-3. Grant Usage Access, Display over other apps, and Notifications.
-4. Add a target package, for example `com.android.chrome`.
-5. Save the policy schedule. Default weekdays are Monday-Friday; leave active time blank for all day.
-6. Reset credit to `0`, start the monitor, and open the target app.
-7. Confirm the overlay shows a policy reason such as `credit_empty`.
-8. Add test credit and keep the target app foreground for 60 seconds.
-9. Add a required daily quest, then complete it with mock proof and confirm `free_day`.
-10. Test one exception path: mock free day, manual holiday, or emergency unlock.
-11. Export the dogfood TSV:
+1. Answer the developer gate with `예`.
+2. Add `com.android.chrome` as a blocked target.
+3. Save policy, reset credit to `0`, and start the monitor.
+4. Open Chrome and confirm the overlay blocks it.
+5. Add `5` test minutes and confirm Chrome is allowed.
+6. Keep Chrome foreground for `60` seconds and confirm `1` minute is spent.
+7. Export and analyze dogfood data:
 
    ```bash
    pnpm android:dogfood:export
-   ```
-
-12. Analyze the newest export:
-
-   ```bash
    pnpm android:dogfood:analyze
    ```
 
-Exports are written under `artifacts/android-dogfood/`, which is intentionally ignored by git.
+Use `ANDROID_SERIAL=<device-id>` when more than one Android device is connected.
 
-## Commit And PR Workflow
+## Repository Map
+
+```text
+apps/
+  android/  Native Kotlin local blocker prototype
+  api/      Fastify health-only scaffold; GitHub runtime starts later
+  ios/      SwiftUI + Screen Time API source skeleton
+docs/       Product, security, design, competitive review, and execution plans
+fixtures/   Cross-platform policy golden fixtures
+packages/
+  scoring/  Rules-first scoring package scaffold
+  shared/   Shared TypeScript contracts and canonical policy logic
+scripts/    Android dogfood install, export, and analyzer helpers
+```
+
+## Product Rules
+
+The project only moves forward when these remain true:
+
+- Block only user-selected targets.
+- Never block this app, OS settings, permission screens, account deletion, or logout paths.
+- Keep the app uninstallable.
+- Treat strict mode as convenience friction, not tamper-proof control.
+- Store local dogfood data locally until the user exports it.
+- Do not store private repo raw diffs by default.
+- Use AI only as an explainable helper after deterministic rules and ledger events exist.
+
+## Documentation
+
+Start here:
+
+- [Documentation index](docs/README.md)
+- [MVP execution plan](docs/mvp-execution-plan.md)
+- [Android dogfood runbook](docs/android-dogfood-runbook.md)
+- [Product and security hardening plan](docs/product-security-hardening-plan.md)
+- [Competitive service review](docs/competitive-service-review.md)
+- [App design](docs/app-design.md)
+
+Platform-specific docs:
+
+- [Android local blocker README](apps/android/README.md)
+- [iOS local shield README](apps/ios/README.md)
+
+## Roadmap Gates
+
+| Gate | Decision |
+| --- | --- |
+| MVP-A | Finish physical-device Android smoke and 14-day dogfood evidence. |
+| MVP-B | Build GitHub webhook security, dedupe, credit ledger, and mobile sync shape. |
+| Product moat | Add proof history, browser/desktop companion, cross-device policy, and explainable ledger. |
+| Paid release | Wait until blocker evidence and proof ledger value are both clear. |
+
+Do not build payments, money stake, parent/school mode, leaderboard, full-diff LLM scoring, or broad account systems before the gate that actually needs them.
+
+## Development Workflow
 
 Work from `dev`, not `main`.
 
@@ -221,11 +201,9 @@ refactor/<task-name>
 test/<task-name>
 ```
 
-Keep commits split by task. Do not bundle unrelated implementation, docs, and tooling changes into one commit when they can be reviewed independently.
+Keep commits split by task. For PRs with multiple task commits, preserve commits with a normal merge unless squash is explicitly requested.
 
-For PRs with multiple task commits, preserve the commits with a normal merge instead of squash merging unless the user explicitly asks for squash.
-
-Before merging, run:
+Before merging implementation changes, run:
 
 ```bash
 pnpm test
@@ -233,14 +211,3 @@ pnpm build
 pnpm typecheck
 ./gradlew :apps:android:assembleDebug :apps:android:lintDebug
 ```
-
-## After Phase 1
-
-Current recommended sequence is maintained in [MVP execution plan](docs/mvp-execution-plan.md#10-remaining-work-plan). Short version:
-
-1. Run and document physical-device Android dogfood smoke evidence.
-2. Draft the browser/desktop companion spike before treating mobile-only as a paid product.
-3. Start GitHub Sprint 4 with webhook HMAC/dedupe, not scoring.
-4. Build credit ledger foundation before mobile API sync.
-
-Do not build payments, school/parent mode, leaderboard, money stakes, or full-diff AI scoring yet.
