@@ -115,6 +115,15 @@ object UiKit {
         }
     }
 
+    fun caption(context: Context, text: String = ""): TextView {
+        return TextView(context).apply {
+            this.text = text
+            textSize = 12f
+            setTextColor(COLOR_MUTED)
+            setLineSpacing(dp(context, 1).toFloat(), 1.0f)
+        }
+    }
+
     fun monoBlock(context: Context): TextView {
         return TextView(context).apply {
             layoutParams = topSpacedParams(context)
@@ -123,6 +132,31 @@ object UiKit {
             setTextColor(COLOR_INK)
             setPadding(dp(context, 12), dp(context, 10), dp(context, 12), dp(context, 10))
             background = rounded(context, COLOR_CODE_BG, radiusDp = 8, strokeColor = COLOR_BORDER)
+            setLineSpacing(dp(context, 2).toFloat(), 1.0f)
+        }
+    }
+
+    fun noticeBlock(context: Context): TextView {
+        return TextView(context).apply {
+            layoutParams = topSpacedParams(context)
+            textSize = 13f
+            typeface = Typeface.DEFAULT_BOLD
+            setTextColor(COLOR_PRIMARY_DARK)
+            setPadding(dp(context, 12), dp(context, 10), dp(context, 12), dp(context, 10))
+            background = rounded(context, 0xFFEFF6FF.toInt(), radiusDp = 8, strokeColor = 0xFFBFDBFE.toInt())
+            setLineSpacing(dp(context, 2).toFloat(), 1.0f)
+        }
+    }
+
+    fun terminalBlock(context: Context, text: String): TextView {
+        return TextView(context).apply {
+            layoutParams = topSpacedParams(context)
+            this.text = text
+            textSize = 13f
+            typeface = Typeface.MONOSPACE
+            setTextColor(0xFFE2E8F0.toInt())
+            setPadding(dp(context, 12), dp(context, 10), dp(context, 12), dp(context, 10))
+            background = rounded(context, 0xFF111827.toInt(), radiusDp = 8, strokeColor = 0xFF334155.toInt())
             setLineSpacing(dp(context, 2).toFloat(), 1.0f)
         }
     }
@@ -174,7 +208,7 @@ object UiKit {
             text = label
             isAllCaps = false
             textSize = 14f
-            minHeight = dp(context, 44)
+            minHeight = dp(context, 48)
             gravity = Gravity.CENTER
             setPadding(dp(context, 12), 0, dp(context, 12), 0)
             val (backgroundColor, textColor, strokeColor) = when (tone) {

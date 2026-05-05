@@ -29,7 +29,9 @@ class MainActivity : Activity() {
     private lateinit var foregroundReader: ForegroundAppReader
     private lateinit var monitorStateStore: MonitorStateStore
     private lateinit var policyStore: PolicyStore
+    private lateinit var overviewText: TextView
     private lateinit var statusText: TextView
+    private lateinit var privacySummaryText: TextView
     private lateinit var privacyDisclosureText: TextView
     private lateinit var recentPackagesText: TextView
     private lateinit var policySummaryText: TextView
@@ -94,15 +96,22 @@ class MainActivity : Activity() {
 
         val message = UiKit.body(
             this,
-            "커밋, PR, 빌드 실패, 그리고 새벽 2시의 이상한 자신감을 이해하는 사람만 입장할 수 있습니다."
+            "커밋과 빌드 실패를 이해하면 입장 가능."
         ).apply {
             gravity = Gravity.CENTER
             setPadding(0, 0, 0, UiKit.dp(this@MainActivity, 28))
         }
 
+        val terminal = UiKit.terminalBlock(
+            this,
+            "$ whoami\nfrontend_dev\n$ unlock --reason=ship_code\nwaiting for proof"
+        )
+
         root.addView(title)
         root.addView(question)
         root.addView(message)
+        root.addView(terminal)
+        UiKit.addGap(root, 12)
         root.addView(button("예, 커밋으로 증명하겠습니다", UiKit.ButtonTone.PRIMARY) {
             developerGateStore.accept()
             dogfoodEventStore.record("developer_gate_accepted")
@@ -149,20 +158,25 @@ class MainActivity : Activity() {
 
         val subtitle = UiKit.body(
             this,
-            "코드를 냈으면 쉬는 시간도 떳떳하게. 지금은 Android 로컬 차단 릴리즈 후보입니다."
+            "코드를 냈으면 쉬는 시간도 떳떳하게. 선택한 방해 앱만 로컬 크레딧으로 잠급니다."
         ).apply {
             setPadding(0, UiKit.dp(this@MainActivity, 8), 0, UiKit.dp(this@MainActivity, 14))
         }
 
+        overviewText = UiKit.noticeBlock(this)
         statusText = UiKit.monoBlock(this)
 
-        privacyDisclosureText = UiKit.body(this)
+        privacySummaryText = UiKit.caption(
+            this,
+            "Local only: foreground package names plus selected-target overlay. Full disclosure and export controls are in Monitor evidence below."
+        )
+        privacyDisclosureText = UiKit.caption(this)
 
         packageInput = UiKit.input(this, "Package names, comma separated (ex: com.instagram.android)", minLines = 2).apply {
             minLines = 2
         }
 
-        strictModeInput = UiKit.checkbox(this, "Strict mode mock flag")
+        strictModeInput = UiKit.checkbox(this, "Strict mode: hide quick test unlock")
 
         activeFromInput = UiKit.input(this, "Active from HH:mm (blank = 00:00)").apply {
             setSingleLine(true)
@@ -213,13 +227,13 @@ class MainActivity : Activity() {
         UiKit.addGap(root, 10)
         root.addView(title)
         root.addView(subtitle)
-        root.addView(statusText)
+        root.addView(overviewText)
         UiKit.addPanelGap(root)
     }
 
     private fun addPermissionSection(root: LinearLayout) {
-        val section = sectionPanel("Privacy and permissions", "Usage Access reads foreground app events. Overlay draws the local block screen.")
-        section.addView(privacyDisclosureText)
+        val section = sectionPanel("Permissions", "No screen capture, no server sync, no uninstall lock. The app only watches package names you allow Android to report.")
+        section.addView(privacySummaryText)
         UiKit.addGap(section, 8)
         section.addView(button("Open Usage Access Settings", UiKit.ButtonTone.PRIMARY) {
             startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
@@ -235,12 +249,12 @@ class MainActivity : Activity() {
     }
 
     private fun addTargetInputSection(root: LinearLayout) {
-        val section = sectionPanel("Targets", "Only package names saved here can be blocked. Settings, launchers, and this app are rejected.")
+        val section = sectionPanel("Distracting apps", "Pick the apps you want to pause. Settings, launchers, and Commit Unlock are always left alone.")
         section.addView(packageInput)
         section.addView(strictModeInput)
         section.addView(recentPackagesText)
         section.addView(button("Save blocked packages", UiKit.ButtonTone.PRIMARY) { saveTargets() })
-        section.addView(button("Add latest external package") { addLatestExternalPackage() })
+        section.addView(button("Use latest app I opened") { addLatestExternalPackage() })
         root.addView(section)
         UiKit.addPanelGap(root)
     }
@@ -344,6 +358,8 @@ class MainActivity : Activity() {
             renderState()
         })
         section.addView(button("Refresh status") { renderState() })
+        section.addView(statusText)
+        section.addView(privacyDisclosureText)
         section.addView(dogfoodSummaryText)
         section.addView(dogfoodReviewText)
         section.addView(button("Share dogfood export") { shareDogfoodExport() })
@@ -629,7 +645,17 @@ class MainActivity : Activity() {
         manualHolidayInput.isChecked = policy.isManualHolidayActive()
         val recentPackages = recentExternalPackages()
 
+        overviewText.text = buildOverviewCopy(
+            state = state,
+            decision = decision,
+            monitorRuntime = monitorRuntime,
+            usageAccessGranted = usageAccessGranted,
+            overlayGranted = overlayGranted,
+            notificationGranted = notificationGranted
+        )
+
         statusText.text = listOf(
+            "Technical snapshot",
             "Credit: ${state.remainingMinutes} min / ${decision.reason.code}",
             "Monitor: ${monitorRuntime.state.code} (desired=${if (monitorRuntime.desiredRunning) "on" else "off"}, heartbeat=${PrototypeText.monitorHeartbeat(monitorRuntime)})",
             "Permissions: usage=${shortGrant(usageAccessGranted)} overlay=${shortGrant(overlayGranted)} notify=${shortGrant(notificationGranted)}",
@@ -716,6 +742,32 @@ class MainActivity : Activity() {
         return PrototypeText.foregroundUnavailableReason(
             hasUsageAccess = PermissionChecks.hasUsageAccess(this)
         )
+    }
+
+    private fun buildOverviewCopy(
+        state: CreditState,
+        decision: PolicyDecision,
+        monitorRuntime: MonitorRuntimeSnapshot,
+        usageAccessGranted: Boolean,
+        overlayGranted: Boolean,
+        notificationGranted: Boolean
+    ): String {
+        val permissionCount = listOf(usageAccessGranted, overlayGranted, notificationGranted).count { it }
+        val nextStep = when {
+            !usageAccessGranted || !overlayGranted -> "Next: finish permissions so the blocker can actually work."
+            state.blockedTargets.isEmpty() -> "Next: open one distracting app, come back, then tap 'Use latest app I opened'."
+            !monitorRuntime.desiredRunning -> "Next: start the monitor when you are ready to dogfood."
+            state.freeUntil != null -> "Mode: free day is active. Enjoy it without negotiating with yourself."
+            state.remainingMinutes > 0 -> "Mode: ${state.remainingMinutes} earned minutes are ready for selected apps."
+            decision.allowed -> "Mode: allowed by ${decision.reason.code}. No credit spend right now."
+            else -> "Mode: selected apps pause until you earn, add, or override credit."
+        }
+
+        return listOf(
+            "Today: ${state.remainingMinutes} min left, ${state.blockedTargets.size} target${if (state.blockedTargets.size == 1) "" else "s"}",
+            "Setup: $permissionCount/3 permissions, monitor ${monitorRuntime.state.code}",
+            nextStep
+        ).joinToString("\n")
     }
 
     private fun shortGrant(granted: Boolean): String {

@@ -56,9 +56,9 @@ Captured on `CommitUnlockApi33` Android emulator on 2026-05-05. These are real a
 | --- | --- |
 | ![Policy schedule with weekday checkboxes and time window fields](docs/assets/screenshots/android/05-policy-schedule.png) | ![Daily quest section with mock proof controls](docs/assets/screenshots/android/06-daily-quest.png) |
 
-| Emergency and credit | Dogfood review |
+| Emergency and credit | Monitor evidence |
 | --- | --- |
-| ![Emergency unlock and mock credit controls](docs/assets/screenshots/android/07-emergency-credit.png) | ![Monitor and dogfood evidence section with gate counters](docs/assets/screenshots/android/08-dogfood-review.png) |
+| ![Emergency unlock and mock credit controls](docs/assets/screenshots/android/07-emergency-credit.png) | ![Monitor evidence with technical snapshot and local disclosure](docs/assets/screenshots/android/08-dogfood-review.png) |
 
 | Blocking overlay |
 | --- |
