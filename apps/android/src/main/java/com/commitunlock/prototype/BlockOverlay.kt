@@ -19,8 +19,8 @@ class BlockOverlay(private val context: Context) {
         reasonCode: String,
         onOpenApp: () -> Unit,
         onAddCredit: () -> Unit
-    ) {
-        if (overlayView != null) return
+    ): Boolean {
+        if (overlayView != null) return true
         val canAddCredit = !strictMode
 
         val container = LinearLayout(context).apply {
@@ -121,12 +121,16 @@ class BlockOverlay(private val context: Context) {
             PixelFormat.TRANSLUCENT
         )
 
-        overlayView = container
-        windowManager.addView(container, params)
+        return runCatching {
+            windowManager.addView(container, params)
+            overlayView = container
+        }.isSuccess
     }
 
     fun hide() {
-        overlayView?.let { windowManager.removeView(it) }
+        overlayView?.let { view ->
+            runCatching { windowManager.removeView(view) }
+        }
         overlayView = null
     }
 }

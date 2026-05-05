@@ -118,6 +118,25 @@ class DogfoodEventStoreTest {
         assertEquals(2, details.count { it == "usage" })
         assertEquals(1, details.count { it == "overlay" })
     }
+
+    @Test
+    fun summaryCountsOverlayShowFailures() {
+        val storage = FakeDogfoodEventStorage()
+        val clock = StepClock(Instant.parse("2026-05-04T12:00:00Z"))
+        val store = DogfoodEventStore(storage, clock::now)
+
+        store.recordStructured(
+            type = "overlay_show_failed",
+            target = "com.video.app",
+            policyReason = "credit_empty",
+            creditRemaining = 0,
+            detail = "add_view_failed"
+        )
+
+        val summary = store.summary(Instant.parse("2026-05-04T12:00:01Z"))
+
+        assertEquals(1, summary.overlayFailures)
+    }
 }
 
 private class FakeDogfoodEventStorage(initialRaw: List<String> = emptyList()) : DogfoodEventStorage {

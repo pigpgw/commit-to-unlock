@@ -115,6 +115,7 @@ object DogfoodReviewEngine {
         val mockProofCompletions = metrics.getValue("dailyQuestMockCompletions")
         val foregroundChanges = metrics.getValue("foregroundChanges")
         val overlayShows = metrics.getValue("overlayShows")
+        val overlayFailures = metrics.getValue("overlayFailures")
         val permissionFailures = metrics.getValue("permissionFailures")
         val applicableQualityEvents = dataQuality.sumOf { it.events }
         val populatedQualityEvents = dataQuality.sumOf { it.populated }
@@ -133,9 +134,15 @@ object DogfoodReviewEngine {
                 ),
                 DogfoodReviewGateCheck(
                     label = "Blocking overlay was observed",
-                    passed = overlayShows > 0 || blockedAttempts > 0,
-                    actual = maxOf(overlayShows, blockedAttempts).toString(),
-                    target = "> 0 overlay_shown or blocked_attempt events"
+                    passed = overlayShows > 0,
+                    actual = "shown=$overlayShows blocked=$blockedAttempts failed=$overlayFailures",
+                    target = "> 0 overlay_shown events"
+                ),
+                DogfoodReviewGateCheck(
+                    label = "Overlay show failures",
+                    passed = overlayFailures == 0,
+                    actual = overlayFailures.toString(),
+                    target = "0 overlay_show_failed events"
                 ),
                 DogfoodReviewGateCheck(
                     label = "Permission/service failures are logged when they happen",
@@ -268,6 +275,9 @@ object DogfoodReviewEngine {
         if (metrics.getValue("permissionFailures") > metrics.getValue("blockedAttempts")) {
             notes += "Permission failures exceed blocked attempts; improve onboarding and permission recovery before adding features."
         }
+        if (metrics.getValue("overlayFailures") > 0) {
+            notes += "Overlay show failures were logged; verify Display over other apps, OEM background limits, and addView timing before paid release."
+        }
         if (metrics.getValue("dailyQuestAdds") > 0 && metrics.getValue("dailyQuestMockCompletions") == 0) {
             notes += "Daily quests are planned but not completed with proof; test the mock proof loop before GitHub scoring."
         }
@@ -347,6 +357,7 @@ object DogfoodReviewEngine {
         val permissionFailures = setOf("permission_missing")
         val overlayOpens = setOf("overlay_open_app")
         val overlayCreditAdds = setOf("overlay_add_credit")
+        val overlayFailures = setOf("overlay_show_failed")
         val autoCreditSpends = setOf("credit_auto_spent")
         val manualCreditChanges = setOf("credit_added", "credit_spent", "credit_reset")
         val freeDays = setOf("free_day_set")
@@ -364,6 +375,7 @@ object DogfoodReviewEngine {
         "permissionFailures" to eventTypes.permissionFailures,
         "overlayOpens" to eventTypes.overlayOpens,
         "overlayCreditAdds" to eventTypes.overlayCreditAdds,
+        "overlayFailures" to eventTypes.overlayFailures,
         "autoCreditSpends" to eventTypes.autoCreditSpends,
         "manualCreditChanges" to eventTypes.manualCreditChanges,
         "freeDays" to eventTypes.freeDays,
@@ -378,6 +390,7 @@ object DogfoodReviewEngine {
         "blocked_attempt",
         "foreground_changed",
         "overlay_open_app",
+        "overlay_show_failed",
         "overlay_shown",
         "policy_allowed",
         "policy_blocked",
@@ -393,6 +406,7 @@ object DogfoodReviewEngine {
         "overlay_add_credit",
         "overlay_hidden",
         "overlay_open_app",
+        "overlay_show_failed",
         "overlay_shown",
         "policy_allowed",
         "policy_blocked",
@@ -410,6 +424,7 @@ object DogfoodReviewEngine {
         "overlay_add_credit",
         "overlay_hidden",
         "overlay_open_app",
+        "overlay_show_failed",
         "overlay_shown",
         "policy_allowed",
         "policy_blocked",

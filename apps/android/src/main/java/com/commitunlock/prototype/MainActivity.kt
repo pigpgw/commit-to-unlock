@@ -246,7 +246,7 @@ class MainActivity : Activity() {
     }
 
     private fun addPolicySection(root: LinearLayout) {
-        val section = sectionPanel("Policy schedule", "Weekdays, time window, free day, holiday, and emergency unlock are evaluated before credit.")
+        val section = sectionPanel("Policy schedule", "Weekdays, time window, free day, manual holiday, and emergency unlock are evaluated before credit.")
         weekdayInputs.clear()
         weekdayLabels.forEach { (day, label) ->
             val checkbox = UiKit.checkbox(this, label)
@@ -682,6 +682,7 @@ class MainActivity : Activity() {
             "Permission failures: ${dogfoodSummary.permissionFailures}",
             "Overlay open-app actions: ${dogfoodSummary.overlayOpens}",
             "Overlay test-credit unlocks: ${dogfoodSummary.overlayCreditAdds}",
+            "Overlay show failures: ${dogfoodSummary.overlayFailures}",
             "Automatic credit spends: ${dogfoodSummary.automaticCreditSpends}",
             "Manual credit changes: ${dogfoodSummary.manualCreditChanges}",
             "Stored dogfood events: ${dogfoodSummary.eventCount}"

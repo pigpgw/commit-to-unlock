@@ -271,7 +271,7 @@ class MonitorService : Service() {
             creditRemaining = creditRemaining
         )
         overlay.hide()
-        overlay.show(
+        val shown = overlay.show(
             packageName = foregroundPackage,
             strictMode = strictMode,
             reasonCode = reason.code,
@@ -297,6 +297,19 @@ class MonitorService : Service() {
                 hideOverlay("credit_added")
             }
         )
+        if (!shown) {
+            dogfoodEventStore.recordStructured(
+                type = "overlay_show_failed",
+                target = foregroundPackage,
+                policyReason = reason.code,
+                creditRemaining = creditRemaining,
+                detail = "add_view_failed"
+            )
+            showingBlockedPackage = null
+            showingStrictMode = null
+            showingReason = null
+            return
+        }
         showingBlockedPackage = foregroundPackage
         showingStrictMode = strictMode
         showingReason = reason
