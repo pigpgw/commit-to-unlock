@@ -30,6 +30,7 @@ class MainActivity : Activity() {
     private lateinit var monitorStateStore: MonitorStateStore
     private lateinit var policyStore: PolicyStore
     private lateinit var overviewText: TextView
+    private lateinit var setupChecklistText: TextView
     private lateinit var statusText: TextView
     private lateinit var privacySummaryText: TextView
     private lateinit var privacyDisclosureText: TextView
@@ -164,6 +165,7 @@ class MainActivity : Activity() {
         }
 
         overviewText = UiKit.noticeBlock(this)
+        setupChecklistText = UiKit.monoBlock(this)
         statusText = UiKit.monoBlock(this)
 
         privacySummaryText = UiKit.caption(
@@ -172,7 +174,7 @@ class MainActivity : Activity() {
         )
         privacyDisclosureText = UiKit.caption(this)
 
-        packageInput = UiKit.input(this, "Package names, comma separated (ex: com.instagram.android)", minLines = 2).apply {
+        packageInput = UiKit.input(this, "Package names, comma/newline separated (ex: com.android.chrome)", minLines = 2).apply {
             minLines = 2
         }
 
@@ -233,6 +235,7 @@ class MainActivity : Activity() {
 
     private fun addPermissionSection(root: LinearLayout) {
         val section = sectionPanel("Permissions", "No screen capture, no server sync, no uninstall lock. The app only watches package names you allow Android to report.")
+        section.addView(setupChecklistText)
         section.addView(privacySummaryText)
         UiKit.addGap(section, 8)
         section.addView(button("Open Usage Access Settings", UiKit.ButtonTone.PRIMARY) {
@@ -255,6 +258,7 @@ class MainActivity : Activity() {
         section.addView(recentPackagesText)
         section.addView(button("Save blocked packages", UiKit.ButtonTone.PRIMARY) { saveTargets() })
         section.addView(button("Use latest app I opened") { addLatestExternalPackage() })
+        section.addView(button("Prepare reliable Chrome demo", UiKit.ButtonTone.SECONDARY) { prepareChromeDemo() })
         root.addView(section)
         UiKit.addPanelGap(root)
     }
@@ -277,6 +281,7 @@ class MainActivity : Activity() {
             dogfoodEventStore.record("free_day_cleared")
             renderState()
         })
+        section.addView(button("Clear all bypasses", UiKit.ButtonTone.GHOST) { clearAllBypasses() })
         section.addView(policySummaryText)
         root.addView(section)
         UiKit.addPanelGap(root)
@@ -345,10 +350,7 @@ class MainActivity : Activity() {
     private fun addMonitorAndDogfoodSection(root: LinearLayout) {
         val section = sectionPanel("Monitor and dogfood evidence", "Foreground service status, 14-day gate data, local export, and event log.")
         section.addView(button("Start monitor service", UiKit.ButtonTone.PRIMARY) {
-            monitorStateStore.setDesiredRunning(true)
-            dogfoodEventStore.record("monitor_start_requested")
-            startForegroundService(Intent(this, MonitorService::class.java))
-            renderState()
+            startMonitorFromUi()
         })
         section.addView(button("Stop monitor service", UiKit.ButtonTone.DANGER) {
             monitorStateStore.setDesiredRunning(false)
@@ -385,7 +387,7 @@ class MainActivity : Activity() {
 
     private fun saveTargets() {
         val result = TargetGuardrails.normalizeTargets(
-            packageInput.text.toString().split(","),
+            TargetInputParser.parse(packageInput.text.toString()),
             packageName
         )
         val targets = result.accepted
@@ -402,6 +404,9 @@ class MainActivity : Activity() {
         )
         recordRejectedTargets(result.rejected)
         showRejectedTargetToast(result.rejected)
+        if (targets.isEmpty()) {
+            Toast.makeText(this, "No valid target saved. Add a package like com.android.chrome.", Toast.LENGTH_LONG).show()
+        }
         renderState()
     }
 
@@ -421,6 +426,12 @@ class MainActivity : Activity() {
             .filter { it.value.isChecked }
             .keys
             .sorted()
+        if (selectedWeekdays.isEmpty()) {
+            Toast.makeText(this, "Pick at least one active day, or the blocker will never run.", Toast.LENGTH_LONG).show()
+            dogfoodEventStore.record("policy_save_rejected", "no_active_weekdays")
+            renderState()
+            return
+        }
         val today = LocalDate.now(ZoneId.of(timezone)).toString()
 
         policyStore.save(current.copy(
@@ -436,6 +447,49 @@ class MainActivity : Activity() {
             "policy_saved",
             "weekdays=${selectedWeekdays.joinToString(",")} from=${activeFrom.valueOrNull().orEmpty()} until=${activeUntil.valueOrNull().orEmpty()} manualHoliday=${manualHolidayInput.isChecked}"
         )
+        renderState()
+    }
+
+    private fun prepareChromeDemo() {
+        val now = Instant.now()
+        val timezone = ZoneId.systemDefault().id
+        creditStore.save(
+            CreditState(
+                remainingMinutes = 0,
+                blockedTargets = listOf(DEMO_TARGET_PACKAGE),
+                freeUntil = null,
+                strictMode = false,
+                lastUpdatedAt = now.toString()
+            )
+        )
+        policyStore.save(
+            PolicyState(
+                activeWeekdays = (1..7).toList(),
+                activeFrom = null,
+                activeUntil = null,
+                applyOnPublicHolidays = false,
+                manualHolidayDate = null,
+                timezone = timezone
+            )
+        )
+        emergencyUnlockStore.clear()
+        dogfoodEventStore.recordStructured(
+            type = "demo_setup_prepared",
+            target = DEMO_TARGET_PACKAGE,
+            policyReason = "all_days_credit_empty",
+            creditRemaining = 0
+        )
+        Toast.makeText(this, "Chrome demo ready: all days, zero credit, no bypasses.", Toast.LENGTH_LONG).show()
+        renderState()
+    }
+
+    private fun clearAllBypasses() {
+        val policy = policyStore.read()
+        creditStore.setFreeUntil(null)
+        emergencyUnlockStore.clear()
+        policyStore.save(policy.copy(manualHolidayDate = null))
+        dogfoodEventStore.record("bypasses_cleared")
+        Toast.makeText(this, "Free day, manual holiday, and emergency unlocks cleared.", Toast.LENGTH_SHORT).show()
         renderState()
     }
 
@@ -554,6 +608,7 @@ class MainActivity : Activity() {
     private fun addLatestExternalPackage() {
         if (!PermissionChecks.hasUsageAccess(this)) {
             dogfoodEventStore.record("permission_missing", "usage_access")
+            Toast.makeText(this, "Grant Usage Access first, then open the target app once.", Toast.LENGTH_LONG).show()
             renderState()
             return
         }
@@ -565,6 +620,7 @@ class MainActivity : Activity() {
 
         if (latestExternalPackage == null) {
             dogfoodEventStore.record("recent_external_package_missing")
+            Toast.makeText(this, "No recent external package found. Open Chrome or YouTube once, then come back.", Toast.LENGTH_LONG).show()
             renderState()
             return
         }
@@ -586,6 +642,54 @@ class MainActivity : Activity() {
             type = "target_added",
             target = latestExternalPackage
         )
+        Toast.makeText(this, "Added $latestExternalPackage", Toast.LENGTH_SHORT).show()
+        renderState()
+    }
+
+    private fun startMonitorFromUi() {
+        val state = creditStore.read()
+        val usageAccessGranted = PermissionChecks.hasUsageAccess(this)
+        val overlayGranted = PermissionChecks.canDrawOverlays(this)
+        val notificationGranted = PermissionChecks.hasNotificationPermission(this)
+        val setup = SetupChecklist.evaluate(
+            SetupChecklistState(
+                usageAccessGranted = usageAccessGranted,
+                overlayGranted = overlayGranted,
+                notificationGranted = notificationGranted,
+                blockedTargetCount = state.blockedTargets.size,
+                monitorRunning = false
+            )
+        )
+
+        if (!setup.canStartMonitor) {
+            dogfoodEventStore.record(
+                "monitor_start_rejected",
+                setup.missingItems.joinToString(",") { it.name.lowercase() }
+            )
+            when {
+                !usageAccessGranted -> {
+                    Toast.makeText(this, "Usage Access is required before the monitor can start.", Toast.LENGTH_LONG).show()
+                    startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+                }
+                !overlayGranted -> {
+                    Toast.makeText(this, "Overlay permission is required before the blocker can show.", Toast.LENGTH_LONG).show()
+                    startActivity(Intent(
+                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:$packageName")
+                    ))
+                }
+                state.blockedTargets.isEmpty() -> {
+                    Toast.makeText(this, "Add at least one target package first.", Toast.LENGTH_LONG).show()
+                }
+            }
+            renderState()
+            return
+        }
+
+        monitorStateStore.setDesiredRunning(true)
+        dogfoodEventStore.record("monitor_start_requested")
+        startForegroundService(Intent(this, MonitorService::class.java))
+        Toast.makeText(this, "Monitor started. Open a selected app with zero credit to test blocking.", Toast.LENGTH_LONG).show()
         renderState()
     }
 
@@ -624,6 +728,15 @@ class MainActivity : Activity() {
         val monitorRuntime = monitorStateStore.runtimeStatus(
             serviceRunning = MonitorServiceInspector.isMonitorServiceRunning(this)
         )
+        val setupChecklist = SetupChecklist.evaluate(
+            SetupChecklistState(
+                usageAccessGranted = usageAccessGranted,
+                overlayGranted = overlayGranted,
+                notificationGranted = notificationGranted,
+                blockedTargetCount = state.blockedTargets.size,
+                monitorRunning = monitorRuntime.state == MonitorRuntimeState.RUNNING
+            )
+        )
         val decision = PolicyDecisionEngine.evaluate(
             PolicyDecisionInput(
                 currentPackage = foregroundPackage,
@@ -649,6 +762,14 @@ class MainActivity : Activity() {
             state = state,
             decision = decision,
             monitorRuntime = monitorRuntime,
+            usageAccessGranted = usageAccessGranted,
+            overlayGranted = overlayGranted,
+            notificationGranted = notificationGranted,
+            setupChecklist = setupChecklist
+        )
+
+        setupChecklistText.text = buildSetupChecklistCopy(
+            setupChecklist = setupChecklist,
             usageAccessGranted = usageAccessGranted,
             overlayGranted = overlayGranted,
             notificationGranted = notificationGranted
@@ -750,11 +871,12 @@ class MainActivity : Activity() {
         monitorRuntime: MonitorRuntimeSnapshot,
         usageAccessGranted: Boolean,
         overlayGranted: Boolean,
-        notificationGranted: Boolean
+        notificationGranted: Boolean,
+        setupChecklist: SetupChecklistResult
     ): String {
         val permissionCount = listOf(usageAccessGranted, overlayGranted, notificationGranted).count { it }
         val nextStep = when {
-            !usageAccessGranted || !overlayGranted -> "Next: finish permissions so the blocker can actually work."
+            !setupChecklist.canStartMonitor -> "Next: ${setupChecklist.nextAction}"
             state.blockedTargets.isEmpty() -> "Next: open one distracting app, come back, then tap 'Use latest app I opened'."
             !monitorRuntime.desiredRunning -> "Next: start the monitor when you are ready to dogfood."
             state.freeUntil != null -> "Mode: free day is active. Enjoy it without negotiating with yourself."
@@ -765,8 +887,31 @@ class MainActivity : Activity() {
 
         return listOf(
             "Today: ${state.remainingMinutes} min left, ${state.blockedTargets.size} target${if (state.blockedTargets.size == 1) "" else "s"}",
-            "Setup: $permissionCount/3 permissions, monitor ${monitorRuntime.state.code}",
+            "Setup: $permissionCount/3 permissions, monitor ${monitorRuntime.state.code}, blocker ${if (setupChecklist.readyForBlocking) "ready" else "not ready"}",
             nextStep
+        ).joinToString("\n")
+    }
+
+    private fun buildSetupChecklistCopy(
+        setupChecklist: SetupChecklistResult,
+        usageAccessGranted: Boolean,
+        overlayGranted: Boolean,
+        notificationGranted: Boolean
+    ): String {
+        val missing = setupChecklist.missingItems
+            .takeIf { it.isNotEmpty() }
+            ?.joinToString(", ") { it.label }
+            ?: "none"
+
+        return listOf(
+            "Setup checklist",
+            "Usage Access: ${shortGrant(usageAccessGranted)}",
+            "Overlay Permission: ${shortGrant(overlayGranted)}",
+            "Notifications: ${shortGrant(notificationGranted)}",
+            "Can start monitor: ${setupChecklist.canStartMonitor}",
+            "Ready for blocking: ${setupChecklist.readyForBlocking}",
+            "Missing: $missing",
+            "Next: ${setupChecklist.nextAction}"
         ).joinToString("\n")
     }
 
@@ -802,6 +947,7 @@ class MainActivity : Activity() {
     companion object {
         private const val DAILY_EMERGENCY_LIMIT = 3
         private const val WEEKLY_EMERGENCY_LIMIT = 10
+        private const val DEMO_TARGET_PACKAGE = "com.android.chrome"
         private val weekdayLabels = listOf(
             1 to "Monday",
             2 to "Tuesday",
