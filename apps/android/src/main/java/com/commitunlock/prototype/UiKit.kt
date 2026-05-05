@@ -26,6 +26,8 @@ object UiKit {
     const val COLOR_WARNING = 0xFF9A6700.toInt()
     const val COLOR_DANGER = 0xFFCF222E.toInt()
     const val COLOR_CODE_BG = 0xFFF1F5F9.toInt()
+    const val COLOR_DANGER_BG = 0xFFFFF1F0.toInt()
+    const val COLOR_PRIMARY_BG = 0xFFEAF3FF.toInt()
 
     enum class ButtonTone {
         PRIMARY,
@@ -48,7 +50,7 @@ object UiKit {
     fun root(context: Context): LinearLayout {
         return LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(context, 20), dp(context, 28), dp(context, 20), dp(context, 32))
+            setPadding(dp(context, 16), dp(context, 24), dp(context, 16), dp(context, 32))
             setBackgroundColor(COLOR_SURFACE)
         }
     }
@@ -60,7 +62,7 @@ object UiKit {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            setPadding(dp(context, 16), dp(context, 14), dp(context, 16), dp(context, 16))
+            setPadding(dp(context, 16), dp(context, 16), dp(context, 16), dp(context, 16))
             background = rounded(context, COLOR_PANEL, radiusDp = 8, strokeColor = COLOR_BORDER)
         }
     }
@@ -79,7 +81,7 @@ object UiKit {
     fun title(context: Context, text: String): TextView {
         return TextView(context).apply {
             this.text = text
-            textSize = 28f
+            textSize = 26f
             typeface = Typeface.DEFAULT_BOLD
             setTextColor(COLOR_INK)
             includeFontPadding = false
@@ -89,7 +91,7 @@ object UiKit {
     fun heading(context: Context, text: String): TextView {
         return TextView(context).apply {
             this.text = text
-            textSize = 22f
+            textSize = 21f
             typeface = Typeface.DEFAULT_BOLD
             setTextColor(COLOR_INK)
             includeFontPadding = false
@@ -127,7 +129,7 @@ object UiKit {
     fun monoBlock(context: Context): TextView {
         return TextView(context).apply {
             layoutParams = topSpacedParams(context)
-            textSize = 13f
+            textSize = 12f
             typeface = Typeface.MONOSPACE
             setTextColor(COLOR_INK)
             setPadding(dp(context, 12), dp(context, 10), dp(context, 12), dp(context, 10))
@@ -143,7 +145,7 @@ object UiKit {
             typeface = Typeface.DEFAULT_BOLD
             setTextColor(COLOR_PRIMARY_DARK)
             setPadding(dp(context, 12), dp(context, 10), dp(context, 12), dp(context, 10))
-            background = rounded(context, 0xFFEFF6FF.toInt(), radiusDp = 8, strokeColor = 0xFFBFDBFE.toInt())
+            background = rounded(context, COLOR_PRIMARY_BG, radiusDp = 8, strokeColor = 0xFFBFDBFE.toInt())
             setLineSpacing(dp(context, 2).toFloat(), 1.0f)
         }
     }
@@ -168,7 +170,7 @@ object UiKit {
             typeface = Typeface.DEFAULT_BOLD
             setTextColor(color)
             setPadding(dp(context, 10), dp(context, 5), dp(context, 10), dp(context, 5))
-            background = rounded(context, 0xFFEFF6FF.toInt(), radiusDp = 8, strokeColor = 0xFFBFDBFE.toInt())
+            background = rounded(context, COLOR_PRIMARY_BG, radiusDp = 8, strokeColor = 0xFFBFDBFE.toInt())
         }
     }
 
@@ -208,18 +210,25 @@ object UiKit {
             text = label
             isAllCaps = false
             textSize = 14f
-            minHeight = dp(context, 48)
+            minHeight = dp(context, 44)
+            minWidth = 0
+            minimumHeight = dp(context, 44)
+            minimumWidth = 0
             gravity = Gravity.CENTER
-            setPadding(dp(context, 12), 0, dp(context, 12), 0)
+            includeFontPadding = false
+            maxLines = 2
+            setPadding(dp(context, 14), dp(context, 8), dp(context, 14), dp(context, 8))
             val (backgroundColor, textColor, strokeColor) = when (tone) {
                 ButtonTone.PRIMARY -> Triple(COLOR_PRIMARY, 0xFFFFFFFF.toInt(), COLOR_PRIMARY)
-                ButtonTone.SECONDARY -> Triple(0xFFEFF6FF.toInt(), COLOR_PRIMARY_DARK, 0xFFBFDBFE.toInt())
-                ButtonTone.DANGER -> Triple(0xFFFFEBE9.toInt(), COLOR_DANGER, 0xFFFFC1BA.toInt())
+                ButtonTone.SECONDARY -> Triple(COLOR_PRIMARY_BG, COLOR_PRIMARY_DARK, 0xFFBFDBFE.toInt())
+                ButtonTone.DANGER -> Triple(COLOR_DANGER_BG, COLOR_DANGER, 0xFFFFC1BA.toInt())
                 ButtonTone.GHOST -> Triple(COLOR_PANEL, COLOR_MUTED, COLOR_BORDER)
             }
-            backgroundTintList = ColorStateList.valueOf(backgroundColor)
             setTextColor(textColor)
             background = rounded(context, backgroundColor, radiusDp = 8, strokeColor = strokeColor)
+            stateListAnimator = null
+            elevation = 0f
+            translationZ = 0f
             setOnClickListener { action() }
         }
     }

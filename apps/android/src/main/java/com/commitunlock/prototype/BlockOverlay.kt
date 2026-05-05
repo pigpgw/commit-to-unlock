@@ -28,11 +28,11 @@ class BlockOverlay(private val context: Context) {
             gravity = Gravity.CENTER
             setPadding(
                 UiKit.dp(context, 20),
-                UiKit.dp(context, 32),
+                UiKit.dp(context, 28),
                 UiKit.dp(context, 20),
-                UiKit.dp(context, 32)
+                UiKit.dp(context, 28)
             )
-            setBackgroundColor(0xF20F172A.toInt())
+            setBackgroundColor(0xF4111726.toInt())
         }
 
         val panel = LinearLayout(context).apply {
@@ -47,25 +47,42 @@ class BlockOverlay(private val context: Context) {
             background = UiKit.rounded(context, 0xFF111827.toInt(), radiusDp = 8, strokeColor = 0xFF334155.toInt())
         }
 
+        val badge = TextView(context).apply {
+            text = "TARGET PAUSED"
+            textSize = 12f
+            typeface = android.graphics.Typeface.DEFAULT_BOLD
+            setTextColor(0xFF93C5FD.toInt())
+            gravity = Gravity.CENTER
+            includeFontPadding = false
+            setPadding(
+                UiKit.dp(context, 10),
+                UiKit.dp(context, 6),
+                UiKit.dp(context, 10),
+                UiKit.dp(context, 6)
+            )
+            background = UiKit.rounded(context, 0xFF1E293B.toInt(), radiusDp = 8, strokeColor = 0xFF334155.toInt())
+        }
+
         val title = TextView(context).apply {
             text = "Commit first. Scroll later."
-            textSize = 28f
+            textSize = 26f
             typeface = android.graphics.Typeface.DEFAULT_BOLD
             setTextColor(0xFFFFFFFF.toInt())
             gravity = Gravity.CENTER
             includeFontPadding = false
+            setPadding(0, UiKit.dp(context, 14), 0, 0)
         }
 
         val message = TextView(context).apply {
-            text = "Your local credit ledger is empty, so this target is paused."
-            textSize = 16f
+            text = "Your credit ledger is empty for this target."
+            textSize = 15f
             setTextColor(0xFFE5E7EB.toInt())
             gravity = Gravity.CENTER
             setPadding(0, UiKit.dp(context, 14), 0, UiKit.dp(context, 14))
         }
 
         val targetState = UiKit.monoBlock(context).apply {
-            text = "Target: $packageName\nReason: $reasonCode\nRemaining credit: 0 minutes\nStrict mode: ${if (strictMode) "on" else "off"}"
+            text = "target  $packageName\nreason  $reasonCode\ncredit  0 min\nstrict  ${if (strictMode) "on" else "off"}"
             setTextColor(0xFFE2E8F0.toInt())
             gravity = Gravity.CENTER
             background = UiKit.rounded(context, 0xFF0B1220.toInt(), radiusDp = 8, strokeColor = 0xFF334155.toInt())
@@ -73,27 +90,28 @@ class BlockOverlay(private val context: Context) {
 
         val nextAction = TextView(context).apply {
             text = if (strictMode) {
-                "Open Commit Unlock to review your policy or add credit from the app."
+                "Open Commit Unlock to review policy or add credit."
             } else {
-                "Prototype mode: patch in test credit here, or open Commit Unlock to review targets and dogfood evidence."
+                "Prototype mode lets you patch test credit here."
             }
-            textSize = 15f
+            textSize = 14f
             setTextColor(0xFFE2E8F0.toInt())
             gravity = Gravity.CENTER
             setPadding(0, UiKit.dp(context, 16), 0, UiKit.dp(context, 10))
         }
 
-        val openApp = UiKit.button(context, "Review in Commit Unlock", UiKit.ButtonTone.PRIMARY, onOpenApp)
-        val addCredit = UiKit.button(context, "Patch in 5 test minutes", UiKit.ButtonTone.SECONDARY, onAddCredit)
+        val openApp = UiKit.button(context, "Review policy", UiKit.ButtonTone.PRIMARY, onOpenApp)
+        val addCredit = UiKit.button(context, "Add 5 test minutes", UiKit.ButtonTone.SECONDARY, onAddCredit)
 
         val strictModeNotice = TextView(context).apply {
             text = "Strict mode is on. The overlay test-credit shortcut is disabled."
             textSize = 15f
             setTextColor(0xFFCBD5E1.toInt())
             gravity = Gravity.CENTER
-            setPadding(0, 12, 0, 0)
+            setPadding(0, UiKit.dp(context, 12), 0, 0)
         }
 
+        panel.addView(badge)
         panel.addView(title)
         panel.addView(message)
         panel.addView(targetState)

@@ -224,7 +224,7 @@ class MainActivity : Activity() {
     }
 
     private fun addHeaderSection(root: LinearLayout, title: TextView, subtitle: TextView) {
-        root.addView(UiKit.pill(this, "LOCAL RC 0.1 / SELECTED TARGETS ONLY"))
+        root.addView(UiKit.pill(this, "LOCAL RC 0.1 / DEVELOPER MODE"))
         UiKit.addGap(root, 10)
         root.addView(title)
         root.addView(subtitle)
@@ -233,20 +233,23 @@ class MainActivity : Activity() {
     }
 
     private fun addPermissionSection(root: LinearLayout) {
-        val section = sectionPanel("Permissions", "No screen capture, no server sync, no uninstall lock. The app only watches package names you allow Android to report.")
+        val section = sectionPanel(
+            "Setup access",
+            "No screen capture, server sync, or uninstall lock. Android only reports foreground package names."
+        )
         section.addView(setupChecklistText)
         section.addView(privacySummaryText)
         UiKit.addGap(section, 8)
-        section.addView(button("Open Usage Access Settings", UiKit.ButtonTone.PRIMARY) {
+        section.addView(button("Open Usage Access", UiKit.ButtonTone.PRIMARY) {
             startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
         })
-        section.addView(button("Open Overlay Permission Settings") {
+        section.addView(button("Open Overlay Settings") {
             startActivity(Intent(
                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                 Uri.parse("package:$packageName")
             ))
         })
-        section.addView(button("Request Notification Permission") {
+        section.addView(button("Request Notifications") {
             requestNotificationPermission()
         })
         root.addView(section)
@@ -254,19 +257,25 @@ class MainActivity : Activity() {
     }
 
     private fun addTargetInputSection(root: LinearLayout) {
-        val section = sectionPanel("Distracting apps", "Pick the apps you want to pause. Settings, launchers, and Commit Unlock are always left alone.")
+        val section = sectionPanel(
+            "Target apps",
+            "Choose only the apps you want to pause. Settings, launchers, and Commit Unlock stay open."
+        )
         section.addView(packageInput)
         section.addView(strictModeInput)
         section.addView(recentPackagesText)
-        section.addView(button("Save blocked packages", UiKit.ButtonTone.PRIMARY) { saveTargets() })
-        section.addView(button("Use latest app I opened") { addLatestExternalPackage() })
-        section.addView(button("Prepare reliable Chrome demo", UiKit.ButtonTone.SECONDARY) { prepareChromeDemo() })
+        section.addView(button("Save targets", UiKit.ButtonTone.PRIMARY) { saveTargets() })
+        section.addView(button("Add latest foreground app") { addLatestExternalPackage() })
+        section.addView(button("Prepare Chrome demo", UiKit.ButtonTone.SECONDARY) { prepareChromeDemo() })
         root.addView(section)
         UiKit.addPanelGap(root)
     }
 
     private fun addPolicySection(root: LinearLayout) {
-        val section = sectionPanel("Policy schedule", "Weekdays, time window, free day, manual holiday, and emergency unlock are evaluated before credit.")
+        val section = sectionPanel(
+            "Schedule and bypasses",
+            "Active days, time windows, free day, manual holiday, and emergency unlock are checked before credit."
+        )
         weekdayInputs.clear()
         weekdayLabels.forEach { (day, label) ->
             val checkbox = UiKit.checkbox(this, label)
@@ -276,9 +285,9 @@ class MainActivity : Activity() {
         section.addView(activeFromInput)
         section.addView(activeUntilInput)
         section.addView(manualHolidayInput)
-        section.addView(button("Save policy schedule", UiKit.ButtonTone.PRIMARY) { savePolicy() })
-        section.addView(button("Set mock free day until midnight") { setMockFreeDay() })
-        section.addView(button("Clear mock free day", UiKit.ButtonTone.GHOST) {
+        section.addView(button("Save schedule", UiKit.ButtonTone.PRIMARY) { savePolicy() })
+        section.addView(button("Free day until midnight") { setMockFreeDay() })
+        section.addView(button("Clear free day", UiKit.ButtonTone.GHOST) {
             creditStore.setFreeUntil(null)
             dogfoodEventStore.record("free_day_cleared")
             renderState()
@@ -290,11 +299,14 @@ class MainActivity : Activity() {
     }
 
     private fun addQuestSection(root: LinearLayout) {
-        val section = sectionPanel("Daily quest", "Quest plans do not unlock anything until mock proof completion is recorded.")
+        val section = sectionPanel(
+            "Proof quest",
+            "Plans do not unlock anything until mock proof completion is recorded."
+        )
         section.addView(questTitleInput)
         section.addView(questRequiredInput)
-        section.addView(button("Add daily quest plan", UiKit.ButtonTone.PRIMARY) { addDailyQuest() })
-        section.addView(button("Complete next quest with mock proof") { completeNextQuestWithMockProof() })
+        section.addView(button("Add quest plan", UiKit.ButtonTone.PRIMARY) { addDailyQuest() })
+        section.addView(button("Complete next with mock proof") { completeNextQuestWithMockProof() })
         section.addView(button("Clear today's quests", UiKit.ButtonTone.GHOST) { clearDailyQuests() })
         section.addView(questSummaryText)
         root.addView(section)
@@ -302,12 +314,15 @@ class MainActivity : Activity() {
     }
 
     private fun addEmergencySection(root: LinearLayout) {
-        val section = sectionPanel("Emergency unlock", "Short escape hatch with reason logging. Strict mode disables the longest option.")
+        val section = sectionPanel(
+            "Emergency bypass",
+            "Short escape hatch with reason logging. Strict mode disables the longest option."
+        )
         section.addView(emergencyReasonInput)
-        section.addView(button("Emergency unlock 5 minutes") { startEmergencyUnlock(5) })
-        section.addView(button("Emergency unlock 15 minutes") { startEmergencyUnlock(15) })
-        section.addView(button("Emergency unlock 30 minutes") { startEmergencyUnlock(30) })
-        section.addView(button("Clear emergency unlocks", UiKit.ButtonTone.GHOST) {
+        section.addView(button("Unlock 5 minutes") { startEmergencyUnlock(5) })
+        section.addView(button("Unlock 15 minutes") { startEmergencyUnlock(15) })
+        section.addView(button("Unlock 30 minutes") { startEmergencyUnlock(30) })
+        section.addView(button("Clear emergency bypasses", UiKit.ButtonTone.GHOST) {
             emergencyUnlockStore.clear()
             dogfoodEventStore.record("emergency_unlocks_cleared")
             renderState()
@@ -318,7 +333,7 @@ class MainActivity : Activity() {
 
     private fun addTargetAndCreditSection(root: LinearLayout) {
         val section = sectionPanel(
-            "Mock credit",
+            "Test credit",
             "Local minutes for emulator and device dogfood. Capped at ${LocalCreditPolicy.MAX_LOCAL_TEST_MINUTES} minutes."
         )
         section.addView(button("Add 5 test minutes", UiKit.ButtonTone.PRIMARY) {
@@ -353,11 +368,14 @@ class MainActivity : Activity() {
     }
 
     private fun addMonitorAndDogfoodSection(root: LinearLayout) {
-        val section = sectionPanel("Monitor and dogfood evidence", "Foreground service status, 14-day gate data, local export, and event log.")
-        section.addView(button("Start monitor service", UiKit.ButtonTone.PRIMARY) {
+        val section = sectionPanel(
+            "Evidence and export",
+            "Foreground service status, 14-day gate data, local export, and event log."
+        )
+        section.addView(button("Start monitor", UiKit.ButtonTone.PRIMARY) {
             startMonitorFromUi()
         })
-        section.addView(button("Stop monitor service", UiKit.ButtonTone.DANGER) {
+        section.addView(button("Stop monitor", UiKit.ButtonTone.DANGER) {
             monitorStateStore.setDesiredRunning(false)
             monitorStateStore.clearHeartbeat()
             dogfoodEventStore.record("monitor_stop_requested")
@@ -369,8 +387,8 @@ class MainActivity : Activity() {
         section.addView(privacyDisclosureText)
         section.addView(dogfoodSummaryText)
         section.addView(dogfoodReviewText)
-        section.addView(button("Share dogfood export") { shareDogfoodExport() })
-        section.addView(button("Share redacted dogfood export") { shareDogfoodExport(redactSensitive = true) })
+        section.addView(button("Share full export") { shareDogfoodExport() })
+        section.addView(button("Share redacted export") { shareDogfoodExport(redactSensitive = true) })
         section.addView(button("Clear dogfood events", UiKit.ButtonTone.GHOST) {
             dogfoodEventStore.clear()
             renderState()
