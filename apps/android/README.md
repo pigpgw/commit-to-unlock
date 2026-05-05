@@ -10,7 +10,9 @@ Verified on `CommitUnlockApi33` Android 13 emulator on 2026-05-05:
 
 - first-run developer gate and rejection branch render correctly
 - permission status appears on the home dashboard
+- setup checklist explains missing prerequisites before monitor start
 - `com.android.chrome` can be saved as a selected target
+- reliable Chrome demo reset sets all days, zero credit, Chrome target, and no bypasses
 - selected target + `0` mock credit displays the blocking overlay
 - selected target + positive mock credit allows access
 - foreground target use spends `1` mock minute after `60` seconds
@@ -106,6 +108,7 @@ Use this exact path for every release-candidate check.
 3. Grant Usage Access, overlay, and notification permissions.
 4. Open Chrome once, return to Commit Unlock, and confirm `com.android.chrome` appears in recent external packages.
 5. Add `com.android.chrome` as a blocked target.
+   - For the fastest repeatable setup, tap `Prepare reliable Chrome demo`.
 6. Save the policy schedule. Leave time fields empty for all-day behavior.
 7. Tap `Reset credit to 0`.
 8. Tap `Start monitor service`.

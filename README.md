@@ -27,6 +27,8 @@ That means the app should not become a generic screen-time blocker. The paid pro
 - Playful first-run developer gate.
 - Local mock credit state with `remainingMinutes`, `blockedTargets`, `strictMode`, and `lastUpdatedAt`.
 - Manual package targets, with guardrails against blocking this app, launcher/settings/permission-controller, and core system services.
+- Setup checklist that explains why blocking is not ready before the monitor starts.
+- Reliable Chrome demo reset that clears bypasses, enables all days, sets `com.android.chrome`, and resets credit to `0`.
 - `UsageStatsManager` foreground-app detection.
 - Overlay block screen when a selected target is foreground and local credit is `0`.
 - Access allowed when mock credit is above `0` or a policy exception applies.
