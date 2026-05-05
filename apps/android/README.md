@@ -26,7 +26,7 @@ Screenshots are stored in `docs/assets/screenshots/android/`.
 | Policy schedule | `05-policy-schedule.png` |
 | Daily quest | `06-daily-quest.png` |
 | Emergency and credit | `07-emergency-credit.png` |
-| Dogfood review | `08-dogfood-review.png` |
+| Monitor evidence | `08-dogfood-review.png` |
 | Blocking overlay | `09-block-overlay.png` |
 
 ## Behavior
@@ -35,6 +35,8 @@ Screenshots are stored in `docs/assets/screenshots/android/`.
   - `예` stores local acceptance and opens the prototype.
   - `아니오` shows a playful rejection screen and exits.
   - This is product tone, not real identity verification.
+- Shows a friendly top summary with today's credit, setup status, and the next action before technical diagnostics.
+- Keeps the first permission panel short, then moves full local-data disclosure to the monitor evidence section.
 - Stores local mock credit state:
   - `remainingMinutes`
   - `blockedTargets`

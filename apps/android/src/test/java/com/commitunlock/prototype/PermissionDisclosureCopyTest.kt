@@ -23,8 +23,8 @@ class PermissionDisclosureCopyTest {
         assertContains(copy, "package names")
         assertContains(copy, "quest titles")
         assertContains(copy, "emergency reasons")
-        assertContains(copy, "Share dogfood export only sends TSV when you choose it")
-        assertContains(copy, "Clear dogfood events removes the local event log")
+        assertContains(copy, "sharing sends TSV only when you choose it")
+        assertContains(copy, "clearing removes local events")
         assertContains(copy, "not tamper-proof")
     }
 

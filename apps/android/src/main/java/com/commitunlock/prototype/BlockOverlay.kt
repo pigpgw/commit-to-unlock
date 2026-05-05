@@ -48,7 +48,7 @@ class BlockOverlay(private val context: Context) {
         }
 
         val title = TextView(context).apply {
-            text = "No leisure credit left"
+            text = "Commit first. Scroll later."
             textSize = 28f
             typeface = android.graphics.Typeface.DEFAULT_BOLD
             setTextColor(0xFFFFFFFF.toInt())
@@ -57,7 +57,7 @@ class BlockOverlay(private val context: Context) {
         }
 
         val message = TextView(context).apply {
-            text = "This target is paused by your local policy."
+            text = "Your local credit ledger is empty, so this target is paused."
             textSize = 16f
             setTextColor(0xFFE5E7EB.toInt())
             gravity = Gravity.CENTER
@@ -75,7 +75,7 @@ class BlockOverlay(private val context: Context) {
             text = if (strictMode) {
                 "Open Commit Unlock to review your policy or add credit from the app."
             } else {
-                "Prototype mode: add test credit here, or open Commit Unlock to review your targets and dogfood log."
+                "Prototype mode: patch in test credit here, or open Commit Unlock to review targets and dogfood evidence."
             }
             textSize = 15f
             setTextColor(0xFFE2E8F0.toInt())
@@ -84,7 +84,7 @@ class BlockOverlay(private val context: Context) {
         }
 
         val openApp = UiKit.button(context, "Review in Commit Unlock", UiKit.ButtonTone.PRIMARY, onOpenApp)
-        val addCredit = UiKit.button(context, "Add 5 test minutes (prototype)", UiKit.ButtonTone.SECONDARY, onAddCredit)
+        val addCredit = UiKit.button(context, "Patch in 5 test minutes", UiKit.ButtonTone.SECONDARY, onAddCredit)
 
         val strictModeNotice = TextView(context).apply {
             text = "Strict mode is on. The overlay test-credit shortcut is disabled."
