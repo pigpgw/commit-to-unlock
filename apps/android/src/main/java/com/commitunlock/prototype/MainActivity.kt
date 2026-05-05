@@ -78,184 +78,123 @@ class MainActivity : Activity() {
     }
 
     private fun buildDeveloperGate(): ScrollView {
-        val root = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
+        val root = UiKit.root(this).apply {
             gravity = Gravity.CENTER_HORIZONTAL
-            setPadding(36, 72, 36, 48)
+            setPadding(UiKit.dp(this@MainActivity, 24), UiKit.dp(this@MainActivity, 64), UiKit.dp(this@MainActivity, 24), UiKit.dp(this@MainActivity, 40))
         }
 
-        val title = TextView(this).apply {
-            text = "개발자지만 난 괜찮아"
-            textSize = 28f
+        val title = UiKit.title(this, "개발자지만 난 괜찮아").apply {
             gravity = Gravity.CENTER
-            setTextColor(0xFF111827.toInt())
         }
 
-        val question = TextView(this).apply {
-            text = "개발자이신가요?"
-            textSize = 22f
+        val question = UiKit.heading(this, "개발자이신가요?").apply {
             gravity = Gravity.CENTER
-            setTextColor(0xFF111827.toInt())
-            setPadding(0, 24, 0, 12)
+            setPadding(0, UiKit.dp(this@MainActivity, 22), 0, UiKit.dp(this@MainActivity, 10))
         }
 
-        val message = TextView(this).apply {
-            text = "이 앱은 커밋, PR, 빌드 실패, 그리고 새벽 2시의 이상한 자신감을 이해하는 사람만 입장할 수 있습니다."
-            textSize = 16f
+        val message = UiKit.body(
+            this,
+            "커밋, PR, 빌드 실패, 그리고 새벽 2시의 이상한 자신감을 이해하는 사람만 입장할 수 있습니다."
+        ).apply {
             gravity = Gravity.CENTER
-            setTextColor(0xFF475569.toInt())
-            setPadding(0, 0, 0, 28)
+            setPadding(0, 0, 0, UiKit.dp(this@MainActivity, 28))
         }
 
         root.addView(title)
         root.addView(question)
         root.addView(message)
-        root.addView(button("예, 커밋으로 증명하겠습니다") {
+        root.addView(button("예, 커밋으로 증명하겠습니다", UiKit.ButtonTone.PRIMARY) {
             developerGateStore.accept()
             dogfoodEventStore.record("developer_gate_accepted")
             showMainPrototype()
         })
+        UiKit.addGap(root, 8)
         root.addView(button("아니오, 그냥 스크롤하러 왔습니다") {
             dogfoodEventStore.record("developer_gate_rejected")
             setContentView(buildRejectedGate())
         })
 
-        return ScrollView(this).apply { addView(root) }
+        return UiKit.page(this, root)
     }
 
     private fun buildRejectedGate(): ScrollView {
-        val root = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
+        val root = UiKit.root(this).apply {
             gravity = Gravity.CENTER_HORIZONTAL
-            setPadding(36, 72, 36, 48)
+            setPadding(UiKit.dp(this@MainActivity, 24), UiKit.dp(this@MainActivity, 64), UiKit.dp(this@MainActivity, 24), UiKit.dp(this@MainActivity, 40))
         }
 
-        val title = TextView(this).apply {
-            text = "403: 개발자 인증 실패"
-            textSize = 26f
+        val title = UiKit.heading(this, "403: 개발자 인증 실패").apply {
             gravity = Gravity.CENTER
-            setTextColor(0xFF111827.toInt())
         }
 
-        val message = TextView(this).apply {
-            text = "저리가. 여긴 SNS를 줄이려는 개발자 전용 던전입니다. 농담이고, 진짜 개발자라면 앱을 다시 열고 예를 누르세요."
-            textSize = 16f
+        val message = UiKit.body(
+            this,
+            "저리가. 여긴 SNS를 줄이려는 개발자 전용 던전입니다. 농담이고, 진짜 개발자라면 앱을 다시 열고 예를 누르세요."
+        ).apply {
             gravity = Gravity.CENTER
-            setTextColor(0xFF475569.toInt())
-            setPadding(0, 20, 0, 28)
+            setPadding(0, UiKit.dp(this@MainActivity, 18), 0, UiKit.dp(this@MainActivity, 28))
         }
 
         root.addView(title)
         root.addView(message)
-        root.addView(button("퇴장하기") { finishAndRemoveTask() })
+        root.addView(button("퇴장하기", UiKit.ButtonTone.DANGER) { finishAndRemoveTask() })
 
-        return ScrollView(this).apply { addView(root) }
+        return UiKit.page(this, root)
     }
 
     private fun buildContent(): ScrollView {
-        val root = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(36, 48, 36, 48)
+        val root = UiKit.root(this)
+
+        val title = UiKit.title(this, "개발자지만 난 괜찮아")
+
+        val subtitle = UiKit.body(
+            this,
+            "코드를 냈으면 쉬는 시간도 떳떳하게. 지금은 Android 로컬 차단 릴리즈 후보입니다."
+        ).apply {
+            setPadding(0, UiKit.dp(this@MainActivity, 8), 0, UiKit.dp(this@MainActivity, 14))
         }
 
-        val title = TextView(this).apply {
-            text = "개발자지만 난 괜찮아"
-            textSize = 24f
-            setTextColor(0xFF111827.toInt())
-        }
+        statusText = UiKit.monoBlock(this)
 
-        val subtitle = TextView(this).apply {
-            text = "코드를 냈으면 쉬는 시간도 떳떳하게. 지금은 로컬 Android 차단 프로토타입입니다."
-            textSize = 15f
-            setTextColor(0xFF475569.toInt())
-            setPadding(0, 8, 0, 20)
-        }
+        privacyDisclosureText = UiKit.body(this)
 
-        statusText = TextView(this).apply {
-            textSize = 15f
-            setTextColor(0xFF111827.toInt())
-            setPadding(0, 0, 0, 18)
-        }
-
-        privacyDisclosureText = TextView(this).apply {
-            textSize = 13f
-            setTextColor(0xFF334155.toInt())
-            setPadding(0, 0, 0, 18)
-        }
-
-        packageInput = EditText(this).apply {
-            hint = "Package names, comma separated (ex: com.instagram.android)"
+        packageInput = UiKit.input(this, "Package names, comma separated (ex: com.instagram.android)", minLines = 2).apply {
             minLines = 2
         }
 
-        strictModeInput = CheckBox(this).apply {
-            text = "Strict mode mock flag"
-        }
+        strictModeInput = UiKit.checkbox(this, "Strict mode mock flag")
 
-        activeFromInput = EditText(this).apply {
-            hint = "Active from HH:mm (blank = 00:00)"
+        activeFromInput = UiKit.input(this, "Active from HH:mm (blank = 00:00)").apply {
             setSingleLine(true)
         }
 
-        activeUntilInput = EditText(this).apply {
-            hint = "Active until HH:mm (blank = 24:00)"
+        activeUntilInput = UiKit.input(this, "Active until HH:mm (blank = 24:00)").apply {
             setSingleLine(true)
         }
 
-        manualHolidayInput = CheckBox(this).apply {
-            text = "Treat today as holiday"
-        }
+        manualHolidayInput = UiKit.checkbox(this, "Treat today as holiday")
 
-        policySummaryText = TextView(this).apply {
-            textSize = 13f
-            setTextColor(0xFF334155.toInt())
-            setPadding(0, 20, 0, 10)
-        }
+        policySummaryText = UiKit.monoBlock(this)
 
-        questTitleInput = EditText(this).apply {
-            hint = "Daily quest title (ex: fix Android policy UI)"
+        questTitleInput = UiKit.input(this, "Daily quest title (ex: fix Android policy UI)").apply {
             minLines = 1
         }
 
-        questRequiredInput = CheckBox(this).apply {
-            text = "Required for free day"
-            isChecked = true
-        }
+        questRequiredInput = UiKit.checkbox(this, "Required for free day", checked = true)
 
-        questSummaryText = TextView(this).apply {
-            textSize = 13f
-            setTextColor(0xFF334155.toInt())
-            setPadding(0, 20, 0, 10)
-        }
+        questSummaryText = UiKit.monoBlock(this)
 
-        emergencyReasonInput = EditText(this).apply {
-            hint = "Emergency unlock reason (required)"
+        emergencyReasonInput = UiKit.input(this, "Emergency unlock reason (required)").apply {
             minLines = 1
         }
 
-        recentPackagesText = TextView(this).apply {
-            textSize = 13f
-            setTextColor(0xFF334155.toInt())
-            setPadding(0, 14, 0, 10)
-        }
+        recentPackagesText = UiKit.monoBlock(this)
 
-        dogfoodSummaryText = TextView(this).apply {
-            textSize = 13f
-            setTextColor(0xFF334155.toInt())
-            setPadding(0, 20, 0, 0)
-        }
+        dogfoodSummaryText = UiKit.monoBlock(this)
 
-        dogfoodReviewText = TextView(this).apply {
-            textSize = 13f
-            setTextColor(0xFF334155.toInt())
-            setPadding(0, 20, 0, 0)
-        }
+        dogfoodReviewText = UiKit.monoBlock(this)
 
-        eventLogText = TextView(this).apply {
-            textSize = 13f
-            setTextColor(0xFF334155.toInt())
-            setPadding(0, 20, 0, 0)
-        }
+        eventLogText = UiKit.monoBlock(this)
 
         addHeaderSection(root, title, subtitle)
         addPermissionSection(root)
@@ -266,83 +205,99 @@ class MainActivity : Activity() {
         addTargetAndCreditSection(root)
         addMonitorAndDogfoodSection(root)
 
-        return ScrollView(this).apply { addView(root) }
+        return UiKit.page(this, root)
     }
 
     private fun addHeaderSection(root: LinearLayout, title: TextView, subtitle: TextView) {
+        root.addView(UiKit.pill(this, "LOCAL RC 0.1 / SELECTED TARGETS ONLY"))
+        UiKit.addGap(root, 10)
         root.addView(title)
         root.addView(subtitle)
         root.addView(statusText)
+        UiKit.addPanelGap(root)
     }
 
     private fun addPermissionSection(root: LinearLayout) {
-        root.addView(sectionLabel("Privacy and permissions"))
-        root.addView(privacyDisclosureText)
-        root.addView(button("Open Usage Access Settings") {
+        val section = sectionPanel("Privacy and permissions", "Usage Access reads foreground app events. Overlay draws the local block screen.")
+        section.addView(privacyDisclosureText)
+        UiKit.addGap(section, 8)
+        section.addView(button("Open Usage Access Settings", UiKit.ButtonTone.PRIMARY) {
             startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
         })
-        root.addView(button("Open Overlay Permission Settings") {
+        section.addView(button("Open Overlay Permission Settings") {
             startActivity(Intent(
                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                 Uri.parse("package:$packageName")
             ))
         })
+        root.addView(section)
+        UiKit.addPanelGap(root)
     }
 
     private fun addTargetInputSection(root: LinearLayout) {
-        root.addView(packageInput)
-        root.addView(strictModeInput)
+        val section = sectionPanel("Targets", "Only package names saved here can be blocked. Settings, launchers, and this app are rejected.")
+        section.addView(packageInput)
+        section.addView(strictModeInput)
+        section.addView(recentPackagesText)
+        section.addView(button("Save blocked packages", UiKit.ButtonTone.PRIMARY) { saveTargets() })
+        section.addView(button("Add latest external package") { addLatestExternalPackage() })
+        root.addView(section)
+        UiKit.addPanelGap(root)
     }
 
     private fun addPolicySection(root: LinearLayout) {
-        root.addView(sectionLabel("Policy schedule"))
+        val section = sectionPanel("Policy schedule", "Weekdays, time window, free day, holiday, and emergency unlock are evaluated before credit.")
         weekdayInputs.clear()
         weekdayLabels.forEach { (day, label) ->
-            val checkbox = CheckBox(this).apply { text = label }
+            val checkbox = UiKit.checkbox(this, label)
             weekdayInputs[day] = checkbox
-            root.addView(checkbox)
+            section.addView(checkbox)
         }
-        root.addView(activeFromInput)
-        root.addView(activeUntilInput)
-        root.addView(manualHolidayInput)
-        root.addView(button("Save policy schedule") { savePolicy() })
-        root.addView(button("Set mock free day until midnight") { setMockFreeDay() })
-        root.addView(button("Clear mock free day") {
+        section.addView(activeFromInput)
+        section.addView(activeUntilInput)
+        section.addView(manualHolidayInput)
+        section.addView(button("Save policy schedule", UiKit.ButtonTone.PRIMARY) { savePolicy() })
+        section.addView(button("Set mock free day until midnight") { setMockFreeDay() })
+        section.addView(button("Clear mock free day", UiKit.ButtonTone.GHOST) {
             creditStore.setFreeUntil(null)
             dogfoodEventStore.record("free_day_cleared")
             renderState()
         })
-        root.addView(policySummaryText)
+        section.addView(policySummaryText)
+        root.addView(section)
+        UiKit.addPanelGap(root)
     }
 
     private fun addQuestSection(root: LinearLayout) {
-        root.addView(sectionLabel("Daily quest"))
-        root.addView(questTitleInput)
-        root.addView(questRequiredInput)
-        root.addView(button("Add daily quest plan") { addDailyQuest() })
-        root.addView(button("Complete next quest with mock proof") { completeNextQuestWithMockProof() })
-        root.addView(button("Clear today's quests") { clearDailyQuests() })
-        root.addView(questSummaryText)
+        val section = sectionPanel("Daily quest", "Quest plans do not unlock anything until mock proof completion is recorded.")
+        section.addView(questTitleInput)
+        section.addView(questRequiredInput)
+        section.addView(button("Add daily quest plan", UiKit.ButtonTone.PRIMARY) { addDailyQuest() })
+        section.addView(button("Complete next quest with mock proof") { completeNextQuestWithMockProof() })
+        section.addView(button("Clear today's quests", UiKit.ButtonTone.GHOST) { clearDailyQuests() })
+        section.addView(questSummaryText)
+        root.addView(section)
+        UiKit.addPanelGap(root)
     }
 
     private fun addEmergencySection(root: LinearLayout) {
-        root.addView(sectionLabel("Emergency unlock"))
-        root.addView(emergencyReasonInput)
-        root.addView(button("Emergency unlock 5 minutes") { startEmergencyUnlock(5) })
-        root.addView(button("Emergency unlock 15 minutes") { startEmergencyUnlock(15) })
-        root.addView(button("Emergency unlock 30 minutes") { startEmergencyUnlock(30) })
-        root.addView(button("Clear emergency unlocks") {
+        val section = sectionPanel("Emergency unlock", "Short escape hatch with reason logging. Strict mode disables the longest option.")
+        section.addView(emergencyReasonInput)
+        section.addView(button("Emergency unlock 5 minutes") { startEmergencyUnlock(5) })
+        section.addView(button("Emergency unlock 15 minutes") { startEmergencyUnlock(15) })
+        section.addView(button("Emergency unlock 30 minutes") { startEmergencyUnlock(30) })
+        section.addView(button("Clear emergency unlocks", UiKit.ButtonTone.GHOST) {
             emergencyUnlockStore.clear()
             dogfoodEventStore.record("emergency_unlocks_cleared")
             renderState()
         })
+        root.addView(section)
+        UiKit.addPanelGap(root)
     }
 
     private fun addTargetAndCreditSection(root: LinearLayout) {
-        root.addView(recentPackagesText)
-        root.addView(button("Save blocked packages") { saveTargets() })
-        root.addView(button("Add latest external package") { addLatestExternalPackage() })
-        root.addView(button("Add 5 test minutes") {
+        val section = sectionPanel("Mock credit", "Local minutes for emulator and device dogfood.")
+        section.addView(button("Add 5 test minutes", UiKit.ButtonTone.PRIMARY) {
             creditStore.addMinutes(5)
             dogfoodEventStore.recordStructured(
                 type = "credit_added",
@@ -351,7 +306,7 @@ class MainActivity : Activity() {
             )
             renderState()
         })
-        root.addView(button("Spend 1 test minute") {
+        section.addView(button("Spend 1 test minute") {
             creditStore.spendMinute()
             dogfoodEventStore.recordStructured(
                 type = "credit_spent",
@@ -360,7 +315,7 @@ class MainActivity : Activity() {
             )
             renderState()
         })
-        root.addView(button("Reset credit to 0") {
+        section.addView(button("Reset credit to 0", UiKit.ButtonTone.DANGER) {
             creditStore.resetCredit()
             dogfoodEventStore.recordStructured(
                 type = "credit_reset",
@@ -369,48 +324,47 @@ class MainActivity : Activity() {
             )
             renderState()
         })
+        root.addView(section)
+        UiKit.addPanelGap(root)
     }
 
     private fun addMonitorAndDogfoodSection(root: LinearLayout) {
-        root.addView(button("Start monitor service") {
+        val section = sectionPanel("Monitor and dogfood evidence", "Foreground service status, 14-day gate data, local export, and event log.")
+        section.addView(button("Start monitor service", UiKit.ButtonTone.PRIMARY) {
             monitorStateStore.setDesiredRunning(true)
             dogfoodEventStore.record("monitor_start_requested")
             startForegroundService(Intent(this, MonitorService::class.java))
             renderState()
         })
-        root.addView(button("Stop monitor service") {
+        section.addView(button("Stop monitor service", UiKit.ButtonTone.DANGER) {
             monitorStateStore.setDesiredRunning(false)
             monitorStateStore.clearHeartbeat()
             dogfoodEventStore.record("monitor_stop_requested")
             stopService(Intent(this, MonitorService::class.java))
             renderState()
         })
-        root.addView(button("Refresh status") { renderState() })
-        root.addView(dogfoodSummaryText)
-        root.addView(dogfoodReviewText)
-        root.addView(button("Share dogfood export") { shareDogfoodExport() })
-        root.addView(button("Clear dogfood events") {
+        section.addView(button("Refresh status") { renderState() })
+        section.addView(dogfoodSummaryText)
+        section.addView(dogfoodReviewText)
+        section.addView(button("Share dogfood export") { shareDogfoodExport() })
+        section.addView(button("Clear dogfood events", UiKit.ButtonTone.GHOST) {
             dogfoodEventStore.clear()
             renderState()
         })
-        root.addView(eventLogText)
+        section.addView(eventLogText)
+        root.addView(section)
     }
 
-    private fun button(label: String, action: () -> Unit): Button {
-        return Button(this).apply {
-            text = label
-            gravity = Gravity.CENTER
-            setOnClickListener { action() }
-        }
+    private fun button(
+        label: String,
+        tone: UiKit.ButtonTone = UiKit.ButtonTone.SECONDARY,
+        action: () -> Unit
+    ): Button {
+        return UiKit.button(this, label, tone, action)
     }
 
-    private fun sectionLabel(label: String): TextView {
-        return TextView(this).apply {
-            text = label
-            textSize = 16f
-            setTextColor(0xFF111827.toInt())
-            setPadding(0, 22, 0, 8)
-        }
+    private fun sectionPanel(title: String, subtitle: String? = null): LinearLayout {
+        return UiKit.section(this, title, subtitle)
     }
 
     private fun saveTargets() {
@@ -676,18 +630,12 @@ class MainActivity : Activity() {
         val recentPackages = recentExternalPackages()
 
         statusText.text = listOf(
-            "Usage Access: ${if (usageAccessGranted) "granted" else "missing"}",
-            "Overlay Permission: ${if (overlayGranted) "granted" else "missing"}",
-            "Notification Permission: ${if (notificationGranted) "granted" else "missing"}",
-            "Monitor desired: ${if (monitorRuntime.desiredRunning) "enabled" else "disabled"}",
-            "Monitor service: ${monitorRuntime.state.code}",
-            "Monitor heartbeat: ${PrototypeText.monitorHeartbeat(monitorRuntime)}",
-            "Current foreground: ${foregroundPackage ?: foregroundUnavailableReason()}",
-            "Remaining mock credit: ${state.remainingMinutes} minutes",
-            "Mock free until: ${state.freeUntil ?: "none"}",
-            "Blocked targets: ${state.blockedTargets.ifEmpty { listOf("none") }.joinToString(", ")}",
-            "Strict mode: ${state.strictMode}",
-            "Last updated: ${state.lastUpdatedAt}"
+            "Credit: ${state.remainingMinutes} min / ${decision.reason.code}",
+            "Monitor: ${monitorRuntime.state.code} (desired=${if (monitorRuntime.desiredRunning) "on" else "off"}, heartbeat=${PrototypeText.monitorHeartbeat(monitorRuntime)})",
+            "Permissions: usage=${shortGrant(usageAccessGranted)} overlay=${shortGrant(overlayGranted)} notify=${shortGrant(notificationGranted)}",
+            "Foreground: ${foregroundPackage ?: foregroundUnavailableReason()}",
+            "Targets: ${state.blockedTargets.ifEmpty { listOf("none") }.joinToString(", ")}",
+            "Free until: ${state.freeUntil ?: "none"} / strict=${state.strictMode}"
         ).joinToString("\n")
 
         privacyDisclosureText.text = PermissionDisclosureCopy.build(
@@ -767,6 +715,10 @@ class MainActivity : Activity() {
         return PrototypeText.foregroundUnavailableReason(
             hasUsageAccess = PermissionChecks.hasUsageAccess(this)
         )
+    }
+
+    private fun shortGrant(granted: Boolean): String {
+        return if (granted) "ok" else "missing"
     }
 
     private fun shareDogfoodExport() {

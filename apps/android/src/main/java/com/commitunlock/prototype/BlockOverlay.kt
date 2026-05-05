@@ -6,7 +6,6 @@ import android.os.Build
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
-import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 
@@ -27,31 +26,49 @@ class BlockOverlay(private val context: Context) {
         val container = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            setPadding(48, 48, 48, 48)
-            setBackgroundColor(0xF2111827.toInt())
+            setPadding(
+                UiKit.dp(context, 20),
+                UiKit.dp(context, 32),
+                UiKit.dp(context, 20),
+                UiKit.dp(context, 32)
+            )
+            setBackgroundColor(0xF20F172A.toInt())
+        }
+
+        val panel = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_HORIZONTAL
+            setPadding(
+                UiKit.dp(context, 18),
+                UiKit.dp(context, 20),
+                UiKit.dp(context, 18),
+                UiKit.dp(context, 20)
+            )
+            background = UiKit.rounded(context, 0xFF111827.toInt(), radiusDp = 8, strokeColor = 0xFF334155.toInt())
         }
 
         val title = TextView(context).apply {
             text = "No leisure credit left"
-            textSize = 30f
+            textSize = 28f
+            typeface = android.graphics.Typeface.DEFAULT_BOLD
             setTextColor(0xFFFFFFFF.toInt())
             gravity = Gravity.CENTER
+            includeFontPadding = false
         }
 
         val message = TextView(context).apply {
-            text = "This app is paused because the local policy decision is blocked."
-            textSize = 17f
+            text = "This target is paused by your local policy."
+            textSize = 16f
             setTextColor(0xFFE5E7EB.toInt())
             gravity = Gravity.CENTER
-            setPadding(0, 20, 0, 20)
+            setPadding(0, UiKit.dp(context, 14), 0, UiKit.dp(context, 14))
         }
 
-        val targetState = TextView(context).apply {
+        val targetState = UiKit.monoBlock(context).apply {
             text = "Target: $packageName\nReason: $reasonCode\nRemaining credit: 0 minutes\nStrict mode: ${if (strictMode) "on" else "off"}"
-            textSize = 15f
-            setTextColor(0xFFCBD5E1.toInt())
+            setTextColor(0xFFE2E8F0.toInt())
             gravity = Gravity.CENTER
-            setPadding(0, 0, 0, 20)
+            background = UiKit.rounded(context, 0xFF0B1220.toInt(), radiusDp = 8, strokeColor = 0xFF334155.toInt())
         }
 
         val nextAction = TextView(context).apply {
@@ -63,18 +80,11 @@ class BlockOverlay(private val context: Context) {
             textSize = 15f
             setTextColor(0xFFE2E8F0.toInt())
             gravity = Gravity.CENTER
-            setPadding(0, 0, 0, 26)
+            setPadding(0, UiKit.dp(context, 16), 0, UiKit.dp(context, 10))
         }
 
-        val openApp = Button(context).apply {
-            text = "Review in Commit Unlock"
-            setOnClickListener { onOpenApp() }
-        }
-
-        val addCredit = Button(context).apply {
-            text = "Add 5 test minutes (prototype)"
-            setOnClickListener { onAddCredit() }
-        }
+        val openApp = UiKit.button(context, "Review in Commit Unlock", UiKit.ButtonTone.PRIMARY, onOpenApp)
+        val addCredit = UiKit.button(context, "Add 5 test minutes (prototype)", UiKit.ButtonTone.SECONDARY, onAddCredit)
 
         val strictModeNotice = TextView(context).apply {
             text = "Strict mode is on. The overlay test-credit shortcut is disabled."
@@ -84,16 +94,17 @@ class BlockOverlay(private val context: Context) {
             setPadding(0, 12, 0, 0)
         }
 
-        container.addView(title)
-        container.addView(message)
-        container.addView(targetState)
-        container.addView(nextAction)
-        container.addView(openApp)
+        panel.addView(title)
+        panel.addView(message)
+        panel.addView(targetState)
+        panel.addView(nextAction)
+        panel.addView(openApp)
         if (canAddCredit) {
-            container.addView(addCredit)
+            panel.addView(addCredit)
         } else {
-            container.addView(strictModeNotice)
+            panel.addView(strictModeNotice)
         }
+        container.addView(panel)
 
         val layoutType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY

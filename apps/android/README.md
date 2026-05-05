@@ -2,6 +2,33 @@
 
 This is the first runnable Commit-to-Unlock mobile prototype. It does not connect to GitHub or the API yet.
 
+## RC 0.1 Status
+
+The current Android app is the local release-candidate demo surface. It is polished for emulator walkthroughs and private dogfood, not Play Store release.
+
+Verified on `CommitUnlockApi33` Android 13 emulator on 2026-05-05:
+
+- developer gate renders and persists acceptance
+- Usage Access, Overlay, and Notification permission states are shown in the dashboard
+- `com.android.chrome` can be saved as a selected target
+- selected target + `0` mock credit displays the blocking overlay
+- overlay shortcut can add test credit when strict mode is off
+- policy, daily quest, emergency unlock, and dogfood review screens render without layout overlap
+
+Screenshots are stored in `docs/assets/screenshots/android/`.
+
+| Flow | Screenshot |
+| --- | --- |
+| Developer gate | `01-developer-gate.png` |
+| Rejection branch | `02-rejection-screen.png` |
+| Home dashboard | `03-home-dashboard.png` |
+| Target selection | `04-targets-policy.png` |
+| Policy schedule | `05-policy-schedule.png` |
+| Daily quest | `06-daily-quest.png` |
+| Emergency and credit | `07-emergency-credit.png` |
+| Dogfood review | `08-dogfood-review.png` |
+| Blocking overlay | `09-block-overlay.png` |
+
 ## Behavior
 
 - Shows a first-launch developer gate:

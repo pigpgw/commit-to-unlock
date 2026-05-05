@@ -6,11 +6,11 @@ The project is intentionally build-first. There are no interviews, surveys, land
 
 ## Current Status
 
-Phase 1 is closed as `Android local blocker code-complete, evidence-gated`.
+Phase 1 is closed as `Android local blocker RC 0.1, evidence-gated`.
 
 That means the runnable prototype, policy logic, dogfood logging, analyzer, design guardrails, and CI baseline are complete enough for local dogfood. It does not mean the product is validated. Real-device smoke evidence and a 14-day dogfood data set are still required before GitHub scoring, sync, or monetization work resumes.
 
-The current runnable prototype is Android-only and local-only.
+The current runnable prototype is Android-only and local-only. The release-candidate polish pass tightened the Android visual system, captured emulator screenshots, and kept the product promise narrow: selected distracting apps can be blocked by local credit and policy state. It still is not a public paid release.
 
 It can:
 
@@ -40,6 +40,54 @@ It does not yet:
 - prevent uninstall
 - handle payments or money stakes
 
+## Android RC 0.1 Screenshots
+
+Captured on `CommitUnlockApi33` Android emulator on 2026-05-05. These are real app screenshots, not mocked marketing frames.
+
+| Developer gate | Rejection branch |
+| --- | --- |
+| ![Developer gate asking if the user is a developer](docs/assets/screenshots/android/01-developer-gate.png) | ![Playful rejection screen for non-developer entry](docs/assets/screenshots/android/02-rejection-screen.png) |
+
+| Home dashboard | Target selection |
+| --- | --- |
+| ![Home dashboard showing local credit, permissions, and policy status](docs/assets/screenshots/android/03-home-dashboard.png) | ![Target package entry with Chrome saved as a selected target](docs/assets/screenshots/android/04-targets-policy.png) |
+
+| Policy schedule | Daily quest |
+| --- | --- |
+| ![Policy schedule with weekday checkboxes and time window fields](docs/assets/screenshots/android/05-policy-schedule.png) | ![Daily quest section with mock proof controls](docs/assets/screenshots/android/06-daily-quest.png) |
+
+| Emergency and credit | Dogfood review |
+| --- | --- |
+| ![Emergency unlock and mock credit controls](docs/assets/screenshots/android/07-emergency-credit.png) | ![Monitor and dogfood evidence section with gate counters](docs/assets/screenshots/android/08-dogfood-review.png) |
+
+| Blocking overlay |
+| --- |
+| ![Overlay blocking Chrome because local leisure credit is zero](docs/assets/screenshots/android/09-block-overlay.png) |
+
+## Release Candidate Notes
+
+RC 0.1 is suitable for local demo and sales discovery, not store distribution.
+
+Sales one-liner:
+
+> 코드를 냈으면, 쉬는 시간도 떳떳하게.
+
+Short English positioning:
+
+> Verified developer work becomes leisure credit for selected distracting apps.
+
+Current demo script:
+
+1. Launch the Android app and answer the developer gate.
+2. Show that only selected package names can be blocked.
+3. Save `com.android.chrome`, reset credit to `0`, and start the monitor.
+4. Open Chrome and show the blocking overlay.
+5. Add `5` test minutes and show access is allowed while credit remains.
+6. Show policy exceptions: weekdays, time window, manual free day, daily quest mock proof, and emergency unlock.
+7. Show dogfood review and TSV export path for validation evidence.
+
+Do not sell or describe RC 0.1 as whole-phone lock, uninstall prevention, parent control, school MDM, GitHub scoring, or AI code-quality judgment.
+
 ## Product Direction
 
 The product should not compete as a generic screen-time blocker. The recommended position is:
@@ -56,6 +104,12 @@ Core principles:
 - Privacy by default.
 - No shame copy.
 - Policy-compliant control.
+
+Design and market references used for this release-candidate pass:
+
+- [Google Play preview asset guidance](https://support.google.com/googleplay/android-developer/answer/9866151): screenshots should show real app experience, avoid noisy extra text, and keep assets current.
+- [Material Design buttons](https://m3.material.io/components/buttons/overview) and [cards](https://m3.material.io/components/cards/overview): the Android UI uses clear action hierarchy, restrained panels, and 8dp radii.
+- [Opal pricing](https://opalapp.com/pricing), [Freedom pricing](https://freedom.to/premium), [ScreenZen](https://screenzen.co/), and [one sec platforms](https://one-sec.app/browser-extension): generic blockers already compete on strict mode, schedules, free plans, and cross-device support, so this product stays focused on developer proof and selected-app credit.
 
 Read these docs in order before changing product direction or implementation priority:
 

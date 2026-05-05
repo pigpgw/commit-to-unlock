@@ -1,5 +1,5 @@
 <resources>
-    <color name="brand_primary">#0F766E</color>
+    <color name="brand_primary">#0969DA</color>
     <color name="brand_dark">#111827</color>
-    <color name="surface">#F8FAFC</color>
+    <color name="surface">#F6F8FA</color>
 </resources>

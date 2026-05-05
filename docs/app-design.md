@@ -1,8 +1,8 @@
 # Commit-to-Unlock App Design
 
-문서 상태: v0.7
+문서 상태: v0.8
 역할: 제품/기술 통합 설계 기준 문서
-현재 최우선 구현: Android dogfood 데이터 수집과 Gate A/B/C 판단
+현재 최우선 구현: Android RC 0.1 실기기 dogfood와 Gate A/B/C/D 판단
 
 현재 실행 순서는 [mvp-execution-plan.md](mvp-execution-plan.md)를 우선한다. 신규 기능의 기획/보안/개인정보/platform gate는 [product-security-hardening-plan.md](product-security-hardening-plan.md)를 따른다. 경쟁 서비스 기준의 차별화와 paid moat는 [competitive-service-review.md](competitive-service-review.md)를 따른다. 상세 결정 기록은 [decision-log.md](decision-log.md)를 따른다. 보안/로직 점검은 [security-and-logic-review.md](security-and-logic-review.md)를 따른다. GitHub runtime 진입 기준은 [github-sprint4-entry.md](github-sprint4-entry.md)를 따른다. 차단 범위와 계정/탈퇴 UX는 [control-account-design.md](control-account-design.md)를 따른다. proof/quest/요일/휴일/override 정책은 [proof-policy-mvp.md](proof-policy-mvp.md)를 따른다.
 
@@ -74,11 +74,20 @@ Commit-to-Unlock은 “개발 활동을 했다고 직접 체크하면 앱을 열
 | monospace | package, repo, reason code, PR ref |
 | 피해야 할 테마 | neon hacker, one-note purple gradient, beige wellness |
 
+Android RC 0.1 visual implementation:
+
+- native Android view-only UI를 유지한다. Compose나 외부 디자인 라이브러리는 MVP 안정성/빌드 범위를 늘리므로 아직 추가하지 않는다.
+- `UiKit.kt`를 단일 visual helper로 둔다. 색상, 8dp panel/button radius, typography, monospace blocks, button tone은 여기서만 새로 만든다.
+- Home은 marketing hero가 아니라 developer utility dashboard다. 상태/권한/타깃/정책/퀘스트/dogfood를 section 단위로 보여준다.
+- Playful copy는 Developer Gate와 Block Overlay에만 둔다. 권한/개인정보/정책/로그 문구는 짧고 정확하게 유지한다.
+- Google Play preview asset guidance에 맞춰 README screenshots는 실제 emulator UI를 사용하고, device frame이나 과장 문구를 덧씌우지 않는다.
+- Opal/Freedom/ScreenZen/one sec 조사는 가격/차단 UX 기준으로만 사용한다. 우리 UI는 wellness blocker처럼 보이지 않게 proof/ledger/policy reason code를 더 강하게 노출한다.
+
 ## 2. Product UX
 
 MVP의 사용자는 개인 개발자다. 학교/부모/MDM, 금전 스테이크, 리더보드, 부트캠프 관리자는 뒤로 미룬다.
 
-핵심 화면은 여섯 개다.
+핵심 화면은 여덟 개다.
 
 | 화면 | 목적 | Sprint |
 | --- | --- | --- |
