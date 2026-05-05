@@ -88,7 +88,7 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 | Android app | runnable local prototype + target guardrails | 현재 유일한 product surface |
 | Android dogfood | runbook/log/export/analyzer/in-app review 있음 | 14일 실기기 데이터 필요 |
 | Android emulator smoke | Android 13 AVD에서 0분 차단, +5분 허용, 60초 자동 차감 확인 | 실기기 smoke 전 단계 통과 |
-| Android UI | 긴 화면을 section helper와 pure text/time helper로 분리함 | 실기기 dogfood fix만 추가 |
+| Android UI | RC 0.1 visual helper, section UI, emulator screenshot evidence 추가 | 실기기 dogfood fix만 추가 |
 | Android monitor state | desired state와 heartbeat 기반 runtime state 분리 | force-stop stale 표시 가능 |
 | Shared policy | TS canonical + Android mirror + golden fixtures | 정책 drift 방지 기준 확보 |
 | Scoring package | pure rules scaffold | 유지. runtime 연결 금지 |
@@ -108,6 +108,7 @@ Android 실기기에서 selected app blocking이 실제로 쓸 만한지 검증�
 - monitor desired state와 heartbeat runtime state가 분리됐다.
 - active docs가 Android-first MVP와 GitHub-deferred 전략으로 정리됐다.
 - CI와 로컬 테스트 기준이 정해졌다.
+- RC 0.1 emulator screenshots are captured under `docs/assets/screenshots/android/`.
 
 완료:
 
