@@ -64,6 +64,8 @@ Screenshots are stored in `docs/assets/screenshots/android/`.
 - Logs `overlay_show_failed` if Android rejects the blocking overlay after a target match, instead of crashing the monitor.
 - Shows recent foreground packages from UsageStats so a target can be added without installed-app scanning.
 - Shows monitor desired state, runtime state, and heartbeat age separately so a force-stopped service is not reported as healthy.
+- Uses a 1s monitor cadence only when permissions, targets, and an interactive device make enforcement possible; otherwise backs off to 5s.
+- Writes monitor heartbeat evidence at most every 5s to reduce repeated local storage writes.
 - Hides the overlay test-credit shortcut when strict mode is enabled.
 - Stores a structured dogfood event log for the last 1,000 local events and keeps a local TSV export file for `adb` collection.
 - Does not use AccessibilityService.

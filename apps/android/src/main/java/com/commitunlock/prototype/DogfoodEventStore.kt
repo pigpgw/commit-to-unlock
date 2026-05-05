@@ -90,8 +90,12 @@ class DogfoodEventStore internal constructor(
     }
 
     fun summary(now: Instant = Instant.now()): DogfoodSummary {
+        return summary(read(), now)
+    }
+
+    fun summary(events: List<DogfoodEvent>, now: Instant = Instant.now()): DogfoodSummary {
         val since = now.minus(Duration.ofDays(SUMMARY_DAYS))
-        val recent = read().filter { it.timestamp >= since }
+        val recent = events.filter { it.timestamp >= since }
         val zoneId = ZoneId.systemDefault()
         val enabledDays = recent
             .filter { it.type == "monitor_started" || it.type == "monitor_heartbeat" }

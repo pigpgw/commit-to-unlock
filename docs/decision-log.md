@@ -62,6 +62,7 @@
 | D-038 | 남은 작업 계획은 새 문서가 아니라 `mvp-execution-plan.md`에 유지한다 | 문서가 다시 분산되면 실행 순서가 흔들린다. 부족한 이유는 `mvp-gap-analysis.md`, 실제 PR 순서는 `mvp-execution-plan.md`, 변경 불가 결정은 이 문서에 둔다. | Accepted |
 | D-039 | Monitor 상태 표시는 저장된 bool이 아니라 heartbeat 기반 runtime evidence를 사용한다 | force-stop/reinstall/reboot에서 저장값만 보면 UI가 실제로 죽은 service를 running으로 표시할 수 있다. 사용자가 켜고 싶어 하는 상태와 실제 heartbeat 상태를 분리한다. | Accepted |
 | D-040 | 1차 마무리는 code/test/docs closeout이지 product evidence complete가 아니다 | Android local blocker는 로컬 실행 가능한 MVP로 닫는다. 단, 실기기 smoke와 14일 dogfood 데이터 없이는 GitHub runtime, sync, monetization으로 넘어가지 않는다. | Accepted |
+| D-041 | Android monitor는 enforce 가능한 상태에서만 1초 cadence를 유지한다 | 권한 누락, target 없음, 화면 비활성 상태에서도 1초 polling/heartbeat/storage 접근을 유지하면 배터리와 로컬 I/O를 낭비한다. 차단 응답성이 필요한 상태는 1초, degraded 상태는 5초로 둔다. | Accepted |
 
 ## Revisit Triggers
 
