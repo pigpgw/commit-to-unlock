@@ -6,6 +6,10 @@ The project is intentionally build-first. There are no interviews, surveys, land
 
 ## Current Status
 
+Phase 1 is closed as `Android local blocker code-complete, evidence-gated`.
+
+That means the runnable prototype, policy logic, dogfood logging, analyzer, design guardrails, and CI baseline are complete enough for local dogfood. It does not mean the product is validated. Real-device smoke evidence and a 14-day dogfood data set are still required before GitHub scoring, sync, or monetization work resumes.
+
 The current runnable prototype is Android-only and local-only.
 
 It can:
@@ -22,6 +26,7 @@ It can:
 - show an in-app dogfood review with Data Quality and Gate A/B/C/D status
 - show a recent dogfood event log in the app
 - export structured dogfood events as TSV through Android share sheet or `adb`
+- distinguish desired monitor state from heartbeat-backed runtime state
 
 The Android emulator smoke flow has been verified on Android 13: selected Chrome target blocks at `0` mock minutes, unlocks after adding `5` test minutes, and spends `1` minute after `60` seconds of foreground use. A physical-device smoke pass is still required before treating MVP-A as evidence-complete.
 
@@ -175,7 +180,7 @@ pnpm typecheck
 ./gradlew :apps:android:assembleDebug :apps:android:lintDebug
 ```
 
-## Next Recommended Work
+## After Phase 1
 
 Current recommended sequence is maintained in [MVP execution plan](docs/mvp-execution-plan.md#10-remaining-work-plan). Short version:
 
