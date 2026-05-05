@@ -614,13 +614,13 @@ class MainActivity : Activity() {
         val policy = policyStore.read()
         val activeUnlocks = emergencyUnlockStore.active()
         val quests = dailyQuestStore.read(policy.timezone)
-        val foregroundPackage = foregroundPackageOrNull()
         val dogfoodEvents = dogfoodEventStore.read()
-        val dogfoodSummary = dogfoodEventStore.summary()
-        val dogfoodReview = DogfoodReviewEngine.analyze(dogfoodEvents, dogfoodSummary)
         val usageAccessGranted = PermissionChecks.hasUsageAccess(this)
         val overlayGranted = PermissionChecks.canDrawOverlays(this)
         val notificationGranted = PermissionChecks.hasNotificationPermission(this)
+        val foregroundPackage = foregroundPackageOrNull(usageAccessGranted)
+        val dogfoodSummary = dogfoodEventStore.summary(dogfoodEvents)
+        val dogfoodReview = DogfoodReviewEngine.analyze(dogfoodEvents, dogfoodSummary)
         val monitorRuntime = monitorStateStore.runtimeStatus(
             serviceRunning = MonitorServiceInspector.isMonitorServiceRunning(this)
         )
@@ -643,7 +643,7 @@ class MainActivity : Activity() {
         activeFromInput.setText(policy.activeFrom.orEmpty())
         activeUntilInput.setText(policy.activeUntil.orEmpty())
         manualHolidayInput.isChecked = policy.isManualHolidayActive()
-        val recentPackages = recentExternalPackages()
+        val recentPackages = recentExternalPackages(usageAccessGranted)
 
         overviewText.text = buildOverviewCopy(
             state = state,
@@ -659,7 +659,7 @@ class MainActivity : Activity() {
             "Credit: ${state.remainingMinutes} min / ${decision.reason.code}",
             "Monitor: ${monitorRuntime.state.code} (desired=${if (monitorRuntime.desiredRunning) "on" else "off"}, heartbeat=${PrototypeText.monitorHeartbeat(monitorRuntime)})",
             "Permissions: usage=${shortGrant(usageAccessGranted)} overlay=${shortGrant(overlayGranted)} notify=${shortGrant(notificationGranted)}",
-            "Foreground: ${foregroundPackage ?: foregroundUnavailableReason()}",
+            "Foreground: ${foregroundPackage ?: foregroundUnavailableReason(usageAccessGranted)}",
             "Targets: ${state.blockedTargets.ifEmpty { listOf("none") }.joinToString(", ")}",
             "Free until: ${state.freeUntil ?: "none"} / strict=${state.strictMode}"
         ).joinToString("\n")
@@ -727,20 +727,20 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun recentExternalPackages(): List<String> {
-        if (!PermissionChecks.hasUsageAccess(this)) return emptyList()
+    private fun recentExternalPackages(hasUsageAccess: Boolean): List<String> {
+        if (!hasUsageAccess) return emptyList()
         return foregroundReader.recentForegroundPackages()
             .filter { TargetGuardrails.normalizeTargets(listOf(it), packageName).accepted.isNotEmpty() }
     }
 
-    private fun foregroundPackageOrNull(): String? {
-        if (!PermissionChecks.hasUsageAccess(this)) return null
+    private fun foregroundPackageOrNull(hasUsageAccess: Boolean): String? {
+        if (!hasUsageAccess) return null
         return foregroundReader.currentForegroundPackage()
     }
 
-    private fun foregroundUnavailableReason(): String {
+    private fun foregroundUnavailableReason(hasUsageAccess: Boolean): String {
         return PrototypeText.foregroundUnavailableReason(
-            hasUsageAccess = PermissionChecks.hasUsageAccess(this)
+            hasUsageAccess = hasUsageAccess
         )
     }
 

@@ -33,11 +33,13 @@ class MonitorService : Service() {
     private var activeSpendPackage: String? = null
     private var lastSpendTickMs: Long? = null
     private var spendAccumulatorMs: Long = 0L
+    private var lastHeartbeatWriteMs: Long = 0L
+    private var lastPermissionMissingKey: String? = null
+    private var lastTargetMatchedKey: String? = null
 
     private val pollRunnable = object : Runnable {
         override fun run() {
-            poll()
-            handler.postDelayed(this, POLL_MS)
+            handler.postDelayed(this, poll())
         }
     }
 
@@ -53,7 +55,7 @@ class MonitorService : Service() {
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, notification("Monitoring selected apps"))
         monitorStateStore.setDesiredRunning(true)
-        monitorStateStore.recordHeartbeat()
+        recordHeartbeat(force = true)
         dogfoodEventStore.record("monitor_started")
         handler.post(pollRunnable)
     }
@@ -68,24 +70,64 @@ class MonitorService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    private fun poll() {
+    private fun poll(): Long {
         recordHeartbeat()
 
-        if (!PermissionChecks.hasUsageAccess(this)) {
-            dogfoodEventStore.record("permission_missing", "usage_access")
+        val usageAccessGranted = PermissionChecks.hasUsageAccess(this)
+        if (!usageAccessGranted) {
+            recordPermissionMissing("usage_access")
             stopSpendSession("usage_access_missing")
             hideOverlay("usage_access_missing")
-            return
+            return MonitorPollCadence.nextDelayMillis(
+                permissionsReady = false,
+                hasTargets = true,
+                deviceInteractive = true
+            )
         }
 
-        if (!PermissionChecks.canDrawOverlays(this)) {
-            dogfoodEventStore.record("permission_missing", "overlay")
+        val overlayGranted = PermissionChecks.canDrawOverlays(this)
+        if (!overlayGranted) {
+            recordPermissionMissing("overlay")
             stopSpendSession("overlay_permission_missing")
             hideOverlay("overlay_permission_missing")
-            return
+            return MonitorPollCadence.nextDelayMillis(
+                permissionsReady = false,
+                hasTargets = true,
+                deviceInteractive = true
+            )
         }
+        lastPermissionMissingKey = null
 
         var state = creditStore.read()
+        if (state.blockedTargets.isEmpty()) {
+            stopSpendSession(
+                reason = "no_targets",
+                clearAccumulator = state.remainingMinutes <= 0
+            )
+            hideOverlay("no_targets")
+            lastTargetMatchedKey = null
+            return MonitorPollCadence.nextDelayMillis(
+                permissionsReady = true,
+                hasTargets = false,
+                deviceInteractive = true
+            )
+        }
+
+        val deviceInteractive = isDeviceInteractive()
+        if (!deviceInteractive) {
+            stopSpendSession(
+                reason = "device_not_interactive",
+                clearAccumulator = state.remainingMinutes <= 0
+            )
+            hideOverlay("device_not_interactive")
+            lastTargetMatchedKey = null
+            return MonitorPollCadence.nextDelayMillis(
+                permissionsReady = true,
+                hasTargets = true,
+                deviceInteractive = false
+            )
+        }
+
         val policyState = policyStore.read()
         val activeUnlocks = emergencyUnlockStore.active()
         val rawForegroundPackage = foregroundReader.currentForegroundPackage()
@@ -95,7 +137,6 @@ class MonitorService : Service() {
             showingBlockedPackage = showingBlockedPackage,
             lastResolvedPackage = lastResolvedForegroundPackage
         )
-        val deviceInteractive = isDeviceInteractive()
         lastResolvedForegroundPackage = foregroundPackage
 
         if (foregroundPackage != null && foregroundPackage != lastForegroundPackage) {
@@ -104,15 +145,6 @@ class MonitorService : Service() {
                 type = "foreground_changed",
                 target = foregroundPackage
             )
-        }
-
-        if (!deviceInteractive) {
-            stopSpendSession(
-                reason = "device_not_interactive",
-                clearAccumulator = state.remainingMinutes <= 0
-            )
-            hideOverlay("device_not_interactive")
-            return
         }
 
         var decision = evaluatePolicy(foregroundPackage, state, policyState, activeUnlocks)
@@ -130,26 +162,47 @@ class MonitorService : Service() {
         }
 
         if (!decision.allowed) {
-            val blockedPackage = decision.matchedTarget ?: foregroundPackage ?: return
-            dogfoodEventStore.recordStructured(
-                type = "target_matched",
-                target = blockedPackage,
-                policyReason = decision.reason.code,
-                creditRemaining = state.remainingMinutes
-            )
-            showOverlay(blockedPackage, state.strictMode, decision.reason)
+            val blockedPackage = decision.matchedTarget ?: foregroundPackage
+            if (blockedPackage == null) {
+                hideOverlay("missing_target")
+                return MonitorPollCadence.nextDelayMillis(
+                    permissionsReady = true,
+                    hasTargets = state.blockedTargets.isNotEmpty(),
+                    deviceInteractive = true
+                )
+            }
+            recordTargetMatched(blockedPackage, decision.reason, state.remainingMinutes)
+            showOverlay(blockedPackage, state.strictMode, decision.reason, state.remainingMinutes)
         } else {
+            lastTargetMatchedKey = null
             hideOverlay(decision.reason.code)
         }
+
+        return MonitorPollCadence.nextDelayMillis(
+            permissionsReady = true,
+            hasTargets = state.blockedTargets.isNotEmpty(),
+            deviceInteractive = true
+        )
     }
 
-    private fun recordHeartbeat() {
-        monitorStateStore.recordHeartbeat()
+    private fun recordHeartbeat(force: Boolean = false) {
+        val nowMs = System.currentTimeMillis()
+        if (!force && nowMs - lastHeartbeatWriteMs < HEARTBEAT_WRITE_INTERVAL_MS) return
+
+        lastHeartbeatWriteMs = nowMs
+        monitorStateStore.recordHeartbeat(nowMs)
         val today = LocalDate.now().toString()
         if (lastHeartbeatDay == today) return
 
         lastHeartbeatDay = today
         dogfoodEventStore.record("monitor_heartbeat", "date=$today")
+    }
+
+    private fun recordPermissionMissing(permissionKey: String) {
+        if (permissionKey == lastPermissionMissingKey) return
+
+        lastPermissionMissingKey = permissionKey
+        dogfoodEventStore.record("permission_missing", permissionKey)
     }
 
     private fun accrueSpend(foregroundPackage: String, state: CreditState): CreditState {
@@ -252,10 +305,28 @@ class MonitorService : Service() {
         )
     }
 
+    private fun recordTargetMatched(
+        blockedPackage: String,
+        reason: PolicyDecisionReason,
+        creditRemaining: Int
+    ) {
+        val key = "$blockedPackage|${reason.code}|$creditRemaining"
+        if (key == lastTargetMatchedKey) return
+
+        lastTargetMatchedKey = key
+        dogfoodEventStore.recordStructured(
+            type = "target_matched",
+            target = blockedPackage,
+            policyReason = reason.code,
+            creditRemaining = creditRemaining
+        )
+    }
+
     private fun showOverlay(
         foregroundPackage: String,
         strictMode: Boolean,
-        reason: PolicyDecisionReason
+        reason: PolicyDecisionReason,
+        creditRemaining: Int
     ) {
         if (
             showingBlockedPackage == foregroundPackage &&
@@ -263,7 +334,6 @@ class MonitorService : Service() {
             showingReason == reason
         ) return
 
-        val creditRemaining = creditStore.read().remainingMinutes
         dogfoodEventStore.recordStructured(
             type = "blocked_attempt",
             target = foregroundPackage,
@@ -374,7 +444,7 @@ class MonitorService : Service() {
     companion object {
         private const val CHANNEL_ID = "commit_unlock_monitor"
         private const val NOTIFICATION_ID = 1001
-        private const val POLL_MS = 1_000L
+        private const val HEARTBEAT_WRITE_INTERVAL_MS = 5_000L
         private const val CREDIT_SPEND_INTERVAL_MS = 60_000L
     }
 }
