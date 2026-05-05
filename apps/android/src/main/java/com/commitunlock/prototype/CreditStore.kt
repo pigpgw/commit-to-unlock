@@ -14,7 +14,9 @@ class CreditStore(context: Context) {
         val targets = TargetGuardrails.normalizeTargets(rawTargets, ownPackage).accepted
 
         return CreditState(
-            remainingMinutes = prefs.getInt(KEY_REMAINING_MINUTES, 0),
+            remainingMinutes = LocalCreditPolicy.normalizeRemainingMinutes(
+                prefs.getInt(KEY_REMAINING_MINUTES, 0)
+            ),
             blockedTargets = targets,
             freeUntil = prefs.getString(KEY_FREE_UNTIL, null),
             strictMode = prefs.getBoolean(KEY_STRICT_MODE, false),
@@ -26,7 +28,7 @@ class CreditStore(context: Context) {
     fun save(state: CreditState) {
         val targets = TargetGuardrails.normalizeTargets(state.blockedTargets, ownPackage).accepted
         prefs.edit()
-            .putInt(KEY_REMAINING_MINUTES, state.remainingMinutes.coerceAtLeast(0))
+            .putInt(KEY_REMAINING_MINUTES, LocalCreditPolicy.normalizeRemainingMinutes(state.remainingMinutes))
             .putString(KEY_TARGETS, targets.joinToString(","))
             .putString(KEY_FREE_UNTIL, state.freeUntil)
             .putBoolean(KEY_STRICT_MODE, state.strictMode)
@@ -37,7 +39,7 @@ class CreditStore(context: Context) {
     fun addMinutes(minutes: Int) {
         val current = read()
         save(current.copy(
-            remainingMinutes = (current.remainingMinutes + minutes).coerceAtLeast(0),
+            remainingMinutes = LocalCreditPolicy.addMinutes(current.remainingMinutes, minutes),
             lastUpdatedAt = Instant.now().toString()
         ))
     }
@@ -45,7 +47,7 @@ class CreditStore(context: Context) {
     fun spendMinute() {
         val current = read()
         save(current.copy(
-            remainingMinutes = (current.remainingMinutes - 1).coerceAtLeast(0),
+            remainingMinutes = LocalCreditPolicy.spendMinute(current.remainingMinutes),
             lastUpdatedAt = Instant.now().toString()
         ))
     }

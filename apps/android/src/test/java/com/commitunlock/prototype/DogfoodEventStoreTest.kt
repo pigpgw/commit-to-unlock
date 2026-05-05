@@ -137,6 +137,27 @@ class DogfoodEventStoreTest {
 
         assertEquals(1, summary.overlayFailures)
     }
+
+    @Test
+    fun redactedExportHidesTargetsAndSensitiveDetails() {
+        val storage = FakeDogfoodEventStorage()
+        val clock = StepClock(Instant.parse("2026-05-04T12:00:00Z"))
+        val store = DogfoodEventStore(storage, clock::now)
+
+        store.recordStructured(
+            type = "daily_quest_added",
+            target = "com.video.app",
+            policyReason = "credit_empty",
+            creditRemaining = 0,
+            detail = "id=quest-1 required=true title=fix secret repo issue"
+        )
+
+        val row = store.exportTsv(redactSensitive = true).lines()[1].split("\t")
+
+        assertEquals("<target:redacted>", row[2])
+        assertEquals("credit_empty", row[3])
+        assertEquals("id=quest-1 required=true title=<redacted>", row[5])
+    }
 }
 
 private class FakeDogfoodEventStorage(initialRaw: List<String> = emptyList()) : DogfoodEventStorage {

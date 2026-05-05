@@ -24,7 +24,7 @@ class PermissionDisclosureCopyTest {
         assertContains(copy, "quest titles")
         assertContains(copy, "emergency reasons")
         assertContains(copy, "sharing sends TSV only when you choose it")
-        assertContains(copy, "clearing removes local events")
+        assertContains(copy, "Clearing removes local events")
         assertContains(copy, "not tamper-proof")
     }
 

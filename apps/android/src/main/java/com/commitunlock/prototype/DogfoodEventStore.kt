@@ -123,11 +123,11 @@ class DogfoodEventStore internal constructor(
         )
     }
 
-    fun exportTsv(): String {
+    fun exportTsv(redactSensitive: Boolean = false): String {
         val header = EXPORT_HEADER
         val rows = read()
             .sortedBy { it.timestamp }
-            .joinToString("\n") { serialize(it) }
+            .joinToString("\n") { serialize(it, redactSensitive) }
         return listOf(header, rows)
             .filter { it.isNotEmpty() }
             .joinToString("\n")
@@ -176,7 +176,7 @@ class DogfoodEventStore internal constructor(
         val rows = rawEvents
             .mapNotNull { parse(it) }
             .sortedBy { it.timestamp }
-            .joinToString("\n") { serialize(it) }
+            .joinToString("\n") { serialize(it, redactSensitive = false) }
         val export = listOf(EXPORT_HEADER, rows)
             .filter { it.isNotEmpty() }
             .joinToString("\n")
@@ -191,14 +191,25 @@ class DogfoodEventStore internal constructor(
             .trim()
     }
 
-    private fun serialize(event: DogfoodEvent): String {
+    private fun serialize(event: DogfoodEvent, redactSensitive: Boolean): String {
+        val target = if (redactSensitive) {
+            DogfoodExportRedactor.target(event.target)
+        } else {
+            event.target.orEmpty()
+        }
+        val detail = if (redactSensitive) {
+            DogfoodExportRedactor.detail(event.detail)
+        } else {
+            event.detail
+        }
+
         return listOf(
             event.timestamp.toString(),
             sanitize(event.type),
-            sanitize(event.target.orEmpty()),
+            sanitize(target),
             sanitize(event.policyReason.orEmpty()),
             event.creditRemaining?.coerceAtLeast(0)?.toString().orEmpty(),
-            sanitize(event.detail)
+            sanitize(detail)
         ).joinToString("\t")
     }
 

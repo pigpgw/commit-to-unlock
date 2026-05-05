@@ -68,7 +68,6 @@ class MainActivity : Activity() {
     }
 
     private fun showMainPrototype() {
-        requestNotificationPermission()
         setContentView(buildContent())
         renderState()
     }
@@ -247,6 +246,9 @@ class MainActivity : Activity() {
                 Uri.parse("package:$packageName")
             ))
         })
+        section.addView(button("Request Notification Permission") {
+            requestNotificationPermission()
+        })
         root.addView(section)
         UiKit.addPanelGap(root)
     }
@@ -315,7 +317,10 @@ class MainActivity : Activity() {
     }
 
     private fun addTargetAndCreditSection(root: LinearLayout) {
-        val section = sectionPanel("Mock credit", "Local minutes for emulator and device dogfood.")
+        val section = sectionPanel(
+            "Mock credit",
+            "Local minutes for emulator and device dogfood. Capped at ${LocalCreditPolicy.MAX_LOCAL_TEST_MINUTES} minutes."
+        )
         section.addView(button("Add 5 test minutes", UiKit.ButtonTone.PRIMARY) {
             creditStore.addMinutes(5)
             dogfoodEventStore.recordStructured(
@@ -365,6 +370,7 @@ class MainActivity : Activity() {
         section.addView(dogfoodSummaryText)
         section.addView(dogfoodReviewText)
         section.addView(button("Share dogfood export") { shareDogfoodExport() })
+        section.addView(button("Share redacted dogfood export") { shareDogfoodExport(redactSensitive = true) })
         section.addView(button("Clear dogfood events", UiKit.ButtonTone.GHOST) {
             dogfoodEventStore.clear()
             renderState()
@@ -919,19 +925,22 @@ class MainActivity : Activity() {
         return if (granted) "ok" else "missing"
     }
 
-    private fun shareDogfoodExport() {
-        val export = dogfoodEventStore.exportTsv()
+    private fun shareDogfoodExport(redactSensitive: Boolean = false) {
+        val export = dogfoodEventStore.exportTsv(redactSensitive = redactSensitive)
+        val label = if (redactSensitive) "redacted " else ""
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/tab-separated-values"
-            putExtra(Intent.EXTRA_SUBJECT, "Commit Unlock dogfood export")
+            putExtra(Intent.EXTRA_SUBJECT, "Commit Unlock ${label}dogfood export")
             putExtra(Intent.EXTRA_TEXT, export)
         }
-        startActivity(Intent.createChooser(intent, "Share dogfood export"))
+        startActivity(Intent.createChooser(intent, "Share ${label}dogfood export"))
     }
 
     private fun requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 10)
+        } else {
+            Toast.makeText(this, "Notifications do not need runtime approval on this Android version.", Toast.LENGTH_SHORT).show()
         }
     }
 
