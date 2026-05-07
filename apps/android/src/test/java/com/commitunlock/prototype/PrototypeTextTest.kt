@@ -47,9 +47,9 @@ class PrototypeTextTest {
 
         val summary = PrototypeText.questSummary(quests, state)
 
-        assertContains(summary, "Required completed: 1 / 1")
-        assertContains(summary, "Free day eligible: true")
-        assertContains(summary, "- [completed] Refactor policy UI (required, mock)")
+        assertContains(summary, "Required: 1 / 1 completed")
+        assertContains(summary, "Free day: ready")
+        assertContains(summary, "[completed] Refactor policy UI (required, mock)")
     }
 
     @Test

@@ -21,17 +21,17 @@ object PrototypeText {
         }
 
         return buildString {
-            append("Daily quest summary\n")
-            append("Required completed: $completedRequiredCount / $requiredCount\n")
-            append("Free day eligible: ${DailyQuestPolicy.shouldGrantFreeDay(quests)}\n")
-            append("Current free until: ${state.freeUntil ?: "none"}\n")
+            append("Proof quest status\n")
+            append("Required: $completedRequiredCount / $requiredCount completed\n")
+            append("Free day: ${if (DailyQuestPolicy.shouldGrantFreeDay(quests)) "ready" else "locked"}\n")
+            append("Free until: ${state.freeUntil ?: "none"}\n")
             if (quests.isEmpty()) {
-                append("No quests planned today")
+                append("No quest planned today")
             } else {
                 append(quests.joinToString("\n") { quest ->
                     val requiredLabel = if (quest.required) "required" else "optional"
                     val proofLabel = quest.proofType ?: "no-proof"
-                    "- [${quest.status.code}] ${quest.title} ($requiredLabel, $proofLabel)"
+                    "[${quest.status.code}] ${quest.title} ($requiredLabel, $proofLabel)"
                 })
             }
         }

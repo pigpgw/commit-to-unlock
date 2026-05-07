@@ -29,6 +29,10 @@ class MainActivity : Activity() {
     private lateinit var foregroundReader: ForegroundAppReader
     private lateinit var monitorStateStore: MonitorStateStore
     private lateinit var policyStore: PolicyStore
+    private lateinit var heroValueText: TextView
+    private lateinit var heroMetaText: TextView
+    private lateinit var focusLoopText: TextView
+    private lateinit var nextActionButton: Button
     private lateinit var overviewText: TextView
     private lateinit var setupChecklistText: TextView
     private lateinit var statusText: TextView
@@ -163,8 +167,17 @@ class MainActivity : Activity() {
             setPadding(0, UiKit.dp(this@MainActivity, 8), 0, UiKit.dp(this@MainActivity, 14))
         }
 
-        overviewText = UiKit.noticeBlock(this)
-        setupChecklistText = UiKit.monoBlock(this)
+        heroValueText = UiKit.heroValue(this)
+        heroMetaText = UiKit.heroMeta(this)
+        focusLoopText = UiKit.heroMeta(this)
+        nextActionButton = button("Continue", UiKit.ButtonTone.PRIMARY) { renderState() }
+        overviewText = UiKit.infoBlock(
+            this,
+            textColor = UiKit.COLOR_PRIMARY_DARK,
+            backgroundColor = UiKit.COLOR_PRIMARY_BG,
+            strokeColor = 0xFFBFDBFE.toInt()
+        )
+        setupChecklistText = UiKit.infoBlock(this)
         statusText = UiKit.monoBlock(this)
 
         privacySummaryText = UiKit.caption(
@@ -189,7 +202,7 @@ class MainActivity : Activity() {
 
         manualHolidayInput = UiKit.checkbox(this, "Treat today as holiday")
 
-        policySummaryText = UiKit.monoBlock(this)
+        policySummaryText = UiKit.infoBlock(this)
 
         questTitleInput = UiKit.input(this, "Daily quest title (ex: fix Android policy UI)").apply {
             minLines = 1
@@ -197,13 +210,13 @@ class MainActivity : Activity() {
 
         questRequiredInput = UiKit.checkbox(this, "Required for free day", checked = true)
 
-        questSummaryText = UiKit.monoBlock(this)
+        questSummaryText = UiKit.infoBlock(this)
 
         emergencyReasonInput = UiKit.input(this, "Emergency unlock reason (required)").apply {
             minLines = 1
         }
 
-        recentPackagesText = UiKit.monoBlock(this)
+        recentPackagesText = UiKit.infoBlock(this)
 
         dogfoodSummaryText = UiKit.monoBlock(this)
 
@@ -224,10 +237,31 @@ class MainActivity : Activity() {
     }
 
     private fun addHeaderSection(root: LinearLayout, title: TextView, subtitle: TextView) {
-        root.addView(UiKit.pill(this, "LOCAL RC 0.1 / DEVELOPER MODE"))
+        root.addView(UiKit.pill(
+            this,
+            "LOCAL RC 0.1 / DEVELOPER MODE",
+            color = UiKit.COLOR_ACCENT,
+            backgroundColor = UiKit.COLOR_ACCENT_BG,
+            strokeColor = 0xFF99F6E4.toInt()
+        ))
         UiKit.addGap(root, 10)
         root.addView(title)
         root.addView(subtitle)
+
+        val hero = UiKit.heroPanel(this)
+        hero.addView(UiKit.pill(
+            this,
+            "SHIP PROOF -> EARN TIME",
+            color = 0xFF5EEAD4.toInt(),
+            backgroundColor = 0xFF12313A.toInt(),
+            strokeColor = 0xFF1F4D5A.toInt()
+        ))
+        hero.addView(heroValueText)
+        hero.addView(heroMetaText)
+        hero.addView(nextActionButton)
+        UiKit.addGap(hero, 8)
+        hero.addView(focusLoopText)
+        root.addView(hero)
         root.addView(overviewText)
         UiKit.addPanelGap(root)
     }
@@ -799,6 +833,26 @@ class MainActivity : Activity() {
         manualHolidayInput.isChecked = policy.isManualHolidayActive()
         val recentPackages = recentExternalPackages(usageAccessGranted)
 
+        heroValueText.text = "${state.remainingMinutes} min"
+        heroMetaText.text = buildHeroMetaCopy(
+            state = state,
+            decision = decision,
+            monitorRuntime = monitorRuntime,
+            setupChecklist = setupChecklist
+        )
+        focusLoopText.text = buildFocusLoopCopy(
+            state = state,
+            dogfoodSummary = dogfoodSummary,
+            setupChecklist = setupChecklist
+        )
+        configureNextActionButton(
+            state = state,
+            decision = decision,
+            monitorRuntime = monitorRuntime,
+            usageAccessGranted = usageAccessGranted,
+            overlayGranted = overlayGranted
+        )
+
         overviewText.text = buildOverviewCopy(
             state = state,
             decision = decision,
@@ -836,25 +890,22 @@ class MainActivity : Activity() {
         )
 
         policySummaryText.text = listOf(
-            "Policy summary",
-            "Decision: ${decision.reason.code} (${if (decision.allowed) "allowed" else "blocked"})",
-            "Credit spend on use: ${decision.shouldSpendCredit}",
-            "Active weekdays: ${policy.activeWeekdays.takeIf { it.isNotEmpty() }?.joinToString(",") ?: "none"}",
-            "Active time: ${(policy.activeFrom ?: "00:00")} - ${(policy.activeUntil ?: "24:00")}",
-            "Manual holiday today: ${policy.isManualHolidayActive()}",
-            "Public holiday source: not connected in local MVP",
-            "Timezone: ${policy.timezone}",
-            "Active emergency unlock: ${activeUnlocks.firstOrNull()?.expiresAt ?: "none"}"
+            "Policy snapshot",
+            "${if (decision.allowed) "[open]" else "[paused]"} ${decision.reason.code} / spend=${decision.shouldSpendCredit}",
+            "Days: ${weekdaySummary(policy.activeWeekdays)}",
+            "Hours: ${(policy.activeFrom ?: "00:00")} - ${(policy.activeUntil ?: "24:00")}",
+            "Bypasses: free=${state.freeUntil ?: "none"} emergency=${activeUnlocks.firstOrNull()?.expiresAt ?: "none"} holiday=${policy.isManualHolidayActive()}",
+            "Timezone: ${policy.timezone}"
         ).joinToString("\n")
 
         questSummaryText.text = PrototypeText.questSummary(quests, state)
 
         recentPackagesText.text = buildString {
-            append("Recent external packages\n")
+            append("Recently seen apps\n")
             if (recentPackages.isEmpty()) {
-                append("none")
+                append("No external package yet. Open YouTube, Chrome, or your real target once, then return.")
             } else {
-                append(recentPackages.joinToString("\n"))
+                append(recentPackages.mapIndexed { index, value -> "${index + 1}. $value" }.joinToString("\n"))
             }
         }
 
@@ -907,6 +958,92 @@ class MainActivity : Activity() {
         )
     }
 
+    private fun buildHeroMetaCopy(
+        state: CreditState,
+        decision: PolicyDecision,
+        monitorRuntime: MonitorRuntimeSnapshot,
+        setupChecklist: SetupChecklistResult
+    ): String {
+        val mode = when {
+            !setupChecklist.canStartMonitor -> "Setup not ready"
+            !setupChecklist.readyForBlocking -> "Monitor not running"
+            state.freeUntil != null -> "Free day active"
+            state.remainingMinutes > 0 -> "Credit ready"
+            decision.allowed -> "Allowed by ${decision.reason.code}"
+            else -> "Selected target paused"
+        }
+        val targetLabel = "${state.blockedTargets.size} target${if (state.blockedTargets.size == 1) "" else "s"}"
+        val blockerLabel = if (setupChecklist.readyForBlocking) "blocker ready" else "blocker pending"
+
+        return listOf(
+            mode,
+            "$targetLabel / monitor ${monitorRuntime.state.code} / $blockerLabel"
+        ).joinToString("\n")
+    }
+
+    private fun buildFocusLoopCopy(
+        state: CreditState,
+        dogfoodSummary: DogfoodSummary,
+        setupChecklist: SetupChecklistResult
+    ): String {
+        val proofSignal = when {
+            dogfoodSummary.dailyQuestMockCompletions > 0 -> "${dogfoodSummary.dailyQuestMockCompletions} proof completions logged"
+            state.remainingMinutes > 0 -> "credit is waiting to be spent"
+            setupChecklist.readyForBlocking -> "open a target with 0 min to test the pause"
+            else -> setupChecklist.nextAction
+        }
+
+        return "Loop: proof -> credit -> selected apps\nNow: $proofSignal"
+    }
+
+    private fun configureNextActionButton(
+        state: CreditState,
+        decision: PolicyDecision,
+        monitorRuntime: MonitorRuntimeSnapshot,
+        usageAccessGranted: Boolean,
+        overlayGranted: Boolean
+    ) {
+        val label: String
+        val action: () -> Unit
+        when {
+            !usageAccessGranted -> {
+                label = "Grant Usage Access"
+                action = { openUsageAccessSettings() }
+            }
+            !overlayGranted -> {
+                label = "Allow Overlay"
+                action = { openOverlaySettings() }
+            }
+            state.blockedTargets.isEmpty() -> {
+                label = "Prepare Chrome Demo"
+                action = { prepareChromeDemo() }
+            }
+            monitorRuntime.state != MonitorRuntimeState.RUNNING -> {
+                label = "Start Monitor"
+                action = { startMonitorFromUi() }
+            }
+            !decision.allowed && state.remainingMinutes <= 0 -> {
+                label = "Add 5 Test Minutes"
+                action = {
+                    creditStore.addMinutes(5)
+                    dogfoodEventStore.recordStructured(
+                        type = "credit_added",
+                        creditRemaining = creditStore.read().remainingMinutes,
+                        detail = "source=hero minutes=5"
+                    )
+                    renderState()
+                }
+            }
+            else -> {
+                label = "Refresh Status"
+                action = { renderState() }
+            }
+        }
+
+        nextActionButton.text = label
+        nextActionButton.setOnClickListener { action() }
+    }
+
     private fun buildOverviewCopy(
         state: CreditState,
         decision: PolicyDecision,
@@ -919,17 +1056,19 @@ class MainActivity : Activity() {
         val permissionCount = listOf(usageAccessGranted, overlayGranted, notificationGranted).count { it }
         val nextStep = when {
             !setupChecklist.canStartMonitor -> "Next: ${setupChecklist.nextAction}"
-            state.blockedTargets.isEmpty() -> "Next: open one distracting app, come back, then tap 'Use latest app I opened'."
+            state.blockedTargets.isEmpty() -> "Next: open one distracting app, come back, then tap 'Add latest foreground app'."
             !monitorRuntime.desiredRunning -> "Next: start the monitor when you are ready to dogfood."
             state.freeUntil != null -> "Mode: free day is active. Enjoy it without negotiating with yourself."
             state.remainingMinutes > 0 -> "Mode: ${state.remainingMinutes} earned minutes are ready for selected apps."
+            decision.reason == PolicyDecisionReason.OWN_APP -> "Mode: dashboard open. Open a selected target to test the pause screen."
             decision.allowed -> "Mode: allowed by ${decision.reason.code}. No credit spend right now."
             else -> "Mode: selected apps pause until you earn, add, or override credit."
         }
 
         return listOf(
-            "Today: ${state.remainingMinutes} min left, ${state.blockedTargets.size} target${if (state.blockedTargets.size == 1) "" else "s"}",
-            "Setup: $permissionCount/3 permissions, monitor ${monitorRuntime.state.code}, blocker ${if (setupChecklist.readyForBlocking) "ready" else "not ready"}",
+            "Focus home",
+            "Credit ${state.remainingMinutes} min / ${state.blockedTargets.size} target${if (state.blockedTargets.size == 1) "" else "s"}",
+            "Setup $permissionCount/3 permissions / monitor ${monitorRuntime.state.code} / ${if (setupChecklist.readyForBlocking) "ready" else "not ready"}",
             nextStep
         ).joinToString("\n")
     }
@@ -945,13 +1084,19 @@ class MainActivity : Activity() {
             ?.joinToString(", ") { it.label }
             ?: "none"
 
+        val usageLine = statusLine("Usage Access", usageAccessGranted, "foreground app detection")
+        val overlayLine = statusLine("Overlay", overlayGranted, "pause screen")
+        val notificationLine = statusLine("Notifications", notificationGranted, "service status")
+        val targetLine = statusLine("Target package", setupChecklist.missingItems.none { it == SetupChecklistItem.BLOCKED_TARGET }, "selected apps only")
+        val monitorLine = statusLine("Monitor", setupChecklist.missingItems.none { it == SetupChecklistItem.MONITOR_STOPPED }, "live blocker")
+
         return listOf(
             "Setup checklist",
-            "Usage Access: ${shortGrant(usageAccessGranted)}",
-            "Overlay Permission: ${shortGrant(overlayGranted)}",
-            "Notifications: ${shortGrant(notificationGranted)}",
-            "Can start monitor: ${setupChecklist.canStartMonitor}",
-            "Ready for blocking: ${setupChecklist.readyForBlocking}",
+            usageLine,
+            overlayLine,
+            notificationLine,
+            targetLine,
+            monitorLine,
             "Missing: $missing",
             "Next: ${setupChecklist.nextAction}"
         ).joinToString("\n")
@@ -959,6 +1104,24 @@ class MainActivity : Activity() {
 
     private fun shortGrant(granted: Boolean): String {
         return if (granted) "ok" else "missing"
+    }
+
+    private fun statusLine(label: String, ok: Boolean, detail: String): String {
+        return "${if (ok) "[ok]" else "[fix]"} $label - $detail"
+    }
+
+    private fun weekdaySummary(days: List<Int>): String {
+        if (days.isEmpty()) return "none"
+        val labels = mapOf(
+            1 to "Mon",
+            2 to "Tue",
+            3 to "Wed",
+            4 to "Thu",
+            5 to "Fri",
+            6 to "Sat",
+            7 to "Sun"
+        )
+        return days.sorted().joinToString(" ") { labels.getValue(it) }
     }
 
     private fun shareDogfoodExport(redactSensitive: Boolean = false) {

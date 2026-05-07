@@ -49,10 +49,10 @@ class BlockOverlay(private val context: Context) {
         }
 
         val badge = TextView(context).apply {
-            text = "TARGET PAUSED"
+            text = "SELECTED APP PAUSED"
             textSize = 12f
             typeface = android.graphics.Typeface.DEFAULT_BOLD
-            setTextColor(0xFF93C5FD.toInt())
+            setTextColor(0xFF5EEAD4.toInt())
             gravity = Gravity.CENTER
             includeFontPadding = false
             setPadding(
@@ -61,21 +61,31 @@ class BlockOverlay(private val context: Context) {
                 UiKit.dp(context, 10),
                 UiKit.dp(context, 6)
             )
-            background = UiKit.rounded(context, 0xFF1E293B.toInt(), radiusDp = 8, strokeColor = 0xFF334155.toInt())
+            background = UiKit.rounded(context, 0xFF12313A.toInt(), radiusDp = 8, strokeColor = 0xFF1F4D5A.toInt())
         }
 
-        val title = TextView(context).apply {
-            text = "Commit first. Scroll later."
-            textSize = 26f
+        val credit = TextView(context).apply {
+            text = "0 min"
+            textSize = 44f
             typeface = android.graphics.Typeface.DEFAULT_BOLD
             setTextColor(0xFFFFFFFF.toInt())
             gravity = Gravity.CENTER
             includeFontPadding = false
-            setPadding(0, UiKit.dp(context, 14), 0, 0)
+            setPadding(0, UiKit.dp(context, 16), 0, 0)
+        }
+
+        val title = TextView(context).apply {
+            text = "Ship proof, then scroll."
+            textSize = 24f
+            typeface = android.graphics.Typeface.DEFAULT_BOLD
+            setTextColor(0xFFE2E8F0.toInt())
+            gravity = Gravity.CENTER
+            includeFontPadding = false
+            setPadding(0, UiKit.dp(context, 8), 0, 0)
         }
 
         val message = TextView(context).apply {
-            text = "Your credit ledger is empty for this target."
+            text = reasonCopy(reasonCode)
             textSize = 15f
             setTextColor(0xFFE5E7EB.toInt())
             gravity = Gravity.CENTER
@@ -91,9 +101,9 @@ class BlockOverlay(private val context: Context) {
 
         val nextAction = TextView(context).apply {
             text = if (strictMode) {
-                "Open Commit Unlock to review policy or add credit."
+                "Strict mode keeps quick test credit off. Review the rule or use an approved bypass."
             } else {
-                "Prototype mode lets you patch test credit here."
+                "Pause for a second. If this was intentional, add prototype credit or review the rule."
             }
             textSize = 14f
             setTextColor(0xFFE2E8F0.toInt())
@@ -113,6 +123,7 @@ class BlockOverlay(private val context: Context) {
         }
 
         panel.addView(badge)
+        panel.addView(credit)
         panel.addView(title)
         panel.addView(message)
         panel.addView(targetState)
@@ -155,5 +166,17 @@ class BlockOverlay(private val context: Context) {
             runCatching { manager.removeView(view) }
         }
         overlayView = null
+    }
+
+    private fun reasonCopy(reasonCode: String): String {
+        return when (reasonCode) {
+            "credit_empty" -> "Your local credit ledger is empty for this target."
+            "inactive_weekday" -> "This app is selected, but today is outside the active schedule."
+            "outside_active_time" -> "This app is selected, but the active time window is closed."
+            "manual_holiday", "public_holiday" -> "A holiday bypass is active for this target."
+            "free_day" -> "A free-day bypass is active."
+            "emergency_unlock" -> "Emergency unlock is active."
+            else -> "This target is paused by your current policy."
+        }
     }
 }

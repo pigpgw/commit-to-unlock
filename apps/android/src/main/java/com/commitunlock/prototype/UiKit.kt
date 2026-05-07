@@ -22,8 +22,12 @@ object UiKit {
     const val COLOR_BORDER = 0xFFE2E8F0.toInt()
     const val COLOR_PRIMARY = 0xFF0969DA.toInt()
     const val COLOR_PRIMARY_DARK = 0xFF0550AE.toInt()
+    const val COLOR_ACCENT = 0xFF0F766E.toInt()
+    const val COLOR_ACCENT_BG = 0xFFCCFBF1.toInt()
     const val COLOR_SUCCESS = 0xFF1F883D.toInt()
+    const val COLOR_SUCCESS_BG = 0xFFEAFBEF.toInt()
     const val COLOR_WARNING = 0xFF9A6700.toInt()
+    const val COLOR_WARNING_BG = 0xFFFFF7ED.toInt()
     const val COLOR_DANGER = 0xFFCF222E.toInt()
     const val COLOR_CODE_BG = 0xFFF1F5F9.toInt()
     const val COLOR_DANGER_BG = 0xFFFFF1F0.toInt()
@@ -67,6 +71,18 @@ object UiKit {
         }
     }
 
+    fun heroPanel(context: Context): LinearLayout {
+        return LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            setPadding(dp(context, 18), dp(context, 18), dp(context, 18), dp(context, 18))
+            background = rounded(context, 0xFF111827.toInt(), radiusDp = 8, strokeColor = 0xFF273449.toInt())
+        }
+    }
+
     fun section(context: Context, title: String, subtitle: String? = null): LinearLayout {
         val panel = panel(context)
         panel.addView(label(context, title))
@@ -76,6 +92,24 @@ object UiKit {
             })
         }
         return panel
+    }
+
+    fun heroValue(context: Context): TextView {
+        return TextView(context).apply {
+            textSize = 40f
+            typeface = Typeface.DEFAULT_BOLD
+            setTextColor(0xFFFFFFFF.toInt())
+            includeFontPadding = false
+            setPadding(0, dp(context, 8), 0, dp(context, 4))
+        }
+    }
+
+    fun heroMeta(context: Context): TextView {
+        return TextView(context).apply {
+            textSize = 14f
+            setTextColor(0xFFE2E8F0.toInt())
+            setLineSpacing(dp(context, 2).toFloat(), 1.0f)
+        }
     }
 
     fun title(context: Context, text: String): TextView {
@@ -126,6 +160,22 @@ object UiKit {
         }
     }
 
+    fun infoBlock(
+        context: Context,
+        textColor: Int = COLOR_INK,
+        backgroundColor: Int = COLOR_CODE_BG,
+        strokeColor: Int = COLOR_BORDER
+    ): TextView {
+        return TextView(context).apply {
+            layoutParams = topSpacedParams(context)
+            textSize = 13f
+            setTextColor(textColor)
+            setPadding(dp(context, 12), dp(context, 10), dp(context, 12), dp(context, 10))
+            background = rounded(context, backgroundColor, radiusDp = 8, strokeColor = strokeColor)
+            setLineSpacing(dp(context, 2).toFloat(), 1.0f)
+        }
+    }
+
     fun monoBlock(context: Context): TextView {
         return TextView(context).apply {
             layoutParams = topSpacedParams(context)
@@ -163,14 +213,20 @@ object UiKit {
         }
     }
 
-    fun pill(context: Context, text: String, color: Int = COLOR_PRIMARY): TextView {
+    fun pill(
+        context: Context,
+        text: String,
+        color: Int = COLOR_PRIMARY,
+        backgroundColor: Int = COLOR_PRIMARY_BG,
+        strokeColor: Int = 0xFFBFDBFE.toInt()
+    ): TextView {
         return TextView(context).apply {
             this.text = text
             textSize = 12f
             typeface = Typeface.DEFAULT_BOLD
             setTextColor(color)
             setPadding(dp(context, 10), dp(context, 5), dp(context, 10), dp(context, 5))
-            background = rounded(context, COLOR_PRIMARY_BG, radiusDp = 8, strokeColor = 0xFFBFDBFE.toInt())
+            background = rounded(context, backgroundColor, radiusDp = 8, strokeColor = strokeColor)
         }
     }
 
